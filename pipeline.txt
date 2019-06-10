@@ -1,0 +1,77 @@
+
+
+(-r): generated only if non-existent or -r
+privided (redo flag).
+
+==========================================
+seqs/perere3.fa
+seqs/sr3.fa
+genome_db/smgenome*
+	
+	|
+    filter_perere3_vs_genoma.py
+	|
+	v
+	
+(-r) alinhamentos/perere3_vs_genoma.bl
+(-r) alinhamentos/sr3_vs_genoma.bl
+alinhamentos/filtered_perere3_vs_genoma.bl
+------------------------------------------
+alinhamentos/filtered_perere3_vs_genoma.bl
+smgenome.fa
+
+        |
+    gen_heads.py
+	|
+	v
+	
+seqs/heads.fa
+-----------------------------------------
+seqs/heads.fa
+					      		       
+        |
+    quantify_heads.py
+        |
+	v
+
+(-r) alinhamentos/heads_vs_heads.bl
+graficos/heads_vs_heads.png
+graficos/heads_vs_heads_log.png
+=========================================
+
+ fetch_SRA_data.py
+	|
+	v
+
+SRA_data/*
+-----------------------------------------
+SRA_data/*		seqs/smgenome.fa
+			
+	|			|
+    trim_SRA_data.py	build_genome_ht2.sh
+	|			|
+	v			v
+
+trimmed_SRA_data/*	genome_ht2/*
+-----------------------------------------
+	trimmed_SRA_data/*
+	genome_ht2/*
+
+		|
+	    align_SRA_to_genome.py
+	    	|
+		v
+	
+alinhamentos/SRA_vs_genoma/*
+-----------------------------------------
+alinhamentos/SRA_vs_genoma/*
+genome_annotation/gene_annotations.gff3
+genome_annotation/head_annotations.gff3
+
+	|
+    count_SRA_reads.py
+	|
+	v
+
+counted_reads/*
+=========================================

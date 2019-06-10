@@ -1,0 +1,44 @@
+qui mar 28 16:01:30 -03 2019 | Removi dois GTAA do final da 'perere3.fa' e 'sr3.fa'.
+qui mar 28 16:07:18 -03 2019 | testeeee
+qui mar 28 16:09:55 -03 2019 | outro
+qui mar 28 18:34:45 -03 2019 | gen_heads.py finalmente funciona (ainda sem filtrar GTAA).
+sex mar 29 16:46:51 -03 2019 | Agora gen_heads.py usa a utils.find_gtaa_break para descartar o começo repetitivo GTAAGTAA...
+ter abr 9 08:32:48 -03 2019 | Ontem baixei e trimei o primeiro arquivodos dados de RNAseq do SRA.
+sáb abr 20 12:23:12 -03 2019 | 'fetch_SRA_data.py' e 'trim_SRA_data.py' incluídos no 'pipeline.txt'.
+sáb abr 20 15:51:06 -03 2019 | align_SRA_to_genome.py criado.
+sáb abr 20 16:21:48 -03 2019 | 76 trimado.
+sáb abr 20 16:23:53 -03 2019 | 75 trimado.
+sáb abr 20 16:38:18 -03 2019 | 74 trimado.
+sáb abr 20 16:40:56 -03 2019 | 72 alinhado com genoma.
+sáb abr 20 16:44:40 -03 2019 | 73 trimado.
+sáb abr 20 17:14:16 -03 2019 | 72 trimado.
+sáb abr 20 18:04:03 -03 2019 | 76 alinhado com genoma.
+sáb abr 20 18:35:48 -03 2019 | 74 alinhado com genoma.
+sáb abr 20 18:36:21 -03 2019 | 73 já tinha sido alinhado com genoma.
+sáb abr 20 18:59:44 -03 2019 | 75 alinhado com genoma.
+sáb abr 20 19:26:38 -03 2019 | 'remove_non-gene_annotations.py' nasceu.
+sáb abr 20 20:47:53 -03 2019 | gen_heads agora filtra as anotações não gênicas e anota as heads no gff.
+sáb abr 20 20:48:37 -03 2019 | remove_non-gene_annotations excluída, já que gen_heads faz seu trabalho agora.
+seg abr 22 01:22:08 -03 2019 | Dividi anotações de genes e heads em arquivos diferentes. De novo tem um arquivo pra filtrar os genes.
+qua abr 24 19:29:25 -03 2019 | Contagem de reads funciona! 72-76 gerados.
+qui mai 2 23:08:39 -03 2019 | Pus a parte de blastear do 'filter_perere3_vs_genoma.bl' em outro arquivo, o 'align_seqs_to_genome.py'.
+sex mai 10 17:47:47 -03 2019 | 79 trimado.
+sex mai 10 17:48:52 -03 2019 | Use os scripts com "complete" no nome.
+sex mai 10 18:32:42 -03 2019 | 78 trimado.
+sex mai 10 19:45:53 -03 2019 | 81 trimado.
+sex mai 10 20:14:10 -03 2019 | 80 trimado.
+sex mai 10 20:14:51 -03 2019 | 77 trimado.
+sex mai 10 20:53:45 -03 2019 | 80 trimado mesmo rs.
+sáb mai 11 21:12:06 -03 2019 | plot_read_counts.py FINALMENTE FUNCIONA BEEEEM! Dá um --help.
+sáb mai 11 21:13:08 -03 2019 | plot_motherlength_hist nasceu aqui rapidinho.
+seg mai 27 12:57:10 -03 2019 | Sexta eu comecei o count_reads_by_bp.py, ainda demora muito e preciso fazer um checkpoint.
+seg mai 27 12:58:24 -03 2019 | plot_read_counts.py agora aceita os tipos box (boxplot) e hex (hexbin).
+seg mai 27 16:30:14 -03 2019 | Hoje falei com Ricardo.
+sex mai 31 15:32:18 -03 2019 | count_reads_by_bp era estratégia pra pegar comprimento real, vou tentar a do Ricardo em get_aligns_in_heads 
+sex mai 31 16:02:29 -03 2019 | Talvez eu não esteja considerando em qual fita tão as coisas.
+dom jun 2 20:39:47 -03 2019 | EITAAA O PANDAS CONSIDERA OS EXTREMOS INCLUSOS, VAI TER QQUE AJEITAR UMAS COISA.
+seg jun 3 00:21:31 -03 2019 | relate(...) não considera o comprimento real. -_-
+seg jun 3 14:35:23 -03 2019 | boxplot/considerar gene mais próximo/filtar para heads com mais de 4 não_zeros
+seg jun 3 14:36:42 -03 2019 | boxplot/considerar gene mais próximo/filtar para heads com mais de 4 não_zeros
+qui jun 6 18:32:31 -03 2019 | 79 alinhadoooo
+seg jun 10 14:39:02 -03 2019 | Normalizar contagens por biblioteca.

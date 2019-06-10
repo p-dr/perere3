@@ -166,9 +166,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+<<<<<<< HEAD
 .dmypy.json
 dmypy.json
 
 # Pyre type checker
 .pyre/
-/Trimmomatic-0.39*
+/Trimmomatic-0.39

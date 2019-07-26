@@ -1,9 +1,13 @@
+# description: Counts how many reads were aligned to each gene and head, using HTSeq. Saves it as an attribute on GFF file.
+# in: pardir/'alinhamentos/SRA_vs_genoma' pardir/'genome_annotation/head_annotations.gff3' pardir/'genome_annotation/gene_annotations.gff3'
+# out: pardir/'counted_reads'
+
 from glob import iglob
 from pathlib import Path
 from subprocess import call
 from utils import pardir, redo_flag
 
-alignment_dir = pardir/'alinhamentos'/'SRA_vs_genoma'
+alignment_dir = pardir/'alinhamentos/SRA_vs_genoma'
 annotations_dir = pardir/'genome_annotation'
 out_dir = pardir/'counted_reads'
 

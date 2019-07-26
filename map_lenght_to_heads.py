@@ -1,19 +1,18 @@
-#!/bin/bash
-
-# Relates complete Perere3 alignments to heads.
-# Adds lenght parameter to 'pardir/counted_reads/head_alignment_lenght.tsv'.
+# description: (CLARIFICATION NEEDED) Relates Perere3complete-to-genome alignments to heads. Adds lenght parameter to outfile.
+# in: pardir/'alinhamentos/perere3complete_vs_genoma.bl' pardir/'genome_annotation/head_annotations.gff3' pardir/'alinhamentos'/'perere3complete_vs_genoma_antisenso_invertida.bl'
+# out: pardir/'genome_annotation/head_alignment_length.tsv'
 
 from pandas import read_csv
 from utils import pardir, verbose
 from align_seqs_to_genome import COLUMNS
 from gen_heads import HEAD_LEN
 
-OUTPATH = pardir/'genome_annotation'/'head_alignment_length.tsv'
+OUTPATH = pardir/'genome_annotation/head_alignment_length.tsv'
 
 
-aligned_perere = read_csv(str(pardir/'alinhamentos'/'perere3complete_vs_genoma.bl'),
+aligned_perere = read_csv(str(pardir/'alinhamentos/perere3complete_vs_genoma.bl'),
                           sep='\t', header=None, names=COLUMNS.split()).sort_values('send')
-head_annotations = read_csv(str(pardir/'genome_annotation'/'head_annotations.gff3'),
+head_annotations = read_csv(str(pardir/'genome_annotation/head_annotations.gff3'),
                             sep='\t', header=None, names=['acc', 'origin', 'kind',
                                                           'start', 'end', 'dot1',
                                                           'sense', 'dot2', 'attr'])

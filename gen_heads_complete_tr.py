@@ -1,8 +1,7 @@
-#!/bin/python
-
-# Gets HEAD_LEN posterior bases in S. mansoni genome for each alignment in
-# PARENT_DIR/alinhamentos/filtered_perere3_vs_genoma.bl and saves it to
-# PARENT_DIR/alinhamentos/heads.bl.
+# description: Gets HEAD_LEN posterior bases in S. mansoni genome for each perere3 to genome alignment, generating now called head sequences. Annotates lenght of the parent alignment for each head (motherlength.
+# in: pardir/'alinhamentos/perere3complete_vs_genoma.bl' pardir/'seqs/smgenome.fa'
+# out: pardir/'seqs/heads.fa' pardir/'genome_annotation/head_annotations.gff3' pardir/'genome_annotation/heads_motherlength.tsv'
+# plot: 
 
 from Bio.SeqIO import to_dict, parse
 import matplotlib.pyplot as plt
@@ -11,26 +10,26 @@ from sys import argv
 from utils import find_gtaa_break, pardir, verbose
 from align_seqs_to_genome import COLUMNS
 
-HEAD_LEN = 100
+HEAD_LEN = 1000
 
 if __name__ == '__main__':
     #======================== LEITURA ========================#
 
     print('Lendo alinhamentos filtrados do Perere3...')
-    inpath = str(pardir/'alinhamentos'/'perere3complete_vs_genoma.bl')
+    inpath = str(pardir/'alinhamentos/perere3complete_vs_genoma.bl')
     filtered_perere3_vs_genoma = read_csv(inpath, header=None, names=COLUMNS.split(), sep='\\s+')
     print(f"'{inpath}' lido.")
 
     print('Lendo genoma de S. mansoni...')
-    genomedict = to_dict(parse(str(pardir/'seqs'/'smgenome.fa'), 'fasta'))
+    genomedict = to_dict(parse(str(pardir/'seqs/smgenome.fa'), 'fasta'))
     print('Dicionário criado.')
 
 
     print ('Abrindo arquivos de output e anotação...')
 
-    heads_annotations_path = pardir/'genome_annotation'/'head_annotations.gff3'
-    heads_outpath = pardir/'seqs'/'heads.fa'
-    motherlength_path = pardir/'genome_annotation'/'heads_motherlength.tsv'
+    heads_annotations_path = pardir/'genome_annotation/head_annotations.gff3'
+    heads_outpath = pardir/'seqs/heads.fa'
+    motherlength_path = pardir/'genome_annotation/heads_motherlength.tsv'
 
     heads_annotations_file = heads_annotations_path.open('w')
     heads_outfile = heads_outpath.open('w')

@@ -1,3 +1,8 @@
+# description: (CLARIFICATION NEEDED, UNCERTAIN AFFIRMATION) Plots something to test if heads with most reads paired to it appears consintently across SRA libraries.
+# in: pardir/'genome_annotation/heads_motherlength.tsv'
+# out: 
+# plot: 
+
 from pandas import read_csv, DataFrame, cut, pivot_table
 from matplotlib import pyplot as plt
 from utils import pardir
@@ -9,7 +14,7 @@ from sys import argv
 
 
 def add_motherlenghts(count_df):
-    motherlengths = read_csv(str(pardir/'genome_annotation'/'heads_motherlength.tsv'), sep='\t', header=None, names=['head_id', 'motherlength'])
+    motherlengths = read_csv(str(pardir/'genome_annotation/heads_motherlength.tsv'), sep='\t', header=None, names=['head_id', 'motherlength'])
     count_df = count_df.join(motherlengths.set_index('head_id'), on='feature')
     return count_df
 
@@ -24,8 +29,8 @@ def color_from_id(name):
 
     else: # name is a gene name.
         num = int(name.split('_')[1])
-        
-    seed(num)    
+
+    seed(num)
     return rgb_to_hex(int(rd()*255) for i in range(3))
 
 

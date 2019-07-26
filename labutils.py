@@ -1,5 +1,3 @@
-#Só dá pra usar hexadecimal as cores ainda.
-
 from matplotlib.pyplot import plot, fill_between, axis, rcParams
 from matplotlib import pyplot as plt
 from LabIFSC import linearize, Medida, Unidade
@@ -9,6 +7,9 @@ from scipy.optimize import curve_fit
 from pathlib import Path
 from math import pi
 from numpy import arange, array
+from sys import argv
+
+### SÓ DÁ PRA USAR HEXADECIMAL PRAS CORES AINDA! ###
 
 um = Medida(1)
 pardir = Path(__file__).resolve().parents[1]
@@ -22,6 +23,22 @@ h = Medida((6.626070040e-34, 0.000000081e-34), 'J s')
 c = Medida(299792458, 'm/s')
 me = Medida((9.10938356e-31, 0.00000011e-31), 'kg') # electron mass
 mu_0 = Medida((4*pi)*1e-7, 'V s/A m')
+
+redo_flag = '-r' in argv
+if redo_flag:
+    argv.remove('-r')
+    
+verbose = '-v' in argv
+if verbose:
+    argv.remove('-v')
+
+show_flag = '-s' in argv
+if show_flag:
+    argv.remove('-s')
+
+progress_flag = '-p' in argv
+if progress_flag:
+    argv.remove('-p')
 
 def df_to_xy(df, labels=None):
 # Obtém listas xy a partir de DataFrame. Assim,  DataFrames podem ser passados

@@ -42,3 +42,9 @@ seg jun 3 14:35:23 -03 2019 | boxplot/considerar gene mais próximo/filtar para 
 seg jun 3 14:36:42 -03 2019 | boxplot/considerar gene mais próximo/filtar para heads com mais de 4 não_zeros
 qui jun 6 18:32:31 -03 2019 | 79 alinhadoooo
 seg jun 10 14:39:02 -03 2019 | Normalizar contagens por biblioteca.
+seg jun 24 13:45:26 -03 2019 | Problema: trimagem com Pererê só acontece se início do read for idêntico ao adaptador "falso".
+seg jun 24 16:27:42 -03 2019 | correlação em função da distância.
+seg jun 24 16:27:54 -03 2019 | ao gene
+seg jun 24 16:32:11 -03 2019 | normalizar para comprimento das heads
+seg jun 24 16:54:21 -03 2019 | Investigar influência do ruído estatístico: correlação em função da mediana/média da contaagem de reads das heads
+seg jun 24 16:54:37 -03 2019 | Investigar influência do ruído estatístico: correlação em função da mediana/média da contaagem de reads das heads por biblioteca

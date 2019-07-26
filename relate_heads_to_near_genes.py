@@ -1,11 +1,14 @@
+# description: Maps each head to its nearest (or overlapped) gene.
+# in: pardir/'genome_annotation/head_annotations.gff3' pardir/'genome_annotation/gene_annotations.gff3'
+# out: pardir/'genome_annotation/head_genes_relations.tsv'
+
+from utils import pardir, read_tsv, overlaps, verbose, redo_flag
+
 # Achar genes sobrepostos (ou o mais próximo se não se sobrepuserem), às heads pra correlacionar as expressões
 # em um script posterior. Gera tsv em outpath.
 # LEGENDA: gene está à dir(direita)/esq(esquerda)/olap(overlappado com) a head.
 
-from utils import pardir, read_tsv, overlaps, verbose, redo_flag
-from pickle import dump
-
-outpath = pardir/'genome_annotation'/'head_genes_relations.tsv'
+outpath = pardir/'genome_annotation/head_genes_relations.tsv'
 outfile = outpath.open('w')
 
 # Segurança para não sobrescrever como eu fiz agora >.<

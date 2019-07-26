@@ -1,8 +1,6 @@
-#!/bin/python
-
-# Generates filtered_perere3_vs_genoma, which is perere3_vs_genoma
-# without alignments also found for SR3, i.e. overlapped
-# with those of the latter.
+# description:  Generates filtered_perere3_vs_genoma, which is perere3_vs_genoma without alignments also and better found for SR3. i.e. Removes each perere alignment overlapped with SR3 alignment of best score. Also writes filtered out line's indices.
+# in: pardir/'alinhamentos/perere3complete_vs_genoma.bl' pardir/'alinhamentos/sr3complete_vs_genoma.bl'
+# out: pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl' pardir/'scripts/perere3complete_indices_filtrados.csv'
 
 from pandas import read_csv
 from utils import overlaps, pardir, verbose
@@ -15,8 +13,8 @@ from align_seqs_to_genome import COLUMNS
 #================== LER E FILTRAR ALINHAMENTOS ==================#
 
 print('Lendo resultados do Blast...')
-perere3_vs_genoma = read_csv(pardir/f'alinhamentos/perere3complete_vs_genoma.bl', header=None, names=COLUMNS.split(), sep='\\s+')
-sr3_vs_genoma = read_csv(pardir/f'alinhamentos/sr3complete_vs_genoma.bl', header=None, names=COLUMNS.split(), sep='\\s+')
+perere3_vs_genoma = read_csv(pardir/'alinhamentos/perere3complete_vs_genoma.bl', header=None, names=COLUMNS.split(), sep='\\s+')
+sr3_vs_genoma = read_csv(pardir/'alinhamentos/sr3complete_vs_genoma.bl', header=None, names=COLUMNS.split(), sep='\\s+')
 print('Resultados lidos.')
 
 for data in (perere3_vs_genoma, sr3_vs_genoma):

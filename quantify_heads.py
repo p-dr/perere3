@@ -1,10 +1,9 @@
-#!/bin/python
+# description: Aligns (BLAST) heads between themselves. Plots the number of head sequences aligned N times to other heads as a function of N itself.
+# in: pardir/'seqs/heads.fa'
+# out: pardir/'alinhamentos/heads_vs_heads.bl'
+# plot: 
 
-# Generates PARENT_DIR/alinhamentos/heads_vs_heads.bl if '-r' provided
-# and plots N number of alignments versus number of sequences aligned N
-# times to graficos/heads_vs_heads.png and graficos/heads_vs_heads_log.png
-
-from PARENT_DIR import PARENT_DIR
+from utils import pardir, redo_flag
 from os.path import exists
 from pandas import read_csv
 from sys import argv
@@ -15,14 +14,14 @@ COLUMNS = 'qaccver saccver pident mismatch gapopen qstart qend sstart send evalu
 
 #======================== CRIAR HEADS_VS_HEADS ========================#
 
-heads_path = f'{PARENT_DIR}/seqs/heads.fa'
-out_path = f'{PARENT_DIR}/alinhamentos/heads_vs_heads.bl'
+heads_path = pardir/'seqs/heads.fa'
+out_path = pardir/'alinhamentos/heads_vs_heads.bl'
 out_not_exists = not exists(out_path)
 
 if out_not_exists:
     print(f'{out_path} não existe.')
 
-if out_not_exists or '-r' in argv:
+if out_not_exists or redo_flag:
     print('Procurando alinhamentos entre heads...')
 
     # Remember you are using megablast.
@@ -54,7 +53,7 @@ for log in (False, True):
     plt.ylabel('Número de sequências')
     plt.title('Número de sequências "head" que se repetem N vezes graficado contra o pŕoprio N'.upper())
 
-    hist_path = f'{PARENT_DIR}/graficos/heads_vs_heads{["","_log"][log]}.png'
+    hist_path = pardir/f'graficos/heads_vs_heads{["","_log"][log]}.png'
     plt.savefig(hist_path)
     print(f"Histograma salvo em '{hist_path}'.")
     

@@ -1,5 +1,6 @@
-#!/bin/python
-# Generates perere3 and SR3 vs genome alignments.
+# description: Generates perere3 and SR3 vs genome alignments.
+# in: pardir/'seqs' pardir/'genome_db/smgenome'
+# out: pardir/'alinhamentos/perere3_vs_genoma.bl' pardir/'alinhamentos/sr3_vs_genoma.bl' pardir/'alinhamentos/perere3complete_vs_genoma.bl'
 
 from subprocess import run
 from os.path import exists
@@ -10,6 +11,7 @@ from utils import pardir, redo_flag
 
 COLUMNS = 'qaccver saccver qstart qend sstart send length pident evalue bitscore'
 QUERIES = ['perere3', 'sr3', 'perere3complete']
+genomedb_path = pardir/'genome_db/smgenome'
 
 #================== CRIAR ARQUIVOS DE ALINHAMENTO ==================#
 
@@ -18,7 +20,6 @@ for query in QUERIES:
     query_path = pardir/f'seqs/{query}.fa'
     out_path = pardir/f'alinhamentos/{query}_vs_genoma.bl'
     out_not_exists = not exists(out_path)
-    genomedb_path = pardir/'genome_db/smgenome'
     
     if out_not_exists:
         print(f"'{str(out_path)}' não existe.")

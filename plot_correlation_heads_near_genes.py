@@ -1,3 +1,7 @@
+# description: Calculates expression (read count) correlation between heads and its nearest gene(s). When only "reation" is said, I mean head -> nearest gene(s) mapping.
+# in: pardir/'genome_annotation/head_genes_relations.tsv' pardir/'counted_reads'
+# out: pardir/'genome_annotation/head_genes_correlations.tsv'
+
 from utils import read_tsv, pardir, show_flag, redo_flag, verbose
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -8,7 +12,8 @@ if outpath.exists() and not (redo_flag or show_flag):
     print(f"'{str(outpath)}' já existe, nada será feito.")
     exit()
 
-outfile = (outpath).open('w')
+if redo_flag:
+    outfile = (outpath).open('w')
 
 print('Lendo arquivo de relações...')
 relations = read_tsv(pardir/'genome_annotation/head_genes_relations.tsv', header=None, names=['head_id', 'gene_id', 'flag'])
@@ -22,12 +27,14 @@ for count_path in (pardir/'counted_reads').glob('*.csv'):
                      names=['feature', count_path.stem.split('_')[0]],
                      index_col='feature')
 
-    counts = counts.combine_first(count)
+    # if you are running this script while counting reads
+    if not count.empty:
+        total_count = count.iloc[:-2].sum() + count.iloc[-1]
+        counts = counts.combine_first(count/total_count*1e6)
 
 counts = counts.T
 counts.index.name = 'biblioteca'
 counts.reset_index(inplace=True)
-
 print('Concluído. Calculando correlações...')
 
 

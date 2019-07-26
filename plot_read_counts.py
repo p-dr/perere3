@@ -1,3 +1,8 @@
+# description: Plots how many reads aligned to each head, under many plotting formats (--help).
+# in: pardir/'genome_annotation/heads_motherlength.tsv' pardir/'counted_reads'
+# out: 
+# plot: 
+
 from pandas import read_csv, DataFrame, cut, pivot_table
 from matplotlib import pyplot as plt
 from utils import pardir
@@ -9,7 +14,7 @@ from sys import argv
 
 
 def add_motherlenghts(count_df):
-    motherlengths = read_csv(str(pardir/'genome_annotation'/'heads_motherlength.tsv'), sep='\t', header=None, names=['head_id', 'motherlength'])
+    motherlengths = read_csv(str(pardir/'genome_annotation/heads_motherlength.tsv'), sep='\t', header=None, names=['head_id', 'motherlength'])
     count_df = count_df.join(motherlengths.set_index('head_id'), on='feature')
     return count_df
 

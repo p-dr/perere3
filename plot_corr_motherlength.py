@@ -1,3 +1,8 @@
+# description: Plots heads' to nearest gene(s) expression correlation as a function of heads' motherlengths.
+# in: pardir/'genome_annotation/heads_motherlength.tsv' pardir/'genome_annotation/head_genes_correlations.tsv'
+# out: 
+# plot: 
+
 from utils import read_tsv, pardir
 import pandas as pd
 from seaborn import heatmap
@@ -33,7 +38,7 @@ ml_corr.plot.hexbin('ml', 'corr', gridsize=15, cmap='viridis')
 # plt.xlabel('motherlength')
 # plt.ylabel('coeficiente Pearson')
 
-ml_corr['bins'] = pd.cut(ml_corr['ml'], 3)
+ml_corr['bins'] = pd.cut(ml_corr['ml'], 15)
 ml_corr.boxplot('corr', 'bins')
 
 print(ml_corr.groupby('bins').mean())

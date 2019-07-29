@@ -48,3 +48,5 @@ seg jun 24 16:27:54 -03 2019 | ao gene
 seg jun 24 16:32:11 -03 2019 | normalizar para comprimento das heads
 seg jun 24 16:54:21 -03 2019 | Investigar influência do ruído estatístico: correlação em função da mediana/média da contaagem de reads das heads
 seg jun 24 16:54:37 -03 2019 | Investigar influência do ruído estatístico: correlação em função da mediana/média da contaagem de reads das heads por biblioteca
+qui jul 25 21:42:29 -03 2019 | PIPELINER TERMINADOOOOO (talvez eu mude o nome pra 'pipetree_builder' ou coisa assim)
+seg jul 29 14:04:57 -03 2019 | Pode haver divergência entre os scripts que esperam e os que não esperam que os GFF tenha uma linha de cabeçalho. Eles não tem, pois o HTSeq impõe isso.

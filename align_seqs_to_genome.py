@@ -1,16 +1,15 @@
 # description: Generates perere3 and SR3 vs genome alignments.
-# in: pardir/'seqs' pardir/'genome_db/smgenome'
-# out: pardir/'alinhamentos/perere3_vs_genoma.bl' pardir/'alinhamentos/sr3_vs_genoma.bl' pardir/'alinhamentos/perere3complete_vs_genoma.bl'
+# in: pardir/'seqs/perere3.fa' pardir/'seqs/sr3.fa' pardir/'seqs/perere3complete.fa' pardir/'seqs/sr3complete.fa' ardir/'genome_db/smgenome'
+# out: pardir/'alinhamentos/perere3_vs_genoma.bl' pardir/'alinhamentos/sr3_vs_genoma.bl' pardir/'alinhamentos/perere3complete_vs_genoma.bl' pardir/'alinhamentos/sr3complete_vs_genoma.bl'
 
 from subprocess import run
 from os.path import exists
-from utils import pardir, redo_flag
+from utils import pardir, redo_flag, BL_COLUMNS
 
 # Usar biopython para blastear?
 
+QUERIES = ['perere3', 'sr3', 'perere3complete', 'sr3complete']
 
-COLUMNS = 'qaccver saccver qstart qend sstart send length pident evalue bitscore'
-QUERIES = ['perere3', 'sr3', 'perere3complete']
 genomedb_path = pardir/'genome_db/smgenome'
 
 #================== CRIAR ARQUIVOS DE ALINHAMENTO ==================#
@@ -26,5 +25,5 @@ for query in QUERIES:
         
     if out_not_exists or redo_flag:
         print(f'Procurando alinhamentos de {query} contra genoma...')
-        run(f"blastn -task blastn -query {str(query_path)} -db {str(genomedb_path)} -outfmt '6 {COLUMNS}' -out {str(out_path)} -evalue 1e-10", shell=True)
+        run(f"blastn -task blastn -query {str(query_path)} -db {str(genomedb_path)} -outfmt '6 {' '.join(BL_COLUMNS)}' -out {str(out_path)} -evalue 1e-10", shell=True)
         print(f'Alinhamentos salvos em {str(out_path)}.\n')

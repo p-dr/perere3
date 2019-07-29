@@ -1,14 +1,13 @@
-# description: Gets HEAD_LEN posterior bases in S. mansoni genome for each perere3 to genome alignment, generating now called head sequences. Annotates lenght of the parent alignment for each head (motherlength.
-# in: pardir/'alinhamentos/perere3complete_vs_genoma.bl' pardir/'seqs/smgenome.fa'
+# description: Gets HEAD_LEN posterior bases in S. mansoni genome for each perere3 to genome alignment, generating now called head sequences. Annotates lenght of the parent alignment for each head (motherlength).
+# in: pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl' pardir/'seqs/smgenome.fa'
 # out: pardir/'seqs/heads.fa' pardir/'genome_annotation/head_annotations.gff3' pardir/'genome_annotation/heads_motherlength.tsv'
-# plot: 
+# plot:
 
 from Bio.SeqIO import to_dict, parse
 import matplotlib.pyplot as plt
 from pandas import read_csv, DataFrame
 from sys import argv
-from utils import find_gtaa_break, pardir, verbose
-from align_seqs_to_genome import COLUMNS
+from utils import find_gtaa_break, pardir, verbose, GFF3_COLUMNS
 
 HEAD_LEN = 1000
 
@@ -16,8 +15,8 @@ if __name__ == '__main__':
     #======================== LEITURA ========================#
 
     print('Lendo alinhamentos filtrados do Perere3...')
-    inpath = str(pardir/'alinhamentos/perere3complete_vs_genoma.bl')
-    filtered_perere3_vs_genoma = read_csv(inpath, header=None, names=COLUMNS.split(), sep='\\s+')
+    inpath = pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl'
+    filtered_perere3_vs_genoma = read_csv(inpath, sep='\t')
     print(f"'{inpath}' lido.")
 
     print('Lendo genoma de S. mansoni...')
@@ -32,8 +31,10 @@ if __name__ == '__main__':
     motherlength_path = pardir/'genome_annotation/heads_motherlength.tsv'
 
     heads_annotations_file = heads_annotations_path.open('w')
+    # heads_annotations_file.write('\t'.join(GFF3_COLUMNS)+'\n') # Write header.
     heads_outfile = heads_outpath.open('w')
     motherlength_outfile = motherlength_path.open('w')
+    
     #======================== GET HEADS ========================#
 
     print('Buscando as sequências head no genoma...')
@@ -86,7 +87,7 @@ if __name__ == '__main__':
 
             heads_annotations_file.write('\t'.join([row['saccver'], 'WormBase_imported', 'gene',
                                                     str(start_pos), str(end_pos), '.', ['-', '+'][plus_sense], '.',
-                                                    f'gene_id=head{index};comprimento={row["length"]}'])+'\n')
+                                                    f'gene_id=head{index};motherlength={row["length"]};length={HEAD_LEN}'])+'\n')
 
             motherlength_outfile.write(f"head{index}\t{row['length']}\n")
 

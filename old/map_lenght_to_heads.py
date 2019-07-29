@@ -1,6 +1,7 @@
 # description: (CLARIFICATION NEEDED) Relates Perere3complete-to-genome alignments to heads. Adds lenght parameter to outfile.
-# in: pardir/'alinhamentos/perere3complete_vs_genoma.bl' pardir/'genome_annotation/head_annotations.gff3' pardir/'alinhamentos'/'perere3complete_vs_genoma_antisenso_invertida.bl'
-# out: pardir/'genome_annotation/head_alignment_length.tsv'
+# in: pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl' pardir/'genome_annotation/head_annotations.gff3'
+# out: pardir/'genome_annotation/head_alignment_length.tsv' pardir/'alinhamentos/perere3complete_vs_geno-\nma_antisenso_invertida.bl'
+# flags: unknown_purpose
 
 from pandas import read_csv
 from utils import pardir, verbose
@@ -10,8 +11,8 @@ from gen_heads import HEAD_LEN
 OUTPATH = pardir/'genome_annotation/head_alignment_length.tsv'
 
 
-aligned_perere = read_csv(str(pardir/'alinhamentos/perere3complete_vs_genoma.bl'),
-                          sep='\t', header=None, names=COLUMNS.split()).sort_values('send')
+aligned_perere = read_csv(str(pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl'),
+                          sep='\t', header=None, names=COLUMNS.split()).sort_values('send')  # Esse sort não devia ser feito após lidar com o sentido da fita (abaixo)?
 head_annotations = read_csv(str(pardir/'genome_annotation/head_annotations.gff3'),
                             sep='\t', header=None, names=['acc', 'origin', 'kind',
                                                           'start', 'end', 'dot1',
@@ -19,7 +20,12 @@ head_annotations = read_csv(str(pardir/'genome_annotation/head_annotations.gff3'
 
 
 #========== LIDAR COM SENTIDO DA FITA ===========#
-OUT_INVERTIDO = pardir/'alinhamentos'/'perere3complete_vs_genoma_antisenso_invertida.bl'
+# Reconhecer linhas do arquivo BLAST que correspondem a alinhamentos na fita
+# complementar, sinalizado pelo BLAST com ssend < sstart e põe-se os índices
+# sstart e ssend na ordem crescente, visto que sstart será usado posteriorm-
+# ente para ordenamento (foi?).
+
+OUT_INVERTIDO = pardir/'alinhamentos/perere3complete_vs_genoma_antisenso_invertida.bl'
 print('Lidando com sentido da fita...')
 per_len = len(aligned_perere.index)
 count = 0
@@ -37,14 +43,15 @@ print(aligned_perere)
 head_annotations.set_index('start', inplace=True)
 aligned_perere.set_index('send', inplace=True)
 
-#annotation são as heads
+### Agrupar por cromossomo
+# annotation são as head_annotations
 aligned_groups = aligned_perere.groupby(['saccver'])
 annotation_groups = head_annotations.groupby(['acc'])
 
 al_len = len(aligned_perere)
 an_len = len(head_annotations)
 
-# annotations é bem menor.
+# annotations é bem menor. (define qual loop é o de dentro)(?)
 # print('al', al_len, 'an', an_len)
 
 SEARCH_LEN = 5

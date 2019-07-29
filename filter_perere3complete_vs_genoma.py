@@ -3,9 +3,8 @@
 # out: pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl' pardir/'scripts/perere3complete_indices_filtrados.csv'
 
 from pandas import read_csv
-from utils import overlaps, pardir, verbose
+from utils import overlaps, pardir, verbose, BL_COLUMNS
 from time import time, gmtime, strftime
-from align_seqs_to_genome import COLUMNS
 
 # Usar biopython para blastear?
 
@@ -13,8 +12,8 @@ from align_seqs_to_genome import COLUMNS
 #================== LER E FILTRAR ALINHAMENTOS ==================#
 
 print('Lendo resultados do Blast...')
-perere3_vs_genoma = read_csv(pardir/'alinhamentos/perere3complete_vs_genoma.bl', header=None, names=COLUMNS.split(), sep='\\s+')
-sr3_vs_genoma = read_csv(pardir/'alinhamentos/sr3complete_vs_genoma.bl', header=None, names=COLUMNS.split(), sep='\\s+')
+perere3_vs_genoma = read_csv(pardir/'alinhamentos/perere3complete_vs_genoma.bl', header=None, names=BL_COLUMNS, sep='\\s+')
+sr3_vs_genoma = read_csv(pardir/'alinhamentos/sr3complete_vs_genoma.bl', header=None, names=BL_COLUMNS, sep='\\s+')
 print('Resultados lidos.')
 
 for data in (perere3_vs_genoma, sr3_vs_genoma):

@@ -2,7 +2,7 @@
 # in: pardir/'genome_annotation/head_annotations.gff3' pardir/'genome_annotation/gene_annotations.gff3'
 # out: pardir/'genome_annotation/head_genes_relations.tsv'
 
-from utils import pardir, read_tsv, overlaps, verbose, redo_flag
+from utils import pardir, read_tsv, overlaps, redo_flag, parse_gff_attributes, prinf, GFF3_COLUMNS
 
 # Achar genes sobrepostos (ou o mais próximo se não se sobrepuserem), às heads pra correlacionar as expressões
 # em um script posterior. Gera tsv em outpath.
@@ -17,25 +17,22 @@ if outpath.exists() and not redo_flag:
     exit()
 
     
-GFF_COLS = ['chrom', 'start', 'end', 'sense', 'id']
+GFF_COLS_SUBSET = ['seqid', 'start', 'end', 'strand', 'attributes']
 
 # ESTAMOS CONSIDERANDO SENTIDO
-heads = read_tsv(pardir/'genome_annotation/head_annotations.gff3', header=None)
-heads.drop([1, 2, 5, 7], inplace=True, axis=1)
-heads[8] = heads[8].apply(lambda s: s.strip('gene_id=').split(';')[0])
-heads.columns = GFF_COLS
-head_groups = heads.groupby(['chrom', 'sense'])
+heads = read_tsv(pardir/'genome_annotation/head_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
+genes = read_tsv(pardir/'genome_annotation/gene_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
+heads['id'] = parse_gff_attributes(heads.attributes).index
+genes['id'] = parse_gff_attributes(genes.attributes).index
+head_groups = heads.groupby(['seqid', 'strand'])
+gene_groups = genes.groupby(['seqid', 'strand'])
 
-genes = read_tsv(pardir/'genome_annotation/gene_annotations.gff3', header=None)
-genes.drop([1, 2, 5, 7], inplace=True, axis=1)
-genes[8] = genes[8].apply(lambda s: s.strip('gene_id=').split(';')[0])
-genes.columns = GFF_COLS
 
 # ### alterar um pouquinho as duplicatas muahahah
 genes.loc[genes.duplicated('start', 'last'), 'start'] += 1
 genes.loc[genes.duplicated('end', 'last'), 'end'] += 1
 
-gene_groups = genes.groupby(['chrom', 'sense'])
+gene_groups = genes.groupby(['seqid', 'strand'])
 
 
 if __name__ == '__main__':
@@ -47,9 +44,8 @@ if __name__ == '__main__':
             gene_group = gene_groups.get_group(head_group_name)
 
         except KeyError:
-            if verbose:
-                print('Não há nenhum gene no cromossomo. As heads abaixo são "desgenadas".')
-                print(head_group)
+            prinf('Não há nenhum gene no cromossomo. As heads abaixo são "desgenadas".')
+            prinf(head_group)
             continue
         
         for _, head_row in head_group.iterrows():
@@ -83,10 +79,9 @@ if __name__ == '__main__':
                             distance = new_distance
 
                     except KeyError:
-                        if verbose:
-                            print(f'Não há gene à {flag} de {head_row.id}.')
+                        prinf(f'Não há gene à {flag} de {head_row.id}.')
 
-            outfile.write('\t'.join([head_row.id, chosen_gene_id, flag, distance])+'\n')
+            outfile.write('\t'.join([head_row.id, chosen_gene_id, flag, str(distance)])+'\n')
 
     print('Concluído.')
 

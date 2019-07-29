@@ -33,16 +33,21 @@ def parse_script(script_path):
 
 
 if __name__ == '__main__':
+
+    untagged_scripts = []
+    
     for script_path in scripts_dir.glob('*[.py,.sh]'):
         script_name = script_path.name
         script_tags = parse_script(script_path)
 
-        # if not script_tags: continue
-        
-        pipeline.attr('node', color='lightgray', shape='box', style='filled', tooltip='hooooooo')
+        if not script_tags:
+            untagged_scripts.append(script_name)
+            continue
+
+        pipeline.attr('node', color='lightgray', shape='box', style='filled', tooltip=script_tags['description'])
         pipeline.node(script_name)
 
-        pipeline.attr('node', color='black', shape='folder', style='solid')
+        pipeline.attr('node', color='black', shape='folder', style='solid', tooltip='File or folder.')
         
         for inpath in script_tags.get('in', ()):
             pipeline.edge(inpath, script_name)
@@ -50,4 +55,7 @@ if __name__ == '__main__':
         for outpath in script_tags.get('out', ()):
             pipeline.edge(script_name, outpath)
 
-    pipeline.render(pardir/'pipeline', format='pdf', cleanup=True, view=True)
+
+    print('Não utilizados:', *untagged_scripts)
+    pipeline.render(pardir/'pipeline', format='svg', cleanup=True)
+    pipeline.render(pardir/'pipeline', format='pdf', cleanup=True)#, view=True)

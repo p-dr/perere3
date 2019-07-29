@@ -3,6 +3,8 @@ from pathlib import Path
 scripts_path = Path(__file__).parent
 pardir = scripts_path.parent
 
+GFF3_COLUMNS = ['seqid', 'source', 'type', 'start', 'end', 'score', 'strand', 'phase', 'attributes']
+BL_COLUMNS = ['qaccver', 'saccver', 'qstart', 'qend', 'sstart', 'send', 'length', 'pident', 'evalue', 'bitscore']
 
 from sys import argv
 
@@ -26,7 +28,6 @@ def prinf(text, *args, **kwargs):
     global verbose
     if verbose:
         print(text, *args, **kwargs)
-
 
 from datetime import datetime as dt
 
@@ -118,7 +119,16 @@ def time_func(func, nt=1000, *args, **kwargs):
         func(*args, **kwargs)
     return time()-t0
     
-from pandas import read_csv
+from pandas import read_csv, DataFrame
+import pandas as pd
 
 def read_tsv(*args, **kwargs):
-    return read_csv(*args, sep='\\s+', **kwargs)
+    return read_csv(*args, sep='\t', **kwargs)
+
+def parse_gff_attributes(attr, id_as_index=True, gene_id='gene_id'):
+    expanded_attr = attr.str.split(';')
+    expanded_attr = expanded_attr.apply(lambda l: dict([i.split('=') for i in l]))
+    ret = DataFrame(list(expanded_attr))
+    if id_as_index:
+        ret.set_index(gene_id, inplace=True)
+    return ret.infer_objects()

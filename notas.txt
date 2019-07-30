@@ -50,3 +50,7 @@ seg jun 24 16:54:21 -03 2019 | Investigar influência do ruído estatístico: co
 seg jun 24 16:54:37 -03 2019 | Investigar influência do ruído estatístico: correlação em função da mediana/média da contaagem de reads das heads por biblioteca
 qui jul 25 21:42:29 -03 2019 | PIPELINER TERMINADOOOOO (talvez eu mude o nome pra 'pipetree_builder' ou coisa assim)
 seg jul 29 14:04:57 -03 2019 | Pode haver divergência entre os scripts que esperam e os que não esperam que os GFF tenha uma linha de cabeçalho. Eles não tem, pois o HTSeq impõe isso.
+seg jul 29 15:24:03 -03 2019 | Checkpoint: tem posições start negativas nas anotações head. O HTSeq tá pirano com isso.
+seg jul 29 15:25:52 -03 2019 | plot_correlation_heads_near_genes.py agora normaliza pelo comprimento dos genes e das heads.
+ter jul 30 13:10:55 -03 2019 | O verbose do gen_heads_complete_tr.py é muito útil. Algumas coisas tão esquisitas, como o prefixo não batendo muito bem, e talvez a find_gtaa_break falhe em casos como 'TGTAAGTAAGTAA|GTAGTGGCT...'.
+ter jul 30 13:11:45 -03 2019 | Posições negativas de heads consertadas.

@@ -7,9 +7,13 @@ from Bio.SeqIO import to_dict, parse
 import matplotlib.pyplot as plt
 from pandas import read_csv, DataFrame
 from sys import argv
-from utils import find_gtaa_break, pardir, verbose, GFF3_COLUMNS
+from utils import find_gtaa_break, pardir, verbose, prinf
 
-HEAD_LEN = 1000
+# A filtragem por evalue é feita no próprio BLAST.
+
+HEAD_LEN = 1000                 # final head length
+GTAA_WINDOW_LEN = 1500          # search window length for GTAA repetitions
+PREFIX_LEN = 12
 
 if __name__ == '__main__':
     #======================== LEITURA ========================#
@@ -32,15 +36,13 @@ if __name__ == '__main__':
 
     heads_annotations_file = heads_annotations_path.open('w')
     # heads_annotations_file.write('\t'.join(GFF3_COLUMNS)+'\n') # Write header.
+    
     heads_outfile = heads_outpath.open('w')
     motherlength_outfile = motherlength_path.open('w')
     
     #======================== GET HEADS ========================#
 
     print('Buscando as sequências head no genoma...')
-
-    GTAA_WINDOW_LEN = 200
-    PREFIX_LEN = 12
     
     with (pardir/'seqs'/'perere3complete.fa').open() as per_file:
         perere_len = len(''.join([l.strip() for l in per_file.readlines()][1:]))
@@ -68,7 +70,9 @@ if __name__ == '__main__':
                 # verbose use only
                 prefix = genome_piece[head_slice.stop : head_slice.stop + PREFIX_LEN].reverse_complement()
 
-            if head_slice.start < 0:
+            ###### Algumas dão xabu
+            if head_slice.start < 0 or head_slice.stop < 0:
+                prinf(f'Head descartada com posições:', head_slice)
                 continue
             
             skip_gtaa = find_gtaa_break(proto_head)
@@ -98,9 +102,8 @@ if __name__ == '__main__':
             #========================================================================#
 
 
-            if verbose:
-                print(['-', '+'][plus_sense], prefix, proto_head[:skip_gtaa]+' | '+head[:30-skip_gtaa]+'...',
-                      f" {len(head)}bp\t{row['pident']:.2f}%\t{row['evalue']:.2e}\t{row['bitscore']:5}\t{row['saccver']}\t{head_slice.start}-{head_slice.stop}")
+            prinf(['-', '+'][plus_sense], prefix, proto_head[:skip_gtaa]+' | '+head[:30-skip_gtaa]+'...',
+                  f" {len(head)}bp\t{row['pident']:.2f}%\t{row['evalue']:.2e}\t{row['bitscore']:5}\t{row['saccver']}\t{head_slice.start}-{head_slice.stop}")
 
 
     print('Todas as sequências encontradas.')

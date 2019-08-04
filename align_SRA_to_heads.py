@@ -1,5 +1,5 @@
 # description: Aligns RNASeq trimmed reads from SRA to heads database (ht2 formatted). Outputs SAM files.
-# in: pardir/'trimmed_SRA_data' pardir/'heads_ht2/heads'
+# in: pardir/'trimmed_SRA_data' pardir/'heads_ht2'
 # out: pardir/'alinhamentos/SRA_vs_heads'
 
 from glob import iglob

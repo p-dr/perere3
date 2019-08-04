@@ -5,7 +5,7 @@
 from glob import iglob
 from pathlib import Path
 from subprocess import call
-from utils import pardir, redo_flag
+from utils import pardir, redo_flag, log
 
 alignment_dir = pardir/'alinhamentos/SRA_vs_genoma'
 annotations_dir = pardir/'genome_annotation'
@@ -21,8 +21,8 @@ for alignment_file in iglob(str(alignment_dir/'*')):
         if not out_path.exists() or redo_flag:
             print (f"Contando reads de {acc} em cada anotação de {kind}...")
             call(f'python -m HTSeq.scripts.count {alignment_file} {annotations_file} -t gene -q > {str(out_path)}', shell=True)
-            print ('htseq-count terminou de rodar.')
-        
+            print (f'\n{out_path.name}: htseq-count terminou de rodar.')
+            log(f"'{str(out_path)}' finalizado.", __file__)
         else:
             print (f"'{str(out_path)}' já existe. Pulando '{acc}_{kind}'.")
 

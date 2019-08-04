@@ -54,3 +54,13 @@ seg jul 29 15:24:03 -03 2019 | Checkpoint: tem posições start negativas nas an
 seg jul 29 15:25:52 -03 2019 | plot_correlation_heads_near_genes.py agora normaliza pelo comprimento dos genes e das heads.
 ter jul 30 13:10:55 -03 2019 | O verbose do gen_heads_complete_tr.py é muito útil. Algumas coisas tão esquisitas, como o prefixo não batendo muito bem, e talvez a find_gtaa_break falhe em casos como 'TGTAAGTAAGTAA|GTAGTGGCT...'.
 ter jul 30 13:11:45 -03 2019 | Posições negativas de heads consertadas.
+ter jul 30 16:10:13 -03 2019 | Acho que precisa contar de novo.
+qua jul 31 08:45:18 -03 2019 | Eu poderia deixar os lengths de genes e heads em um arquivo separado, pra não ficar todo mundo usando o GFF.
+qua jul 31 08:47:19 -03 2019 | Também quero fazer uns scripts que baixam os arquivos essenciais.
+qua jul 31 09:04:24 -03 2019 | No pipeline, mudar a cor dos arquivos pra indicar o quão recentes eles são, pais mais recentes que filhos são um problema, é aí que sabemos que os filhos têm que ser gerados novamente.
+qua jul 31 09:26:17 -03 2019 | Melhor deixar tudo no GFF mesmo, já que essas infrmações vão mudar todas com o comprimento real das heads.
+qua jul 31 09:30:39 -03 2019 | Outra coisa legal do pipeline é que ele mostra como rodar tudo de novo: scripts de uma mesma linha podem rodar em paralelo e deve-se rodar as linhas sequencialmente.
+qua jul 31 18:39:33 -03 2019 | CORES IMPLEMENTADAAAAAAS (tá lindo)
+qui ago 1 00:55:28 -03 2019 | align_SRA_to_heads.py align_SRA_to_heads.py~ out 78 deve ter bugado.
+sáb ago 3 17:44:56 -03 2019 | Criar função para salvar gráficos. (bkp? versão widescreen e quadrada? mexe em um, mexe em todos!)
+sáb ago 3 17:58:23 -03 2019 | Renomeado: plot_correlation_heads_near_genes.py correlate_heads_to_near_genes.py'

@@ -30,6 +30,8 @@ try:
 except ValueError:
     THRESHOLD = 0
 
+fig_rows = 5
+
 for head, counts in total_count_dic.items():
     complete_counts = [counts.get(pos, 0) for pos in range(max(counts.keys())+1)]
 
@@ -39,7 +41,10 @@ for head, counts in total_count_dic.items():
         complete_counts = [i/max_count for i in complete_counts]
 
     if max_count > THRESHOLD:
+        plt.subplot(fig_rows, 1, contador%fig_rows+1)
         plt.plot(complete_counts, label=head)
+        if contador%fig_rows == fig_rows-1:
+            plt.show()
         contador += 1
         
 plt.title('Contagem de reads por base das heads')

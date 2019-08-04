@@ -1,3 +1,6 @@
+# description: Filters SRA_vs_genoma alignments to keep only matches in heads. Deprecated because of long running time.
+# flags: old
+
 from utils import read_tsv, pardir, redo_flag, overlaps, verbose, log, progress_flag
 from re import findall
 from time import time

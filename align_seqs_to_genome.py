@@ -1,6 +1,6 @@
 # description: Generates perere3 and SR3 vs genome alignments.
-# in: pardir/'seqs/perere3.fa' pardir/'seqs/sr3.fa' pardir/'seqs/perere3complete.fa' pardir/'seqs/sr3complete.fa' ardir/'genome_db/smgenome'
-# out: pardir/'alinhamentos/perere3_vs_genoma.bl' pardir/'alinhamentos/sr3_vs_genoma.bl' pardir/'alinhamentos/perere3complete_vs_genoma.bl' pardir/'alinhamentos/sr3complete_vs_genoma.bl'
+# in: pardir/'seqs/perere3complete.fa' pardir/'seqs/sr3complete.fa' pardir/'genome_db'
+# out: pardir/'alinhamentos/perere3complete_vs_genoma.bl' pardir/'alinhamentos/sr3complete_vs_genoma.bl'
 
 from subprocess import run
 from os.path import exists
@@ -8,7 +8,8 @@ from utils import pardir, redo_flag, BL_COLUMNS
 
 # Usar biopython para blastear?
 
-QUERIES = ['perere3', 'sr3', 'perere3complete', 'sr3complete']
+# QUERIES = ['perere3', 'sr3', 'perere3complete', 'sr3complete']
+QUERIES = ['perere3complete', 'sr3complete']
 
 genomedb_path = pardir/'genome_db/smgenome'
 

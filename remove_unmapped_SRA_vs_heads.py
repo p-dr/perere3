@@ -1,8 +1,11 @@
-# Remove lines with '*' (not aligned) from SAM files.
+# description: Remove lines with '*' (not aligned reads) from SAM files (wich are vast majority).
+# in: pardir/'alinhamentos/SRA_vs_heads'
+# out: pardir/'alinhamentos/SRA_vs_heads/only_mapped'
+
 from utils import pardir, redo_flag, log
 
 indir = pardir/'alinhamentos/SRA_vs_heads'
-outdir  = pardir/'alinhamentos/SRA_vs_heads/only_mapped'
+outdir = pardir/'alinhamentos/SRA_vs_heads/only_mapped'
 
 for sam_path in indir.glob('*.sam'):
 

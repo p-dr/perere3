@@ -112,7 +112,7 @@ if __name__ == '__main__':
 
                     if not count%1e5:
 
-                        with outpath.open('') as outfile:
+                        with outpath.open('wb') as outfile:
                             heads_count_by_bp_hist['LASTREADLINE'] = count
                             dump(heads_count_by_bp_hist, outfile)
 

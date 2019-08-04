@@ -1,5 +1,5 @@
 # description: Aligns RNASeq trimmed reads from SRA to S. mansoni genome database (ht2 formatted). Outputs SAM files.
-# in: pardir/'trimmed_SRA_data' pardir/'genome_ht2/smgenome'
+# in: pardir/'trimmed_SRA_data' pardir/'genome_ht2'
 # out: pardir/'alinhamentos/SRA_vs_genoma'
 
 from glob import iglob

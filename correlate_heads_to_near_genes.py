@@ -1,13 +1,13 @@
 # description: Calculates expression (read count) correlation between heads and its nearest gene(s). When only "reation" is said, I mean head -> nearest gene(s) mapping.
 # in: pardir/'genome_annotation/head_genes_relations.tsv' pardir/'counted_reads' pardir/'genome_annotation/gene_annotations.gff3' pardir/'genome_annotation/head_annotations.gff3'
-# out: pardir/'genome_annotation/head_genes_correlations.tsv'
+# out: pardir/'genome_annotation/head_genes_correlations.tsv' pardir/'counted_reads/aggregated.tsv'
 
 from utils import read_tsv, pardir, show_flag, redo_flag, parse_gff_attributes, prinf, GFF3_COLUMNS
 import pandas as pd
-import numpy as np
 from matplotlib import pyplot as plt
 
 outpath = pardir/'genome_annotation/head_genes_correlations.tsv'
+out_aggregated_counts = pardir/'counted_reads/aggregated.tsv'
 
 if outpath.exists() and not (redo_flag or show_flag):
     print(f"'{str(outpath)}' já existe, nada será feito.")
@@ -15,7 +15,6 @@ if outpath.exists() and not (redo_flag or show_flag):
 
 if redo_flag:
     outfile = (outpath).open('w')
-
 
 print('Buscando comprimentos de genes e heads...')
 gene_attibutes = read_tsv(pardir/'genome_annotation/gene_annotations.gff3', names=GFF3_COLUMNS, usecols=['attributes'])['attributes']
@@ -28,6 +27,8 @@ lengths = pd.concat([head_lengths, gene_lengths]).astype(int)
 
 print('Concluído. Lendo arquivo de relações...')
 relations = read_tsv(pardir/'genome_annotation/head_genes_relations.tsv')
+if redo_flag:
+    outfile.write('\t'.join(relations.columns) + '\tcorrelation\n')
 
 print('Conclúido. Agregando contagens em um DataFrame...')
 
@@ -69,8 +70,11 @@ for count_path in (pardir/'counted_reads').glob('*.csv'):
 counts = counts.T
 counts.index.name = 'biblioteca'
 #counts.reset_index(inplace=True)
+if redo_flag:
+    counts.to_csv(out_aggregated_counts, sep='\t')
+
 print('Concluído. Calculando correlações...')
-print(counts)
+
 
 gridx, gridy = 5, 8
 plt.rcParams['font.size'] = 4
@@ -83,7 +87,7 @@ for _, relation_row in relations.iterrows():
     gid = relation_row.gene_id
     
     if hid not in counts:
-        prinf(f'WARNING: {hid} não presente nas contagens, só nas relações head-gene.')
+        prinf(f'WARNING: {hid} não presente nas contagens, só nas relações head-gene. Talvez a contagem deva ser refeita.')
         continue
     head_col = counts[hid]
     gene_col = counts[gid]
@@ -91,11 +95,10 @@ for _, relation_row in relations.iterrows():
     n_non_zero = (head_col.astype(bool) & gene_col.astype(bool)).sum()
     # if number of significative points (head and gene counts != 0) is less than 4
     if n_non_zero < 4:
-        prinf('\Correlação descartada:\n', counts[[gid, hid]])
+        prinf('\nCorrelação descartada:\n', counts[[gid, hid]])
         continue
 
-    else:
-        prinf('\Correlação plotada:\n', pd.concat([counts[[gid, hid]], head_col.astype(bool) & gene_col.astype(bool)], 1))
+    prinf('\nCorrelação plotada:\n', pd.concat([counts[[gid, hid]], head_col.astype(bool) & gene_col.astype(bool)], 1))
 
     corr = head_col.corr(gene_col)
 
@@ -111,7 +114,9 @@ for _, relation_row in relations.iterrows():
             plt.show()
 
         i += 1
-    else:
+        
+    elif redo_flag:
         outfile.write('\t'.join([*relation_row.astype(str), str(corr)])+'\n')
 
-outfile.close()
+if redo_flag:
+    outfile.close()

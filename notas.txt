@@ -64,3 +64,8 @@ qua jul 31 18:39:33 -03 2019 | CORES IMPLEMENTADAAAAAAS (tá lindo)
 qui ago 1 00:55:28 -03 2019 | align_SRA_to_heads.py align_SRA_to_heads.py~ out 78 deve ter bugado.
 sáb ago 3 17:44:56 -03 2019 | Criar função para salvar gráficos. (bkp? versão widescreen e quadrada? mexe em um, mexe em todos!)
 sáb ago 3 17:58:23 -03 2019 | Renomeado: plot_correlation_heads_near_genes.py correlate_heads_to_near_genes.py'
+qua ago 7 14:49:04 -03 2019 | teste estatístico Wilcoxon ranking test
+qua ago 7 14:49:39 -03 2019 | Plotar distância vs correlação.
+qua ago 7 15:20:57 -03 2019 | Utilizar 100 bases pra head também
+ter ago 20 20:59:26 -03 2019 | Nasce plot_distance_vs_corr.py plot_distance_vs_corr.py~
+ter ago 20 21:00:26 -03 2019 | corr_vs_read_count.py corr_vs_read_count.py~ agora faz teste de Wilcoxon com diferentes regiões.

@@ -7,7 +7,7 @@ from utils import pardir
 import pandas as pd
 import matplotlib.pyplot as plt
 from statsmodels.nonparametric.smoothers_lowess import lowess
-
+from scipy.stats import wilcoxon
 LOWESS_FRAC = 1/5
 
 correlations = pd.read_csv(pardir/('genome_annotation/head_genes_correlations' +
@@ -34,11 +34,19 @@ hg_data.columns = ['correlation', 'Mean', 'Median']
 ax = None
 for i, col in enumerate(hg_data.columns[1:]):
     ax = hg_data.plot.scatter(col, 'correlation', label=col,
-                              ax=ax, color='C'+str(i), logx=True, alpha=.1)
+                              ax=ax, color='C'+str(i), logx=False, alpha=.1)
 
 plt.plot(*lowess(hg_data.correlation, hg_data.Mean, frac=LOWESS_FRAC).T, label='lowess mean')
 plt.plot(*lowess(hg_data.correlation, hg_data.Median, frac=LOWESS_FRAC).T, label='lowess median')
 plt.legend()
 
-plt.show()
+sample1 = hg_data.loc[hg_data.Mean < .15, 'correlation']
+sample2 = hg_data[(hg_data.Mean > .4) & (hg_data.Mean < .6)].correlation
+sample3 = hg_data[(hg_data.Mean > 1) & (hg_data.Mean < 2)].correlation
 
+# supposed the correlations are already shuffled
+print(len(sample1.iloc[:len(sample2)]), len(sample2))
+print('1 vs2:', wilcoxon(sample2, sample1.iloc[:len(sample2)]))
+print('2 vs3:', wilcoxon(sample3, sample2.iloc[:len(sample3)]))
+print('1 vs3:', wilcoxon(sample3, sample1.iloc[:len(sample3)]))
+plt.show()

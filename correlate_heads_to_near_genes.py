@@ -57,8 +57,8 @@ for count_path in (pardir/'counted_reads').glob('*.csv'):
         total_count = count.iloc[:-2].sum() + count.iloc[-1]
         count /= total_count/1e6
         
-        ### NORMALIZE FOR FEATURE LENGTH:
-        count[lib_name] /= lengths
+        ### NORMALIZE FOR FEATURE LENGTH (IN KBP):
+        count[lib_name] /= lengths/1000
         count.dropna(inplace=True)
 
         # count final meaning:

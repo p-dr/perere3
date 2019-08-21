@@ -39,14 +39,14 @@ def build_edges(script_tags, script_name):
     pipeline.attr('node', color='black', shape='box', style='solid', tooltip=script_tags['description'])
     pipeline.node(script_name)
 
+    pipeline.attr('node', shape='folder', tooltip='File or folder.', style='filled')
+    
     for inpath in script_tags.get('in', ()):
-        pipeline.attr('node', color=file2color_map[inpath],
-                      shape='folder', tooltip='File or folder.', style='filled')
+        pipeline.attr('node', color=file2color_map[inpath])
         pipeline.edge(inpath.replace('/','/\n/'), script_name)
 
     for outpath in script_tags.get('out', ()):
-        pipeline.attr('node', color=file2color_map[outpath],
-                      shape='folder', tooltip='File or folder.', style='filled')
+        pipeline.attr('node', color=file2color_map[outpath])
         pipeline.edge(script_name, outpath.replace('/','/\n/'))
 
 

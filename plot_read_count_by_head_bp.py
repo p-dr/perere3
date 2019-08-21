@@ -1,13 +1,21 @@
 # description: Plots how many read were aligned at each head's bp.
-# in: pardir/'reads_by_heads_bp'
+# in: pardir/'reads_by_heads_bp' pardir/'genome_annotation/heads_motherlength.tsv'
 # out: 
 # plot: 
 
 from utils import pardir, redo_flag, verbose, argv
 from pickle import load
+from scipy.signal import find_peaks
+import pandas as pd
 import matplotlib.pyplot as plt
 
+# Minimum motherlength value to be plotted.
+ML_THRESH = 3000
+
 indir = pardir/'reads_by_heads_bp'
+motherlengths = pd.read_csv(pardir/'genome_annotation/heads_motherlength.tsv',
+                            sep='\t', header=None, names=['head_id', 'motherlength'],
+                            index_col='head_id')
 
 print('Agregando dicionários...')
 total_count_dic = {}
@@ -35,14 +43,21 @@ fig_rows = 5
 for head, counts in total_count_dic.items():
     complete_counts = [counts.get(pos, 0) for pos in range(max(counts.keys())+1)]
 
-    #normalizar
+    # Normalizar
     max_count = max(counts.values())
     if 'norm' in argv:
         complete_counts = [i/max_count for i in complete_counts]
 
-    if max_count > THRESHOLD:
+    motherlength = motherlengths.loc[head, 'motherlength']
+    
+    if max_count > THRESHOLD and motherlength > ML_THRESH:
+        
         plt.subplot(fig_rows, 1, contador%fig_rows+1)
-        plt.plot(complete_counts, label=head)
+        plt.legend()
+
+        plt.plot(complete_counts, label=f'{head} (ml={motherlength})')
+
+        
         if contador%fig_rows == fig_rows-1:
             plt.show()
         contador += 1

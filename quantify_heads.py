@@ -3,7 +3,7 @@
 # out: pardir/'alinhamentos/heads_vs_heads.bl'
 # plot: 
 
-from utils import pardir, redo_flag
+from utils import pardir, redo_flag, save_all_figs
 from os.path import exists
 from pandas import read_csv
 from sys import argv
@@ -38,24 +38,20 @@ print(f"'{out_path}' lido.")
 
 #======================== HISTOGRAMA ========================#
 
-hist = (heads_vs_heads['qaccver'].value_counts()-1).value_counts()
+hist = (heads_vs_heads['qaccver'].value_counts()-1)
 
 for log in (False, True):
 
     print('Construindo histograma...')
 
-    plt.rcParams['axes.titlesize'] = 24
-    plt.rcParams['axes.labelsize'] = 20
-
-    hist.plot('bar', grid=False, logy=log)
+    hist.hist(bins=14)
 
     plt.xlabel('Número de repetições')
     plt.ylabel('Número de sequências')
-    plt.title('Número de sequências "head" que se repetem N vezes graficado contra o pŕoprio N'.upper())
+    plt.title('Frequências da quantidade de alinhamentos de uma head com as outras'.upper())
 
-    hist_path = pardir/f'graficos/heads_vs_heads{["","_log"][log]}.png'
-    plt.savefig(hist_path)
-    print(f"Histograma salvo em '{hist_path}'.")
+    save_all_figs()
+    print("Histograma salvo.")
     
     if '-s' in argv:
         plt.show()

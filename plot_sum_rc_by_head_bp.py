@@ -24,7 +24,7 @@ heads_data = pd.read_csv(pardir/'genome_annotation/head_annotations.gff3',
                          names=GFF3_COLUMNS, sep='\t', usecols=['seqid', 'start', 'end',
                                                       'strand', 'attributes'])
 
-heads_data = unfold_gff(heads_data).set_index('gene_id')
+heads_data = unfold_gff(heads_data)
 print(heads_data)
 
 print('Agregando dicionários...')
@@ -36,62 +36,57 @@ for count_dic_path in indir.glob('*'):
         count_dic = load(count_dic_file)
 
     for head in count_dic.keys():
-        total_count_dic[head] = total_count_dic.get(head, {})
+        head_total_count = sum(count_dic[head].values())
         for pos, count in count_dic[head].items():
-            total_count_dic[head][pos] = total_count_dic[head].get(pos, 0) + count
+            total_count_dic[pos] = total_count_dic.get(pos, 0) + count/head_total_count
 
 print('Feito. Completando posições faltantes e plotando...')
-contador = 0
 
-try:
-    THRESHOLD = int(argv[-1])
-except ValueError:
-    THRESHOLD = 0
+complete_counts = [total_count_dic.get(pos, 0) for pos in
+                   range(max(total_count_dic.keys())+1)]
+print('Posições foram completadas. Plotando...')
 
-fig_rows = 5
+motherlength = motherlengths.loc[head, 'motherlength']
 
-for head, counts in total_count_dic.items():
-    complete_counts = [counts.get(pos, 0) for pos in range(max(counts.keys())+1)]
+axesy = plt.axis()[2:]
+n_heads = len(heads_data)
+mask_count = [0]*1000
+count = 0
 
-    # Normalizar
-    max_count = max(counts.values())
-    if 'norm' in argv:
-        complete_counts = [i/max_count for i in complete_counts]
+### FIND AND PLOT REPETIVIVE REGIONS
+def plot_repetitive():
+    try:
+        for irow, row in heads_data.iterrows():
+            seqid, hstart, hend = row[['seqid', 'start', 'end']]
 
-    motherlength = motherlengths.loc[head, 'motherlength']
+            for j, mask in mask_map.get_group(seqid).iterrows():
+                # if mask does not overlaps
+                if mask.end < hstart or mask.start > hend:
+                    continue
+                else:
+                    olap_mask = (max(mask.start - hstart, 0), min(mask.end - hstart, 1000))
+                    for i in range(*olap_mask):
+                        mask_count[i] += 1
+                    # plt.fill_between(olap_mask, *axesy, alpha=.1)
+                    count += 1
 
-    if max_count > THRESHOLD and motherlength > ML_THRESH:
+            print(irow, '/', n_heads, 'plotted:', count)
 
-        plt.subplot(fig_rows, 1, contador%fig_rows+1)
-        plt.legend()
+    except KeyboardInterrupt:
+        pass
 
-        plt.plot(complete_counts, label=f'{head} (ml={motherlength})')
-        axesy = plt.axis()[2:]
-
-        ### FIND AND PLOT REPETIVIVE REGIONS
-        seqid, hstart, hend = heads_data.loc[head, ['seqid', 'start', 'end']]
-
-        masks = []
-        for j, mask in mask_map.get_group(seqid).iterrows():
-            # if mask does not overlaps
-            if mask.end < hstart or mask.start > hend:
-                continue
-            else:
-                olap_mask = (mask.start - hstart, mask.end - hstart)
-                print(*zip(olap_mask, axesy))
-                plt.fill_between(olap_mask, *axesy, alpha=.5)
+    return mask_count
 
 
-        if contador%fig_rows == fig_rows-1:
-            save_all_figs()
-            plt.show()
-        contador += 1
+# NORMALIZE
+complete_counts = [c/max(complete_counts) for c in complete_counts]
+#mask_count = [c/max(mask_count) for c in mask_count]
 
+plt.plot(complete_counts, label='Read count')
+#plt.plot(mask_count, label='Masked count')
 plt.title('Contagem de reads por base das heads')
 plt.xlabel('Posição na head')
 plt.ylabel('Contagem')
-if contador <= 10:
-    plt.legend()
 save_all_figs()
 plt.show()
 print('Pronto.')

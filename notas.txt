@@ -69,3 +69,23 @@ qua ago 7 14:49:39 -03 2019 | Plotar distância vs correlação.
 qua ago 7 15:20:57 -03 2019 | Utilizar 100 bases pra head também
 ter ago 20 20:59:26 -03 2019 | Nasce plot_distance_vs_corr.py plot_distance_vs_corr.py~
 ter ago 20 21:00:26 -03 2019 | corr_vs_read_count.py corr_vs_read_count.py~ agora faz teste de Wilcoxon com diferentes regiões.
+qua ago 21 08:37:24 -03 2019 | analisar separadamente as correlações das heads olp.
+qua ago 21 08:42:29 -03 2019 | Cuidar do sentido em que os tranposons e os genes correlacionados estão, desconsiderar readthrough se estiverem em fitas diferentes e considerar o sentido dos reads em si.
+qua ago 21 08:59:41 -03 2019 | Separar heads à frente e atrás do gene mais próximo.
+qua ago 21 09:10:37 -03 2019 | Separar cópias ativas de passivas
+sex ago 30 10:35:47 -03 2019 | Spearman correlação para as curvas de lowess
+sex ago 30 10:37:22 -03 2019 | Tentar criar um perfil médio geral das contagens e regiões repetitivas, testar influência das regiões repetitivas nas contagens
+sex ago 30 10:52:40 -03 2019 | comparação entre cópias inteiras e não inteiras
+sex ago 30 10:52:50 -03 2019 | comparação entre cópias inteiras e não inteiras (correlação)
+sex ago 30 11:04:19 -03 2019 | analisar estágio-especificidade entre cópias íntegras ou não
+qui set 12 10:59:20 -03 2019 | Renomear heads no relatório?
+sex set 13 10:49:16 -03 2019 | Elementos truncados podem não codificar proteína mas ainda sim serem reconhecidos por elas
+sex set 13 10:50:01 -03 2019 | graficar frequência de contagem.
+sex set 13 10:52:41 -03 2019 | transcrição por distŝncia
+qui set 19 15:15:06 -03 2019 | semana passada (esqueci) fiz o plot_sum_rc_by_head_bp.py
+sex set 20 10:56:17 -03 2019 | 3' é favorecido pelo RNASeq
+sex set 20 10:56:42 -03 2019 | Há transcritos raros que sofrem na PCR
+sex set 20 10:57:15 -03 2019 | Melhorar mapa de transcriçõ de genes e heads em cada posição do genoma.
+sex set 20 11:30:12 -03 2019 | pvalor das correlações de spearman
+sex set 20 11:30:36 -03 2019 | log do mapa de contagem por posição no genoma
+sex set 20 11:32:49 -03 2019 | Eliminar cópias sobrepostas aos genes

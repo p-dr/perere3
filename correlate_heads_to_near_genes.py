@@ -2,12 +2,21 @@
 # in: pardir/'genome_annotation/head_genes_relations.tsv' pardir/'counted_reads' pardir/'genome_annotation/gene_annotations.gff3' pardir/'genome_annotation/head_annotations.gff3'
 # out: pardir/'genome_annotation/head_genes_correlations.tsv' pardir/'counted_reads/aggregated.tsv'
 
-from utils import read_tsv, pardir, show_flag, redo_flag, parse_gff_attributes, prinf, GFF3_COLUMNS
+from utils import read_tsv, pardir, show_flag, redo_flag, parse_gff_attributes,
+prinf, GFF3_COLUMNS, save_all_figs
 import pandas as pd
 from matplotlib import pyplot as plt
+from sys import argv
 
-outpath = pardir/'genome_annotation/head_genes_correlations.tsv'
-out_aggregated_counts = pardir/'counted_reads/aggregated.tsv'
+if '--sem_sentido' in argv:
+    nosense_flag = '_unconsidering_sense'
+
+else:
+    nosense_flag = ''
+
+
+outpath = pardir/f'genome_annotation/head_genes_correlations{nosense_flag}.tsv'
+out_aggregated_counts = pardir/f'counted_reads/aggregated{nosense_flag}.tsv'
 
 if outpath.exists() and not (redo_flag or show_flag):
     print(f"'{str(outpath)}' já existe, nada será feito.")
@@ -26,7 +35,8 @@ head_lengths = parse_gff_attributes(head_attibutes)['length']
 lengths = pd.concat([head_lengths, gene_lengths]).astype(int)
 
 print('Concluído. Lendo arquivo de relações...')
-relations = read_tsv(pardir/'genome_annotation/head_genes_relations.tsv')
+relations = read_tsv(pardir/f'genome_annotation/head_genes_relations{nosense_flag}.tsv')
+
 if redo_flag:
     outfile.write('\t'.join(relations.columns) + '\tcorrelation\n')
 
@@ -111,6 +121,7 @@ for _, relation_row in relations.iterrows():
 
         if gridi == gridx*gridy:
             plt.tight_layout()
+            save_all_figs()
             plt.show()
 
         i += 1

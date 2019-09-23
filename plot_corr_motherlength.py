@@ -3,7 +3,7 @@
 # out: 
 # plot: 
 
-from utils import read_tsv, pardir
+from utils import read_tsv, pardir, save_all_figs
 import pandas as pd
 from seaborn import heatmap
 from matplotlib import pyplot as plt
@@ -42,4 +42,5 @@ ml_corr['bins'] = pd.cut(ml_corr['ml'], 15)
 ml_corr.boxplot('correlation', 'bins')
 
 print(ml_corr.groupby('bins').mean())
+save_all_figs()
 plt.show()

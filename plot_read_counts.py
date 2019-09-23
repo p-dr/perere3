@@ -5,7 +5,7 @@
 
 from pandas import read_csv, DataFrame, cut, pivot_table
 from matplotlib import pyplot as plt
-from utils import pardir
+from utils import pardir, save_all_figs
 from labutils import rgb_to_hex
 from pathlib import Path
 from random import random as rd, seed
@@ -71,11 +71,12 @@ def plot_motherlength(count_df, count_mode, stem):
     count_df = add_motherlenghts(count_df)
     colors = count_df['feature'].apply(color_from_id).values
 
-    count_df.plot('motherlength', count_mode+'_count', 'scatter', color=colors, title=stem, figsize=(16, 9), alpha=.5)
+    count_df.plot('motherlength', count_mode+'_count', 'scatter', color=colors,
+                  title=stem, figsize=(16, 9), alpha=.5, figure=30)
 
 
 def plot_box(count_df, count_mode, stem):
-    BINS = 10
+    BINS = 20
     count_df = add_motherlenghts(count_df)
     # count_df = count_df[count_df['count'] > 10]
     
@@ -170,6 +171,11 @@ if __name__ == '__main__':
 
         for count_file in counted_reads_dir.glob('*'):
             stem = Path(count_file).stem
+
+            # ALERTA DE GAMBIARRA
+            if stem.startswith('aggregated'):
+                continue
+
             count_df = read_csv(count_file, sep='\t', header=None,
                                 names=['feature', 'count'])
 

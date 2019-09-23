@@ -1,44 +1,53 @@
 # description: Maps each head to its nearest (or overlapped) gene.
 # in: pardir/'genome_annotation/head_annotations.gff3' pardir/'genome_annotation/gene_annotations.gff3'
 # out: pardir/'genome_annotation/head_genes_relations.tsv'
+# pardir/'genome_annotation/head_genes_relations_unconsidering_sense.tsv'
 
 from utils import pardir, read_tsv, overlaps, redo_flag, parse_gff_attributes, prinf, GFF3_COLUMNS
+from sys import argv
 
 # Achar genes sobrepostos (ou o mais próximo se não se sobrepuserem), às heads pra correlacionar as expressões
 # em um script posterior. Gera tsv em outpath.
 # LEGENDA: gene está à dir(direita)/esq(esquerda)/olap(overlappado com) a head.
 
-outpath = pardir/'genome_annotation/head_genes_relations.tsv'
-outfile = outpath.open('w')
+GFF_COLS_SUBSET = ['seqid', 'start', 'end', 'strand', 'attributes']
+
+# ESTAMOS CONSIDERANDO SENTIDO POR DEFAULT (--sem_sentido para não considerar)
+# sequid é o nome do cromossomo (contig)
+if '--sem_sentido' in argv:
+    COLS_TO_GROUP = 'seqid'
+    nosense_flag = '_unconsidering_sense'
+
+else:
+    COLS_TO_GROUP = ['seqid', 'strand']
+    nosense_flag = ''
+
+outpath = pardir/f'genome_annotation/head_genes_relations{nosense_flag}.tsv'
 
 # Segurança para não sobrescrever como eu fiz agora >.<
 if outpath.exists() and not redo_flag:
     print(f"Arquivo '{str(outpath)}' já existe, nada será feito. Use '-r' se quiser sobrescrever.")
     exit()
 
-    
-GFF_COLS_SUBSET = ['seqid', 'start', 'end', 'strand', 'attributes']
+outfile = outpath.open('w')
 
-# ESTAMOS CONSIDERANDO SENTIDO
 heads = read_tsv(pardir/'genome_annotation/head_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
 genes = read_tsv(pardir/'genome_annotation/gene_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
 heads['id'] = parse_gff_attributes(heads.attributes).index
 genes['id'] = parse_gff_attributes(genes.attributes).index
-head_groups = heads.groupby(['seqid', 'strand'])
-gene_groups = genes.groupby(['seqid', 'strand'])
-
+head_groups = heads.groupby(COLS_TO_GROUP)
 
 # ### alterar um pouquinho as duplicatas muahahah
 genes.loc[genes.duplicated('start', 'last'), 'start'] += 1
 genes.loc[genes.duplicated('end', 'last'), 'end'] += 1
 
-gene_groups = genes.groupby(['seqid', 'strand'])
+gene_groups = genes.groupby(COLS_TO_GROUP)
 
 
 if __name__ == '__main__':
     #write header
     outfile.write('\t'.join(['head_id', 'gene_id', 'flag', 'distance'])+'\n')
-    
+
     for head_group_name, head_group in head_groups:
         try:
             gene_group = gene_groups.get_group(head_group_name)
@@ -47,7 +56,7 @@ if __name__ == '__main__':
             prinf('Não há nenhum gene no cromossomo. As heads abaixo são "desgenadas".')
             prinf(head_group)
             continue
-        
+
         for _, head_row in head_group.iterrows():
 
             for _, gene_row in gene_group.iterrows():

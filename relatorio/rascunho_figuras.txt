@@ -1,0 +1,42 @@
+ct = coeficiente de transcrição
+rc = contagem de reads
+d = distância ao gene vizinho
+corr = correlação head-gene de transcrição
+ml = comprimento do alinhamento mãe
+pos = posição da head
+======================================
+
+PONTOS:
+integridade
+promotor das cópias é igual
+	dá pra comparar regiões
+heads são de fato diferentes
+* heads de fato são transcritas
+======================================
+
+hist(n de alinhamentos head-head)
+hist(ml)
+corr/rc
+corr/ml
+*expressão da copia por local do genoma
+rc/pos
+d/corr
+
+
+======================================
+HISTORINHA
+achamos esse transposon diferentão.
+  a cauda dele muda! (mostra isso)
+  * porquê da parte conservada terminar em códon de terminação (TAA).
+  * porquê da sequência repetitiva? (GTAAGTAA)
+
+dá pra usar pra observar atividade do genoma (promotores das cópias são iguais.
+
+só que não: tem que tomar cuidado, porque nas heads que você achou pode ter algumas que perderam o promotor.
+  ml e integridade
+
+além disso, deve ter readthrough e vazamento.
+  correlação entre jusante e montante, entre mesma fita e fitas diferentes.
+  aparentemente, não dá para observar muito bem esses efeitos, será que não são muito presentes?
+
+Tentando eliminar esses efeitos, sobra isso: ().

@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2cm]{geometry}
+\usepackage{graphicx}
+\graphicspath{{../graficos/}}
+
+\title{Análise bioinformática das cópias do transposon não-LTR Pererê-3 no genoma de Schistosoma mansoni}
+\date{Novembro de 2019}
+
+
+\begin{document}
+\section{Introdução}
+
+Tal propriedade nos fornece uma interessante ferramenta: as cópias de Pererê-3 observadas no genoma podem ser distinguidas umas das outras, visto que possuem uma região característica a cada uma delas. Desta forma, novas questões podem ser levantadas, e abre-se um novo campo de exploração.
+
+É possível, por exemplo, que se avalie os níveis de transcrição de cada cópia separadamente, além de que, se cada réplica do transposon carrega o mesmo promotor, as diferenças destes níveis devem se originar de fatores externos à sequência do transposon em si, a exemplo da compactação da cromatina ou influência de regiões codificantes próximas. Visto isso, os diferentes níveis de transcrição em conjunto poderiam oferecer um panorama da atividade do genoma ao longo das bases \footnote{Isso é realmente algo para se centrar o projeto?}.
+\section{Métodos}
+Nota-se que a
+Pode-se, por exemplo, questionar-se acerca do nível de transcrição de cada cópia no genoma, e de sua dependência com a proximidade dos genes vizinhos.
+Criou-se, então, uma série de parâmetros a serem comparados e caracterizados entre as diferentes cópias do transposon Pererê-3.
+
+\subsection{Contagem de reads}
+Nas questões relacionadas aos níveis de transcrição, faz-se uso das bibliotecas de RNA-Seq (...) que compreendem diferentes estágios de vida do \textit{S. mansoni} e conta-se, nas regiões de interesse do genoma, quantos reads dessas bibliotecas podem ser alinhados. Divide-se, então, o valor final da contagem pelo comprimento da região em que se procura o alinhamento dos reads, pois assume-se que cada par de base da região tem igual probabilidade de alinhar-se com cada read e, portanto, a contagem final depende linearmente do comprimento do intervalo de DNA que se analisa. A divisão é feita, então, a fim de eliminar esse fator para fins comparativos, e ao valor resultante dá-se o nome de coeficiente de expressão.\footnote{Já existe? Seria "de tradução" um melhor nome?}
+
+\subsection{Comprimento-mãe}
+Com curiosidade sobre os efeitos da integridade de cada cópia, chama-se de comprimento-mãe o comprimento do alinhamento BLAST que gerou cada sequência cauda. Toma-se cuidado para considerar apenas os alinhamentos que contém a extremidade 3' da cópia de referência, de forma a ser provável a presença da sequência cauda na região pós-3' no genoma. Assume-se que este valor esteja fortemente correlacionado com a integridade da cópia, e a princípio não são consideradas as mutações pontuais, que também são componente importante ao se pensar no grau de integridade de uma sequência.
+
+\subsection{Correlação com genes vizinhos}
+Espera-se que grande parcela das cópias encontradas no genoma sejam expressas também por efeito de readthrough, ou transcrição passiva, em que as cópias do transposon são transcritas por se encontrarem em regiões já codificantes, na fase de leitura aberta (ORF) de um gene, por exemplo, e não fazendo uso da maquinaria própria de transcrição. Supõe-se que esses casos resultem em coeficientes de expressão independentes da integridade da cópia de Pererê-3, uma vez que as proteínas nela codificadas são dispensáveis para a presença da cópia no transcriptoma.\\
+
+Avalia-se, portanto, a correlação entre os coeficientes de transcrição de cada cópia e o coeficiente de seu gene mais próximo ou do gene em que se insere, para os casos em que a cópia se encontra na região expressa de um gene. A esta correlação será referida daqui em diante como correlação com o gene vizinho, e espera-se que seja maior no casos em que a transcrição da sequência head é passiva.
+
+\subsection{Distância ao gene vizinho}
+Ainda sob a questão da influência dos genes mais próximos no coeficiente de transcrição das sequências head, outro fator a se considerar é a distância em si entre a head e o gene vizinho, em pares de base, pois espera-se que a correlação entre eles se intensifique quanto menor for tal distância. Avaliando os casos em que a head está à jusante ou montante do gene separadamente, espera-se também determinar se há atividade do promotor gênico na transcrição da cópia do transposon, isto é, verificar a ocorrência de transcrição por readthrough.
+
+\subsection{A integridade afeta os níveis de transcrição?}
+
+A fim de investigar a influência da completude das cópias em sua capacidade de produzir novos elementos, inicialmente observou-se a distribuição de comprimentos-mãe encontrados.\\
+
+\begin{figure}[h!]
+  \label{mlhist}
+  \centering
+  \includegraphics[width=\textwidth]{plot_motherlenght_hist_0.pdf}
+\end{figure}
+
+Já nesse ponto, há uma clara predominância das cópias menores, principalmente com menos de 600 pares de base de comprimento, representadas mais à esquerda na figura \ref{mlhist}. Contudo, é interessante observar também um aumento significativo da quantidade de cópias íntegras ou quase íntegras, na extrema direita da figura \ref{mlhist}. Esse aumento sugere fortemente que a integridade das cópias é um fator determinante para sua disseminação (ou ao menos sobrevivência) e corrobora a hipótese de que há grande efeito de readtrough: já previa-se que cópias truncadas, de comprimento menor, teriam menor efeito no produto final de um gene \footnote{Só quando em fase, não? investigar melhor. E se for em regiões intrônicas?}, visto que menos aminoácidos seriam adicionados, e portanto seriam mais prováveis se instalar em um gene mantendo-o ativo e funcional, de forma que a cópia poderia tirar proveito da maior conservatividade das regiões gênicas e predominar no genoma \footnote{Elas se instalam degradadas ou se degradam depois de se instalar? Em tese, degradá-las favorece o gene.}.\\
+
+Em seguida, passou-se a analisar mais diretamento a influência do comprimento-mãe na transcrição: elaborou-se gráfico de dispersão entre o coeficiente de transcrição de cada head e seu comprimento mãe, e o resultado é apresentado na figura \ref{mlrc}.
+
+
+\end{document}

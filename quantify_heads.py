@@ -4,6 +4,7 @@
 # plot: 
 
 from utils import pardir, redo_flag, save_all_figs
+from subprocess import run
 from os.path import exists
 from pandas import read_csv
 from sys import argv
@@ -38,13 +39,18 @@ print(f"'{out_path}' lido.")
 
 #======================== HISTOGRAMA ========================#
 
-hist = (heads_vs_heads['qaccver'].value_counts()-1)
+counts = (heads_vs_heads['qaccver'].value_counts()-1)
+hist = counts.value_counts()
+print(hist)
+soma = hist.sum()
+print('soma:', soma, 'porcentagem de 0 repetições:',
+      hist[0]/soma, '% até 1 rep.', hist[0:2].sum()/soma)
 
 for log in (False, True):
 
-    print('Construindo histograma...')
+    print('Construindo countsograma...')
 
-    hist.hist(bins=14)
+    counts.hist(bins=14)
 
     plt.xlabel('Número de repetições')
     plt.ylabel('Número de sequências')
@@ -52,7 +58,7 @@ for log in (False, True):
 
     save_all_figs()
     print("Histograma salvo.")
-    
+
     if '-s' in argv:
         plt.show()
         plt.close()

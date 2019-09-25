@@ -154,6 +154,7 @@ import matplotlib.pyplot as plt
 grafdir = pardir/'graficos'
 figcount = 0
 
+
 def save_all_figs():
     global figcount
     timestamp = dt.now().strftime('%Y-%-m-%-d-%Hh%Mm%Ss')
@@ -163,4 +164,10 @@ def save_all_figs():
         plt.savefig(grafdir/f'old/{main_name}_{figcount}_{timestamp}.pdf')
         plt.savefig(grafdir/f'{main_name}_{figcount}.pdf')
         figcount += 1
-    
+
+
+def plot_box(count_df, x, y, bins=20, *args):
+    newy = str(y)+'_bins'
+    count_df[newy] = pd.cut(count_df[y], bins)
+    count_df.boxplot(x, newy, rot=90, showfliers=False, *args)
+    plt.tight_layout()

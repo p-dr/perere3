@@ -27,6 +27,8 @@ d/corr
 HISTORINHA
 achamos esse transposon diferentão.
   a cauda dele muda! (mostra isso)
+  * explicar como você fez as heads.
+  * explicar melhor cada propriedade (corr, por exemplo).
   * porquê da parte conservada terminar em códon de terminação (TAA).
   * porquê da sequência repetitiva? (GTAAGTAA)
 

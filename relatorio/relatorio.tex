@@ -37,6 +37,10 @@ Avalia-se, portanto, a correlação entre os coeficientes de transcrição de ca
 \subsection{Distância ao gene vizinho}
 Ainda sob a questão da influência dos genes mais próximos no coeficiente de transcrição das sequências head, outro fator a se considerar é a distância em si entre a head e o gene vizinho, em pares de base, pois espera-se que a correlação entre eles se intensifique quanto menor for tal distância. Avaliando os casos em que a head está à jusante ou montante do gene separadamente, espera-se também determinar se há atividade do promotor gênico na transcrição da cópia do transposon, isto é, verificar a ocorrência de transcrição por readthrough ou vazamento. Separando as copias na mesma fita das em firas diferentes, espera-se tambem observar efeito da compactaçao da cromatina na regiao.
 
+\section{Resultados}
+
+\subsection{As cópias são de fato diferentes?}
+Visando constatar a unicidade das cópias de transposon pelo genoma, efetuou-se alinhamentos BLAST das sequências head entre elas mesmas, e verificou-se que aproximadamente 87,6\% das sequências não foram alinhadas com nenhuma outra e por volta de 96,0\% alinharam no máximo uma vez, mostrando que, de fato, não há coincidências gerais claras entre entre as regiões UTR 3' do Pererê-3, e a temática de análise proposta mantém-se válida.
 \subsection{A integridade afeta os níveis de transcrição?}
 
 A fim de investigar a influência da completude das cópias em sua capacidade de produzir novos elementos, inicialmente observou-se a distribuição de comprimentos-mãe encontrados.\\
@@ -47,7 +51,7 @@ A fim de investigar a influência da completude das cópias em sua capacidade de
   \includegraphics[width=.5\textwidth]{plot_motherlenght_hist_0.pdf}
 \end{figure}
 
-Já nesse ponto, há uma clara predominância das cópias menores, principalmente com menos de 600 pares de base de comprimento, representadas mais à esquerda na figura \ref{mlhist}. Contudo, é interessante observar também um aumento significativo da quantidade de cópias íntegras ou quase íntegras, na extrema direita da figura \ref{mlhist}. Esse aumento sugere fortemente que a integridade das cópias é um fator determinante para sua disseminação (ou ao menos sobrevivência) e corrobora a hipótese de que há grande efeito de readtrough: já previa-se que cópias truncadas, de comprimento menor, teriam menor efeito no produto final de um gene \footnote{Só quando em fase, não? investigar melhor. E se for em regiões intrônicas?}, visto que menos aminoácidos seriam adicionados, e portanto seriam mais prováveis se instalar em um gene mantendo-o ativo e funcional, de forma que a cópia poderia tirar proveito da maior conservatividade das regiões gênicas e predominar no genoma \footnote{Elas se instalam degradadas ou se degradam depois de se instalar? Em tese, degradá-las favorece o gene. Escrever sobre hipotese da taxa de degradaçao diferente ao longodo tempo?}.\\
+Já nesse ponto, há uma clara predominância das cópias menores, principalmente com menos de 600 pares de base de comprimento, representadas mais à esquerda na figura \ref{mlhist}. Contudo, é interessante observar também um aumento significativo da quantidade de cópias íntegras ou quase íntegras, na extrema direita da figura \ref{mlhist}. Esse aumento sugere fortemente que a integridade das cópias é um fator determinante para sua disseminação (ou ao menos sobrevivência) e corrobora a hipótese de que há grande efeito de readtrough: já previa-se que cópias truncadas, de comprimento menor, teriam menor efeito no produto final de um gene \footnote{Só quando em fase, não? investigar melhor. E se for em regiões intrônicas?}, visto que menos aminoácidos seriam adicionados, e portanto seriam mais prováveis de se instalar em um gene mantendo-o ativo e funcional, de forma que a cópia poderia tirar proveito da maior conservatividade das regiões gênicas e predominar no genoma \footnote{Elas se instalam degradadas ou se degradam depois de se instalar? Em tese, degradá-las favorece o gene. Escrever sobre hipotese da taxa de degradaçao diferente ao longodo tempo?}.\\
 
 Em seguida, passou-se a analisar mais diretamente a influência do comprimento-mãe na transcrição: elaborou-se gráfico de dispersão entre o coeficiente de transcrição de cada head e seu comprimento mãe, e o resultado é apresentado na figura \ref{mlrc}.
 
@@ -57,9 +61,11 @@ Em seguida, passou-se a analisar mais diretamente a influência do comprimento-m
 	\includegraphics[width=.5\textwidth]{plot_corr_motherlength_2.pdf}
 \end{figure}
 
-	Embora a quatidade de dados seja muito maior nas extremidades direita e esquerda do gráfico, como já apontava a figura \ref{mlhist}, não há diferença significativa de nível de transcrição entre as duas regiões, o que pode sugerir que, embora incompletas, as cópias de menor comprimento mãe ainda sim façam uso da maquinaria própria \footnote{Mesmo as com 60 bp? Parece improvável. Lembre-se de que a parte descartada é justamente o início em 5'. Não deveria estar aí nosso promotor?}.
+	Embora a quatidade de dados seja muito maior nas extremidades direita e esquerda do gráfico, como já apontava a figura \ref{mlhist}, não há diferença significativa de nível de transcrição entre as duas regiões, o que pode sugerir que, embora incompletas, as cópias de menor comprimento-mãe ainda sim façam uso da maquinaria própria \footnote{Mesmo as com 60 bp? Parece improvável. Lembre-se de que a parte descartada é justamente o início em 5'. Não deveria estar aí nosso promotor?}.
 
 Se aprofundando neste efeito, procura-se então observar separadamente as cópias sobrepostas ou não a algum gene, bem como à jusante ou montante de algum, a fim de esclarecer efeitos de readthrough ou vazamento.
+
+	[placeholder]
 
 
 \end{multicols}

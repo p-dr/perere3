@@ -2,6 +2,7 @@
     # pardir/'genome_annotation/head_genes_correlations_unconsidering_sense.tsv'
     # pardir/'genome_annotation/head_annotations.gff3'
     # pardir/'counted_reads/aggregated_unconsidering_sense.tsv
+# out: pardir/'genome_annotation/all_together_now.tsv'
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,6 +12,8 @@ outpath = pardir/'genome_annotation/all_together_now.tsv'
 
 corr_data = pd.read_table(pardir/'genome_annotation/head_genes_correlations_unconsidering_sense.tsv')
 corr_data.set_index('head_id', inplace=True)
+corr_data.rename(columns={'gene_id': 'neighbor_gene'}, inplace=True)
+print(corr_data)
 
 gff_data = pd.read_table(pardir/'genome_annotation/head_annotations.gff3',
                          header=None, names=GFF3_COLUMNS)

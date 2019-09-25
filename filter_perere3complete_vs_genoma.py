@@ -1,6 +1,6 @@
 # description:  Generates filtered_perere3_vs_genoma, which is perere3_vs_genoma without alignments also and better found for SR3. i.e. Removes each perere alignment overlapped with SR3 alignment of best score. Also writes filtered out line's indices.
 # in: pardir/'alinhamentos/perere3complete_vs_genoma.bl' pardir/'alinhamentos/sr3complete_vs_genoma.bl'
-# out: pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl' pardir/'scripts/perere3complete_indices_filtrados.csv'
+# out: pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl' pardir/'alinhamentos/perere3complete_indices_filtrados.csv'
 
 from pandas import read_csv
 from utils import overlaps, pardir, verbose, BL_COLUMNS
@@ -75,7 +75,7 @@ print(f"Escrevendo alinhamentos filtrados do perere3 em '{str(filtered_outpath)}
 filtered_perere3_vs_genoma.to_csv(str(filtered_outpath), sep='\t', index=False)
 print('Arquivo escrito.')
 
-discarded_outpath = pardir/'scripts/perere3complete_indices_filtrados.csv'
+discarded_outpath = pardir/'alinhamentos/perere3complete_indices_filtrados.csv'
 print(f"Escrevendo posições das linhas removidas de 'perere3complete_vs_genoma.bl' em '{str(discarded_outpath)}'...")
 discarded_outpath.open('w').write('\n'.join(discarded))
 print('Arquivo escrito.')

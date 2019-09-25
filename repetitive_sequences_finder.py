@@ -1,6 +1,6 @@
 # description: Get coordinates of genome's masked low-complexity or repetitive regions.
 # in: pardir/'seqs/schistosoma_mansoni.PRJEA36577.WBPS14.genomic_masked.fa'
-# out: pardir/'genome_annotation/masked_map.tsv'
+# out: pardir/'genome_annotation/mask_map.tsv'
 
 from utils import pardir, safe_open, prinf
 from Bio.SeqIO import parse

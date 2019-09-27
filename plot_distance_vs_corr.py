@@ -62,8 +62,11 @@ for pair, title in [(((same_strand, 'Same'), (diff_strand, 'Different')),
                            '.', alpha=.4, color=cor)
 
     plt.axis([1e3, 1e5, *ax[2:]])
-
     plt.legend()
+
+    pair_df = pd.concat([data.reset_index().correlation for data, label in pair], 1)
+    print(pair_df)
+    pair_df.hist(label=title)
 
 if not show_flag:
     save_all_figs()

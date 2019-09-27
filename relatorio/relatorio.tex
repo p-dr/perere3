@@ -8,18 +8,30 @@
 
 
 \title{Análise bioinformática das cópias do transposon não-LTR Pererê-3 no genoma de Schistosoma mansoni}
+\author{Pedro de Carvalho Braga Ilídio Silva}
 \date{Novembro de 2019}
 
 
 \begin{document}
 \begin{multicols}{2}
+
+\maketitle
+
 \section{Introdução}
 
 Tal propriedade nos fornece uma interessante ferramenta: as cópias de Pererê-3 observadas no genoma podem ser distinguidas umas das outras, visto que possuem uma região característica a cada uma delas. Desta forma, novas questões podem ser levantadas, e abre-se um novo campo de exploração.
 
-É possível, por exemplo, que se avalie os níveis de transcrição de cada cópia separadamente, além de que, se cada réplica do transposon carrega o mesmo promotor, as diferenças destes níveis devem se originar de fatores externos à sequência do transposon em si, a exemplo da compactação da cromatina ou influência de regiões codificantes próximas. Visto isso, os diferentes níveis de transcrição em conjunto poderiam oferecer um panorama da atividade do genoma ao longo das bases, e  \footnote{Isso é realmente algo para se centrar o projeto?}.
+É possível, por exemplo, que se avalie os níveis de transcrição de cada cópia separadamente, além de que, se cada réplica do transposon carrega o mesmo promotor, as diferenças destes níveis devem se originar de fatores externos à sequência do transposon em si, a exemplo da compactação da cromatina ou influência de regiões codificantes próximas. Visto isso, os diferentes níveis de transcrição em conjunto poderiam oferecer um panorama da atividade do genoma ao longo das bases\footnote{Isso é um pivô do projeto?}.\\
+
+Procura-se, portanto, investigar os efeitos de genes próximos e da região em que se encontra cada réplica de pererê-3 em seus níveis de transcrição, fazendo uso de técnicas de bioinformática.
+
 \section{Métodos}
-Nota-se que a
+	Inicialmente, obteve-se a região conservada do transposon a cada replicação, a partir do que foi exposto em (CITAR). Efetuou-se busca por regiões semelhantes no genoma do \textit{S. mansoni}\footnote{referência à WormBase} por meio de alinhamento BLASTn, no intuito de encontrar todas as cópias do Pererê-3 inseridas no material genético do platelminto.\\
+
+	Já sabia-se de antemão que um outro transposon, denominado SR-3, possuia semelhança o suficiente com o transposon de nosso interesse para fazer com que o Pererê-3 alinhasse também com as cópias de SR-3 no processo de busca através do genoma. Toma-se então o cuidado de repetir o procedimento descrito antes com a região do SR-3 análoga à região do Pererê-3 com que estamos trabalhando, e prosseguir apenas com os alinhamentos que obtiveram maior score quando realizados com o Pererê e, portanto, apresentam maior probabilidade de serem de fato uma cópia deste último.\\
+
+	Parte-se, então, à obtenção das sequências pertencentes às cópias mas diferentes entre elas, a "impressão digital" de cada cópia, caracterísca do Pererê-3 antes mencionada. Visto que a determinação do comprimento exato dessas regiões mostrou-se complicada, tomou-se o comprimento heurístico de 1000 pares de base à imediata jusante de cada alinhamento encontrado com o BLASTn no procedimento anterior. A essas regiões, específicas de cada cópia, dá-se o nome de sequências "head"\footnote{Talvez venha a convir uma mudança de nome.}. Nota-se, contudo, a existência, em muitos casos, de uma pequena região com a sequência GTAA-repetitiva entre cada head e a região constante de sua cópia-mãe, de forma que consideramos como heads as 1000 bases posteriores às repetições.\\
+
 Pode-se, por exemplo, questionar-se acerca do nível de transcrição de cada cópia no genoma, e de sua dependência com a proximidade dos genes vizinhos.
 Criou-se, então, quatro parâmetros a serem comparados e caracterizados entre as diferentes cópias do transposon Pererê-3, descritos a seguir.
 
@@ -51,7 +63,7 @@ A fim de investigar a influência da completude das cópias em sua capacidade de
   \includegraphics[width=.5\textwidth]{plot_motherlenght_hist_0.pdf}
 \end{figure}
 
-Já nesse ponto, há uma clara predominância das cópias menores, principalmente com menos de 600 pares de base de comprimento, representadas mais à esquerda na figura \ref{mlhist}. Contudo, é interessante observar também um aumento significativo da quantidade de cópias íntegras ou quase íntegras, na extrema direita da figura \ref{mlhist}. Esse aumento sugere fortemente que a integridade das cópias é um fator determinante para sua disseminação (ou ao menos sobrevivência) e corrobora a hipótese de que há grande efeito de readtrough: já previa-se que cópias truncadas, de comprimento menor, teriam menor efeito no produto final de um gene \footnote{Só quando em fase, não? investigar melhor. E se for em regiões intrônicas?}, visto que menos aminoácidos seriam adicionados, e portanto seriam mais prováveis de se instalar em um gene mantendo-o ativo e funcional, de forma que a cópia poderia tirar proveito da maior conservatividade das regiões gênicas e predominar no genoma \footnote{Elas se instalam degradadas ou se degradam depois de se instalar? Em tese, degradá-las favorece o gene. Escrever sobre hipotese da taxa de degradaçao diferente ao longodo tempo?}.\\
+Já nesse ponto, há uma clara predominância das cópias menores, principalmente com menos de 600 pares de base de comprimento, representadas mais à esquerda na figura \ref{mlhist}. Contudo, é interessante observar também um aumento significativo da quantidade de cópias íntegras ou quase íntegras, na extrema direita da figura \ref{mlhist}. Esse aumento sugere fortemente que a integridade das cópias é um fator determinante para sua disseminação (ou ao menos sobrevivência) e corrobora a hipótese de que há grande efeito de readtrough: já previa-se que cópias truncadas, de comprimento menor, teriam menor efeito no produto final de um gene\footnote{Só quando em fase, não? investigar melhor. E se for em regiões intrônicas?}, visto que menos aminoácidos seriam adicionados, e portanto seriam mais prováveis de se instalar em um gene mantendo-o ativo e funcional, de forma que a cópia poderia tirar proveito da maior conservatividade das regiões gênicas e predominar no genoma\footnote{Elas se instalam degradadas ou se degradam depois de se instalar? Em tese, degradá-las favorece o gene. Escrever sobre hipotese da taxa de degradaçao diferente ao longodo tempo?}.\\
 
 Em seguida, passou-se a analisar mais diretamente a influência do comprimento-mãe na transcrição: elaborou-se gráfico de dispersão entre o coeficiente de transcrição de cada head e seu comprimento mãe, e o resultado é apresentado na figura \ref{mlrc}.
 
@@ -61,7 +73,7 @@ Em seguida, passou-se a analisar mais diretamente a influência do comprimento-m
 	\includegraphics[width=.5\textwidth]{plot_corr_motherlength_2.pdf}
 \end{figure}
 
-	Embora a quatidade de dados seja muito maior nas extremidades direita e esquerda do gráfico, como já apontava a figura \ref{mlhist}, não há diferença significativa de nível de transcrição entre as duas regiões, o que pode sugerir que, embora incompletas, as cópias de menor comprimento-mãe ainda sim façam uso da maquinaria própria \footnote{Mesmo as com 60 bp? Parece improvável. Lembre-se de que a parte descartada é justamente o início em 5'. Não deveria estar aí nosso promotor?}.
+	Embora a quatidade de dados seja muito maior nas extremidades direita e esquerda do gráfico, como já apontava a figura \ref{mlhist}, não há diferença significativa de nível de transcrição entre as duas regiões, o que pode sugerir que, embora incompletas, as cópias de menor comprimento-mãe ainda sim façam uso da maquinaria própria\footnote{Mesmo as com 60 bp? Parece improvável. Lembre-se de que a parte descartada é justamente o início em 5'. Não deveria estar aí nosso promotor?}.
 
 Se aprofundando neste efeito, procura-se então observar separadamente as cópias sobrepostas ou não a algum gene, bem como à jusante ou montante de algum, a fim de esclarecer efeitos de readthrough ou vazamento.
 

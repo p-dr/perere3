@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \graphicspath{{../../graficos/}}
 \usepackage{multicol}
+\setlength\columnsep{1cm}
 \usepackage{float}
 
 
@@ -13,41 +14,39 @@
 
 
 \begin{document}
-\begin{multicols}{2}
-
 \maketitle
 
+\begin{multicols}{2}
 \section{Introdução}
-
-Tal propriedade nos fornece uma interessante ferramenta: as cópias de Pererê-3 observadas no genoma podem ser distinguidas umas das outras, visto que possuem uma região característica a cada uma delas. Desta forma, novas questões podem ser levantadas, e abre-se um novo campo de exploração.
+	(... Fundamentos biológicos...)\\
+Tal propriedade nos fornece uma interessante ferramenta: as cópias de Pererê-3 observadas no genoma podem ser distinguidas umas das outras, visto que possuem uma região característica a cada uma delas. Desta forma, novas questões podem ser levantadas, e abre-se um novo campo de exploração.\\
 
 É possível, por exemplo, que se avalie os níveis de transcrição de cada cópia separadamente, além de que, se cada réplica do transposon carrega o mesmo promotor, as diferenças destes níveis devem se originar de fatores externos à sequência do transposon em si, a exemplo da compactação da cromatina ou influência de regiões codificantes próximas. Visto isso, os diferentes níveis de transcrição em conjunto poderiam oferecer um panorama da atividade do genoma ao longo das bases\footnote{Isso é um pivô do projeto?}.\\
 
 Procura-se, portanto, investigar os efeitos de genes próximos e da região em que se encontra cada réplica de pererê-3 em seus níveis de transcrição, fazendo uso de técnicas de bioinformática.
 
-\section{Métodos}
+\section{Metodologia}
 	Inicialmente, obteve-se a região conservada do transposon a cada replicação, a partir do que foi exposto em (CITAR). Efetuou-se busca por regiões semelhantes no genoma do \textit{S. mansoni}\footnote{referência à WormBase} por meio de alinhamento BLASTn, no intuito de encontrar todas as cópias do Pererê-3 inseridas no material genético do platelminto.\\
 
 	Já sabia-se de antemão que um outro transposon, denominado SR-3, possuia semelhança o suficiente com o transposon de nosso interesse para fazer com que o Pererê-3 alinhasse também com as cópias de SR-3 no processo de busca através do genoma. Toma-se então o cuidado de repetir o procedimento descrito antes com a região do SR-3 análoga à região do Pererê-3 com que estamos trabalhando, e prosseguir apenas com os alinhamentos que obtiveram maior score quando realizados com o Pererê e, portanto, apresentam maior probabilidade de serem de fato uma cópia deste último.\\
 
-	Parte-se, então, à obtenção das sequências pertencentes às cópias mas diferentes entre elas, a "impressão digital" de cada cópia, caracterísca do Pererê-3 antes mencionada. Visto que a determinação do comprimento exato dessas regiões mostrou-se complicada, tomou-se o comprimento heurístico de 1000 pares de base à imediata jusante de cada alinhamento encontrado com o BLASTn no procedimento anterior. A essas regiões, específicas de cada cópia, dá-se o nome de sequências "head"\footnote{Talvez venha a convir uma mudança de nome.}. Nota-se, contudo, a existência, em muitos casos, de uma pequena região com a sequência GTAA-repetitiva entre cada head e a região constante de sua cópia-mãe, de forma que consideramos como heads as 1000 bases posteriores às repetições.\\
+	Parte-se, então, à obtenção das sequências pertencentes às cópias mas diferentes entre elas, a "impressão digital" de cada cópia, caracterísca do Pererê-3 antes mencionada. Visto que a determinação do comprimento exato dessas regiões mostrou-se complicada, tomou-se o comprimento heurístico de 1000 pares de base à imediata jusante de cada alinhamento encontrado com o BLASTn no procedimento anterior. A essas regiões, específicas de cada cópia, dá-se o nome de sequências "head"\footnote{Talvez venha a convir uma mudança de nome.}. Nota-se, contudo, a existência, em muitos casos, de uma pequena região com a sequência GTAA-repetitiva entre cada head e a região constante de sua cópia-mãe, a região comum a todas as cópias, de forma que consideramos como head as 1000 bases posteriores às repetições\footnote{Discursar mais sobre a região repetitiva?}.\\
 
-Pode-se, por exemplo, questionar-se acerca do nível de transcrição de cada cópia no genoma, e de sua dependência com a proximidade dos genes vizinhos.
-Criou-se, então, quatro parâmetros a serem comparados e caracterizados entre as diferentes cópias do transposon Pererê-3, descritos a seguir.
+No decorrer do projeto, foram também usados dados de transcriptoma e anotações gênicas, com ajuda dos quais criou-se quatro parâmetros a serem comparados e caracterizados entre as diferentes cópias do transposon Pererê-3, descritos a seguir.
 
 \subsection{Contagem de reads}
-Nas questões relacionadas aos níveis de transcrição, faz-se uso das bibliotecas de RNA-Seq (...) que compreendem diferentes estágios de vida do \textit{S. mansoni} e conta-se, nas regiões de interesse do genoma, quantos reads dessas bibliotecas podem ser alinhados. Divide-se, então, o valor final da contagem pelo comprimento da região em que se procura o alinhamento dos reads, pois assume-se que cada par de base da região tem igual probabilidade de alinhar-se com cada read e, portanto, a contagem final depende linearmente do comprimento do intervalo de DNA que se analisa. A divisão é feita, então, a fim de eliminar esse fator para fins comparativos, e ao valor resultante dá-se o nome de coeficiente de transcriçao.\footnote{Já existe?}
+	Nas questões relacionadas aos níveis de transcrição, faz-se uso das bibliotecas de RNA-Seq (...) que compreendem diferentes estágios de vida do \textit{S. mansoni} e conta-se, nas regiões de interesse do genoma, quantos reads dessas bibliotecas podem ser ali pareados. Para o pareamento, utilizou-se a ferramenta HiSat2\footnote{citar.}, enquanto que na contagem de reads alinhados por região empregou-se o software HTSeq\footnote{citar.}. Divide-se posteriormente o valor final da contagem pelo comprimento da região em que se procura o alinhamento dos reads, pois assume-se que cada par de base da região tem igual probabilidade de alinhar-se com cada read e, portanto, a contagem final depende linearmente do comprimento do intervalo de DNA que se analisa. Divide-se o mesmo valor também pela contagem total de reads de cada biblioteca, pois uma base de dados com mais reads naturalmente geraria maior contagem por região. As divisões são feitas, então, a fim de eliminar esses fatores para fins comparativos, e ao valor resultante dá-se o nome de coeficiente de transcriçao.\footnote{Já existe?}
 
 \subsection{Comprimento-mãe}
-Com curiosidade sobre os efeitos da integridade de cada cópia, chama-se de comprimento-mãe o comprimento do alinhamento BLAST que gerou cada sequência cauda. Toma-se cuidado para considerar apenas os alinhamentos que contém a extremidade 3' da cópia de referência, de forma a ser provável a presença da sequência cauda na região pós-3' no genoma. Assume-se que este valor esteja fortemente correlacionado com a integridade da cópia, e a princípio não são consideradas as mutações pontuais, que também são componente importante ao se pensar no grau de integridade de uma sequência.
+	Com curiosidade sobre os efeitos da integridade de cada cópia, chama-se de comprimento-mãe o comprimento do alinhamento BLAST que gerou cada sequência head. Toma-se cuidado para considerar apenas os alinhamentos que contém a extremidade 3' da cópia de referência, de forma a ser provável a presença da sequência head na região pós-3' no genoma.\footnote{Assume-se que este valor esteja fortemente correlacionado com a integridade da cópia, e não são consideradas as mutações pontuais, componentes também importantes ao se pensar no grau de integridade de uma sequência.}
 
 \subsection{Correlação com genes vizinhos}
-Espera-se que grande parcela das cópias encontradas no genoma sejam expressas também por efeito de readthrough, ou transcrição passiva, em que as cópias do transposon são transcritas por se encontrarem em regiões já codificantes, na fase de leitura aberta (ORF) de um gene, por exemplo, e não fazendo uso da maquinaria própria de transcrição. Um efeito semelhante ocorre se o transposon esta inserido a jusante do gene, de forma a poder ser expresso por ocasionais falhas do terminador genico. Supõe-se que esses casos resultem em coeficientes de expressão independentes da integridade da cópia de Pererê-3, uma vez que as proteínas nela codificadas são dispensáveis para a presença da cópia no transcriptoma.\\
+Espera-se que grande parcela das cópias encontradas no genoma sejam transcritas também por efeito de readthrough, ou transcrição passiva, em que as cópias do transposon são transcritas por se encontrarem em regiões já codificantes, na fase de leitura aberta (ORF) de um gene, por exemplo, e não fazendo uso da maquinaria própria de transcrição. Um efeito semelhante ocorre se o transposon está inserido à jusante do gene, de forma a poder ser transcrito por ocasionais falhas do terminador genico. Supõe-se que esses casos resultem em coeficientes de transcrição independentes da integridade da cópia de Pererê-3, uma vez que as proteínas nela codificadas são dispensáveis para a presença da cópia no transcriptoma.\\
 
 Avalia-se, portanto, a correlação entre os coeficientes de transcrição de cada cópia e o coeficiente de seu gene mais próximo ou do gene em que se insere, para os casos em que a cópia se encontra na região expressa de um gene. A esta correlação será referida daqui em diante como correlação com o gene vizinho, e espera-se que seja maior no casos em que a transcrição da sequência head é passiva.
 
 \subsection{Distância ao gene vizinho}
-Ainda sob a questão da influência dos genes mais próximos no coeficiente de transcrição das sequências head, outro fator a se considerar é a distância em si entre a head e o gene vizinho, em pares de base, pois espera-se que a correlação entre eles se intensifique quanto menor for tal distância. Avaliando os casos em que a head está à jusante ou montante do gene separadamente, espera-se também determinar se há atividade do promotor gênico na transcrição da cópia do transposon, isto é, verificar a ocorrência de transcrição por readthrough ou vazamento. Separando as copias na mesma fita das em firas diferentes, espera-se tambem observar efeito da compactaçao da cromatina na regiao.
+Ainda sob a questão da influência dos genes mais próximos no coeficiente de transcrição das sequências head, outro fator a se considerar é a distância em si entre a head e o gene vizinho, em pares de base, pois espera-se que a correlação entre eles se intensifique quanto menor for tal distância. Avaliando os casos em que a head está à jusante ou montante do gene separadamente, espera-se também determinar se há atividade do promotor gênico na transcrição da cópia do transposon, isto é, verificar a ocorrência de transcrição por readthrough ou vazamento. Separando as copias na mesma fita das em fitas diferentes, espera-se tambem observar efeito da compactação da cromatina na região.
 
 \section{Resultados}
 
@@ -63,9 +62,9 @@ A fim de investigar a influência da completude das cópias em sua capacidade de
   \includegraphics[width=.5\textwidth]{plot_motherlenght_hist_0.pdf}
 \end{figure}
 
-Já nesse ponto, há uma clara predominância das cópias menores, principalmente com menos de 600 pares de base de comprimento, representadas mais à esquerda na figura \ref{mlhist}. Contudo, é interessante observar também um aumento significativo da quantidade de cópias íntegras ou quase íntegras, na extrema direita da figura \ref{mlhist}. Esse aumento sugere fortemente que a integridade das cópias é um fator determinante para sua disseminação (ou ao menos sobrevivência) e corrobora a hipótese de que há grande efeito de readtrough: já previa-se que cópias truncadas, de comprimento menor, teriam menor efeito no produto final de um gene\footnote{Só quando em fase, não? investigar melhor. E se for em regiões intrônicas?}, visto que menos aminoácidos seriam adicionados, e portanto seriam mais prováveis de se instalar em um gene mantendo-o ativo e funcional, de forma que a cópia poderia tirar proveito da maior conservatividade das regiões gênicas e predominar no genoma\footnote{Elas se instalam degradadas ou se degradam depois de se instalar? Em tese, degradá-las favorece o gene. Escrever sobre hipotese da taxa de degradaçao diferente ao longodo tempo?}.\\
+Já nesse ponto, há uma clara predominância das cópias menores, principalmente com menos de 600 pares de base de comprimento, representadas mais à esquerda na figura \ref{mlhist}. Contudo, é interessante observar também um aumento significativo da quantidade de cópias íntegras ou quase íntegras, na extrema direita da figura \ref{mlhist}. Esse aumento sugere fortemente que a integridade das cópias é um fator determinante para sua disseminação (ou ao menos sobrevivência) e corrobora a hipótese de que há grande efeito de readtrough: já previa-se que cópias truncadas, de comprimento menor, teriam menor efeito no produto final de um gene, visto que menos aminoácidos seriam adicionados, e portanto seriam mais prováveis de se instalar em um gene mantendo-o ativo e funcional, de forma que a cópia poderia tirar proveito da maior conservatividade das regiões gênicas e predominar no genoma.\\
 
-Em seguida, passou-se a analisar mais diretamente a influência do comprimento-mãe na transcrição: elaborou-se gráfico de dispersão entre o coeficiente de transcrição de cada head e seu comprimento mãe, e o resultado é apresentado na figura \ref{mlrc}.
+	Em seguida, passou-se a analisar mais diretamente a influência do comprimento-mãe na transcrição: elaborou-se gráfico de dispersão entre o coeficiente de transcrição de cada head e seu comprimento mãe, e o resultado é apresentado na figura \ref{mlrc}\footnote{melhorar esse gráfico, talvez mandar um LOWESS}.
 
 \begin{figure}[H]
 	\centering
@@ -73,12 +72,57 @@ Em seguida, passou-se a analisar mais diretamente a influência do comprimento-m
 	\includegraphics[width=.5\textwidth]{plot_corr_motherlength_2.pdf}
 \end{figure}
 
-	Embora a quatidade de dados seja muito maior nas extremidades direita e esquerda do gráfico, como já apontava a figura \ref{mlhist}, não há diferença significativa de nível de transcrição entre as duas regiões, o que pode sugerir que, embora incompletas, as cópias de menor comprimento-mãe ainda sim façam uso da maquinaria própria\footnote{Mesmo as com 60 bp? Parece improvável. Lembre-se de que a parte descartada é justamente o início em 5'. Não deveria estar aí nosso promotor?}.
+Embora a quatidade de dados seja muito maior nas extremidades direita e esquerda do gráfico, como já apontava a figura \ref{mlhist}, não há diferença significativa de nível de transcrição entre as duas regiões, o que pode sugerir que, embora incompletas, as cópias de menor comprimento-mãe ainda sim façam uso da maquinaria própria. Essa hipótese é contudo desfavorecida ao se observar que as cópias encontradas possuem obrigatoriamente a extremidade 3', como foi pré-requisitado na etapa de escolha dos alinhamentos BLAST do Pererê no genoma, pois isso implica que a região faltante nas cópias incompletas é justamente a 5', onde se esperaria encontrar o promotor de cada elemento.\\
 
-Se aprofundando neste efeito, procura-se então observar separadamente as cópias sobrepostas ou não a algum gene, bem como à jusante ou montante de algum, a fim de esclarecer efeitos de readthrough ou vazamento.
+Se aprofundando na questão da influência dos genes próximos, procura-se então observar separadamente as cópias sobrepostas ou não a algum gene, bem como à jusante ou montante de algum, a fim de esclarecer efeitos de readthrough ou vazamento.
 
-	[placeholder]
 
+\subsection{Há influência de genes próximos na transcrição das cópias?}
+
+Inicialmente, dividiu-se as cópias entre as que sobrepunham alguma região gênica e as que não. Tomou-se os valores de correlação de transcrição com o gene vizinho (ou o gene sobreposto) e comparou-se a distribuição desses valores nas duas populações por meio de teste U de Mann-Whitney\footnote{também conhecido como teste da soma dos postos de Wilcoxon.}. O p-valor obtido foi de aproximadamente \(1,972 \cdot 10^{-36}\), sugerindo muito fortemente que há diferença entre os níveis de transcrição dos dois grupos, como aponta a figura \ref{histintegridade}.
+
+\begin{figure}[H]
+	\centering
+	\label{histintegridade}
+	\includegraphics[width=.5\textwidth]{plot_distance_vs_corr_0.pdf}
+\end{figure}
+
+[discursar sobre efeito de outlier nas correlações próximas de 1.]\\
+
+% Quantos completos sobrepõem: 50 / 77 = 64.93506493506493%
+% Quantos não completos sobrepõem: 447 / 750 = 59.6%
+% Sobreposta ou não:  1.972397354494555e-36
+% Mesma fita ou não:  0.15141679282309445
+% Jusante ou motante:  0.00954215535296983
+% Completa ou não:  0.12347143116394432
+
+A fim de avaliar se a transcrição das heads já apresentava diferença apenas com a distância ao gene vizinho de cada cópia, graficou-se a correlação de transcrição com o gene vizinho em função da distância de cada cópia a ele, distinguindo-se, em um primeiro momento, cópias definidas como íntegras, com mais de 3150 pares de base, de cópias incompletas, com menos de 750 pares de base [explicar (in)conclusões]. O comportamento geral dos dados foi modelado por curvas LOWESS\footnote{Locally Weighted Scatterplot Smoothing (ref)} e o resultado é apresentado na figura \ref{completude}.
+
+\begin{figure}[H]
+	\centering
+	\label{completude}
+	\includegraphics[width=.5\textwidth]{plot_distance_vs_corr_6.pdf}
+\end{figure}
+
+Da mesma forma, distinguiu-se cópias na mesma fita das em fita diferente de seu gene vizinho (figura \ref{samediffstrand}), e observou-se que de fato há um comportamento decrescente na correlação de transcrição conforme a distância ao vizinho aumenta, como é natural de se esperar, principalmente entre \(5 \cdot 10^3\) a \(5 \dot 10^4\) pares de base de distância. Para outras distâncias fora dessa faixa, o comportamento da correlação é ruidoso, muito provavelmente devido ao menor número de medidas.
+
+\begin{figure}[H]
+	\centering
+	\label{samediffstrand}
+	\includegraphics[width=.5\textwidth]{plot_distance_vs_corr_4}
+\end{figure}
+
+Para a quantidade de dados analisada e o nível de ruído estatístico decorrente, não foi possível observar distinção de correlação de transcrição ao gene vizinho entre as populações de mesma fita ou em fita diferente a ele, obtendo p-valor aproximado de \(0.1514\) pelo teste U de Mann-Whitney.
+
+O mesmo procedimento foi executado separando-se agora as heads à jusante das que estão à montante de seu gene mais próximo na mesma fita, e resultou na figura \ref{updownstream}.
+
+\begin{figure}[H]
+	\centering
+	\label{updownstream}
+	\includegraphics[width=.5\textwidth]{plot_distance_vs_corr_5.pdf}
+\end{figure}
+
+Há visível superioridade da correlação quando as heads estão à jusante do gene, reforçando a hipótese de que há vazamento nas transcrições gênicas, ou seja, que o nível de transcrição das heads pode ser incrementado se ela estiver próxima à extremidade 3' de uma região codificante no genoma, provavelmente em decorrência de falha na terminação da transcrição. A superioridade é corroborada pelo teste U de Mann-Whitney, dado que o p-valor obtido foi de \(9,452 \cdot 10^{-3}\) ao se comparar as duas populações.
 
 \end{multicols}
 \end{document}

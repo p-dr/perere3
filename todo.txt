@@ -1,0 +1,14 @@
+================== TODO ==================
+\ Finish to download and trim SRA data;
+\ Criar script para construir pipeline  partir de dicionário com infiles e outfiles de cada script;
+\ Ajeitar pipeline: usar o filteredperere e especificar a pastinha que tá só 'seqs';
+\ Normalizar para comprimento das heads;
+\ Investigar influência do ruído estatístico: correlação em função da mediana/média da contaagem de reads das heads;
+/ Conseguir comprimentos reais;
+\ inteiras/incompletas, dentro/fora, jusante/montante, mesma/outra fita (wilcoxon);
+* entender Teste rank-sum Wilcoxon;
+* explicar melhor a correlação com vizinho;
+* distribuição de transcrição das heads (?).
+* Parece que acabamos descartando o gene vizinho quando ele está em outra fita:a gente só usa os genes mais próximos e descartamos os de fita diferente, nem pra procurar o gene vizinho de restringindo à mesma fita.
+* distribuição das distâncias (?)
+* distância vs transcrição (não corr)

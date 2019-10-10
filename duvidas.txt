@@ -1,0 +1,12 @@
+\ Só quando em fase, não? investigar melhor. E se for em regiões intrônicas? Respondido: Provavelmente o mecanismo mais comum é a inserção nas regiões intrônicas, que deixam de ser intrônicas naquele ponto específico por coincidência.
+
+\ A não integridade vista no transcriptoma não pode ser resultado da parte que não "se tornou éxon" mas a cópia inteira estar no genoma? Não, pois a integridade é avaliada no genoma em si, não no trascriptoma.
+
+* É importante explicitar a quantidade de amostras?
+
+* Elas se instalam degradadas ou se degradam depois de se instalar? Em tese, degradá-las favorece o gene. Escrever sobre hipotese da taxa de degradaçao diferente ao longodo tempo?
+
+* O que fazer com os poucos dados da comparação completa incompleta?
+
+* Parece que acabamos descartando o gene vizinho quando ele está em outra fita:a gente só usa os genes mais próximos e descartamos os de fita diferente, nem pra procurar o gene vizinho de restringindo à mesma fita.
+

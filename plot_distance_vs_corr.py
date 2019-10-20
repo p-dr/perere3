@@ -9,47 +9,36 @@ from statsmodels.nonparametric.smoothers_lowess import lowess
 from scipy.stats import mannwhitneyu
 
 
-head_data = pd.read_table(pardir/'genome_annotation/all_together_now.tsv',
-                          usecols=['flag', 'strand', 'distance',
-                                   'correlation', 'neighbor_gene',
-                                   'motherlength'])
+head_data = pd.read_table(pardir/'genome_annotation/all_together_now.tsv')
+
 # # Very important to drop NaN's! (we use stuff like data[data.flag != 'olap'])
-head_data = head_data.dropna().reset_index()
+# This keeps only heads with neighbor genes.
+head_data = head_data.dropna().reset_index(drop=True)
 
-gene_data = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3',
-                          names=GFF3_COLUMNS, header=None)
-gene_data = unfold_gff(gene_data)
+# #################### SPLITS ##########################
 
-# ## SPLITS
+# ##### OVERLAPS OR NOT
+overlaps = head_data[(head_data.flag == 'olap') & head_data.same_strand]
+noverlap = head_data.drop(overlaps.index)
 
-# # Strand
-neighbor_genes = head_data.neighbor_gene.dropna()
-nei_strand = gene_data.set_index('gene_id').loc[neighbor_genes].reset_index().strand
-same_strand = head_data[head_data.strand == nei_strand]
+# drop overlapped
+head_data = head_data[head_data.flag != 'olap']
+
+# ##### SAME/DIFF STRAND
+same_strand = head_data[head_data.same_strand]
 diff_strand = head_data.drop(same_strand.index)
 
-# # up/down-stream
-# we're restricting to same strand.
+# ##### UP/DOWN-STREAM: ----->   -->
 downstream = same_strand[(same_strand.strand == '+') &
-                       (same_strand.flag == 'dir')]
+                         (same_strand.flag == 'dir')]
 downstream = downstream.append(same_strand[(same_strand.strand == '-') &
-                                       (same_strand.flag == 'esq')])
-# downstream = same_strand[(same_strand.strand == '+') &
-#                        (same_strand.flag == 'dir')]
-# downstream = downstream.append(same_strand[(same_strand.strand == '-') &
-#                                        (same_strand.flag == 'esq')])
-# 
-upstream = same_strand.drop(downstream.index)[same_strand.flag != 'olap']
-upstream.dropna(inplace=True)
+                                           (same_strand.flag == 'esq')])
 
-# # Overlaps or not
-overlaps = same_strand[same_strand.flag == 'olap']
-noverlap = same_strand.drop(overlaps.index)
-# ((overlaps, noverlap), 'Ovelaps/Does not overlap')
+notdownstream = head_data.drop(downstream.index)
 
-# # Complete or not
-complete = same_strand[same_strand.motherlength > 3150]
-notcomplete = same_strand[same_strand.motherlength < 750]
+# ##### COMPLETE OR NOT
+complete = head_data[head_data.motherlength > 3150]
+notcomplete = head_data[head_data.motherlength < 750]
 
 nolap = (complete.flag == 'olap').sum()
 tot = complete.flag.count()
@@ -59,66 +48,69 @@ nolap = (notcomplete.flag == 'olap').sum()
 tot = notcomplete.flag.count()
 print(f'Quantos não completos sobrepõem: {nolap} / {tot} = {100 * nolap / tot}%')
 
-    # Drop overlapped
-complete = complete.loc[complete.flag != 'olap']
-notcomplete = notcomplete.loc[notcomplete.flag != 'olap']
+# ##### CLOSE PROMOTER: <--   -------->
+close_promoter = diff_strand[(diff_strand.strand == '+') &
+                             (diff_strand.flag == 'dir')]
+close_promoter.append(diff_strand[(diff_strand.strand == '-') &
+                                  (diff_strand.flag == 'esq')])
 
-# ### Wilcoxon
+not_close_promoter = head_data.drop(close_promoter.index)
+
+
+# ################# Wilcoxon #####################
+
 pairs = ((overlaps, noverlap),
          (same_strand, diff_strand),
-         (upstream, downstream),
-         (complete, notcomplete))
+         (downstream, notdownstream),
+         (complete, notcomplete),
+         (close_promoter, not_close_promoter))
 
-labels = ['Sobreposta ou não: ',
-          'Mesma fita ou não: ',
-          'Jusante ou motante: ',
-          'Completa ou não: ']
+labels = ['Sobreposta ou não sobreposta: ',
+          'Mesma fita ou em fitas diferentes: ',
+          'Downstream ou não downstream: ',
+          'Completa ou incompleta: ',
+          'Promotor próximo ou promotor mais distante: ']
 
 for label, pair in zip(labels, pairs):
     a, b = [p.correlation for p in pair]
     pvalue = mannwhitneyu(a, b).pvalue
     print(label, pvalue)
 
-    plt.figure()
-    plt.title(label + str(pvalue))
-    plt.hist(a, alpha=.5)
-    plt.hist(b, alpha=.5)
+    if 1:
+        plt.figure()
+        plt.title(label + str(pvalue))
 
-save_all_figs()
+        plt.hist(a, alpha=.5)
+        plt.hist(b, alpha=.5)
+        plt.legend(label[:-2].split(' ou '))
+
+if not show_flag:
+    save_all_figs()
 plt.show()
 
 
-# ## PLOT
-for pair, title in [(((same_strand, 'Same'), (diff_strand, 'Different')),
-                     'Same/different strand'),
-                    (((upstream, 'Upstream'), (downstream, 'Downstream')),
-                     'Upstream vs downstream'),
-                    (((complete, 'Completas'), (notcomplete, 'Não completas')),
-                     'Completas vs incompletas')]:
+# ################# PLOT ######################
 
+for pair, title in zip(pairs[1:], labels[1:]):
     fig = plt.figure()
     plt.title(title)
-    first = True
+    leg_labs = title[:-2].split(' ou ')
 
-    for data, label in pair:
-        data = data[data.flag != 'olap']
+    for i, data in enumerate(pair):
+        cor = 'C' + str(i)
+
         data.sort_values('distance', inplace=True)
         data.loc[:, 'lowess'] = lowess(data.correlation, data.distance, .6,
-                                return_sorted=False)
-        cor = plt.semilogx(*data[['distance', 'lowess']].values.T,
-                           label=label, zorder=10)[0]._color
-        if first:
-            ax = plt.axis()
-            first = False
+                                       return_sorted=False)
+
+        plt.semilogx(*data[['distance', 'lowess']].values.T,
+                     zorder=10, label=leg_labs[i], color=cor)
+
         fig = plt.semilogx(*data[['distance', 'correlation']].values.T,
                            '.', alpha=.4, color=cor)
 
-    plt.axis([1e3, 1e5, -.1, .4])
     plt.legend()
-
-    # pair_df = pd.concat([data.reset_index().correlation for data, label in pair], 1)
-    # print(pair_df)
-    # pair_df.hist(label=title)
+    # plt.axis([1e3, 1e5, -.1, .4])
 
 if not show_flag:
     save_all_figs()

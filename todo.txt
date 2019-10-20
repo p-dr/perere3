@@ -6,9 +6,13 @@
 \ Investigar influência do ruído estatístico: correlação em função da mediana/média da contaagem de reads das heads;
 / Conseguir comprimentos reais;
 \ inteiras/incompletas, dentro/fora, jusante/montante, mesma/outra fita (wilcoxon);
-* entender Teste rank-sum Wilcoxon;
+\ avaliar tamanho dos contigs que não tem gene vizinho
+* comparar distribuição de transcrição das cópias com as dos genes;
+* corrigir as comparações;
+* pizza da quantidade de casos --> -----> | --> <----- | olap | etc
+------------------------------------------------------------------
 * explicar melhor a correlação com vizinho;
 * distribuição de transcrição das heads (?).
-* Parece que acabamos descartando o gene vizinho quando ele está em outra fita:a gente só usa os genes mais próximos e descartamos os de fita diferente, nem pra procurar o gene vizinho de restringindo à mesma fita.
 * distribuição das distâncias (?)
 * distância vs transcrição (não corr)
+* entender Teste rank-sum Wilcoxon;

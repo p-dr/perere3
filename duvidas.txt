@@ -2,11 +2,24 @@
 
 \ A não integridade vista no transcriptoma não pode ser resultado da parte que não "se tornou éxon" mas a cópia inteira estar no genoma? Não, pois a integridade é avaliada no genoma em si, não no trascriptoma.
 
-* É importante explicitar a quantidade de amostras?
+\ É importante explicitar a quantidade de amostras? }} Talvez nas legendas.
 
 * Elas se instalam degradadas ou se degradam depois de se instalar? Em tese, degradá-las favorece o gene. Escrever sobre hipotese da taxa de degradaçao diferente ao longodo tempo?
 
-* O que fazer com os poucos dados da comparação completa incompleta?
+\ O que fazer com os poucos dados da comparação completa incompleta?
 
-* Parece que acabamos descartando o gene vizinho quando ele está em outra fita:a gente só usa os genes mais próximos e descartamos os de fita diferente, nem pra procurar o gene vizinho de restringindo à mesma fita.
+\ Parece que acabamos descartando o gene vizinho quando ele está em outra fita:a gente só usa os genes mais próximos e descartamos os de fita diferente, nem pra procurar o gene vizinho de restringindo à mesma fita. }} NÃO FAÇA ISSO!! Se houver um gene mais próximo na mesma fita, ele, sim, deve ser considerado, pois efeitos de cromatina advindos dele serão mais fortes (provavelmente) que o do mais distante. 
 
+Pouca transcrição pode ser ruído?
+
+Como se escreve Pererê-3?
+
+Você retirou as bibliotecas com contagem nula pra calcular a correlação? (e tem que fazer isso?)
+
+Pico na distribuições de correlações com vizinho não me parece ser natural.
+
+gene cópia
+--> ->
+<-- ->
+--> <-
+<-- <-

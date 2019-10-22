@@ -91,6 +91,21 @@ Se aprofundando na questão da influência dos genes próximos, procura-se entã
 
 
 \subsection{Há influência de genes próximos na transcrição das cópias?}
+% TABELA DE CORRELAÇÕES DE SPEARMAN
+%                transcription  correlation  distance
+% transcription       1.000000     0.474630 -0.296401
+% correlation         0.474630     1.000000 -0.335262
+% distance           -0.296401    -0.335262  1.000000
+% CORRELAÇÕES DOS OLAP
+%                transcription  correlation
+% transcription       1.000000     0.463281
+% correlation         0.463281     1.000000
+% CORRELAÇÕES DOS NOLAP
+%                transcription  correlation
+% transcription       1.000000     0.465846
+% correlation         0.465846     1.000000
+Procurou-se investigar o efeito que genes próximos exercem sobre a transcrição de uma cópia
+
 
 \subsection{Como a configuração relativa entre a head e seu gene vizinho afeta sua correlação de transcrição?}
 % Quantos completos sobrepõem: 0 / 52 = 0.0%
@@ -102,8 +117,6 @@ Se aprofundando na questão da influência dos genes próximos, procura-se entã
 % Promotor próximo ou promotor mais distante:  0.18699190108349362
 
 Nesta seção procura-se dividir a população de heads entre diferentes posições relativas ao seu gene mais próximo. Nota-se que, em alguns poucos casos, não havia nenhum gene no mesmo contig da head, de forma que essas situações tiveram de ser descartadas e restaram 7645 cópias em análise. Ao se calcular a correlação com o gene vizinho, houve muitos casos em que não foram alinhados sobre a head nenhum read de alguma determinada biblioteca, o que fazia com que a maioria dos pontos utilizados na determinação da correlação fossem nulos, e apenas um ponto que distasse significativamente dos demais era necessário para elevar a correlação a valores próximos a um, dado que a distribuição assumia características lineares. Foram então removidas dos dados as heads sobre as quais menos de quatro bibliotecas de reads, das oito bibliotecas utilizadas, geravam contagem de reads não nula. Isso impactou em perda considerável de dados: mativeram-se 3269 cópias na análise.
-
-[amostra de dados que geraram correlação]
 
 \subsubsection{Cópias sobrepostas a genes sugerem forte correlação transcricional}
 Inicialmente, dividiu-se as cópias entre as que sobrepunham alguma região gênica e as que não. Tomou-se os valores de correlação de transcrição com o gene vizinho (ou o gene sobreposto) e comparou-se a distribuição desses valores nas duas populações por meio de teste U de Mann-Whitney\footnote{também conhecido como teste da soma dos postos de Wilcoxon.}. O p-valor obtido foi de aproximadamente \(1,972 \cdot 10^{-36}\), sugerindo muito fortemente que de fato há diferença entre os níveis de transcrição dos dois grupos, como aponta a figura \ref{histintegridade}.
@@ -147,7 +160,7 @@ O mesmo procedimento da subseção anterior foi executado separando-se das demai
 
 Pela figura \ref{updownstream}, as cópias \textit{downstream} parecem ainda revelar visível superioridade da correlação com o vizinho no gráfico apresentado, dado que sua curva LOWESS permanece superior a das demais cópias principalmente na região com maior número de amostras (distância entre \(5\cdot 10^3\) e \(2 \cdot 10^4\) pares de base), reforçando a hipótese de que há vazamento nas transcrições gênicas, ou seja, que o nível de transcrição das heads pode ser incrementado se ela estiver próxima à extremidade 3' de uma região codificante no genoma, provavelmente em decorrência de falha na terminação da transcrição.
 
-Essas supesições, contudo, ainda tem caráter duvidoso frente à tamanha ruidez estatísca dos dados apresentados [médias e desvios], caráter este aindaevidenciado pelo teste U de Mann-Whitney com o resultado aproximado de \(0.0318\) para o p-valor. Ainda abaixo do limite heurístico de \(0.05\), de forma a poder ser considerada significativa a diferença entre as populações, esse resultado se beneficiaria de futuras análises mais profundas, possivelmente com mais bibliotecas de reads incluídas, de forma a aumentar a confiabilidade das correlações medidas.
+Essas supesições, contudo, ainda tem caráter duvidoso frente à tamanha ruidez estatísca dos dados apresentados, caráter este evidenciado pelo teste U de Mann-Whitney com o resultado aproximado de \(0.0318\) para o p-valor. Ainda abaixo do limite heurístico de \(0.05\), de forma a poder ser considerada significativa a diferença entre as populações, esse resultado se beneficiaria de futuras análises mais profundas, possivelmente com mais bibliotecas de reads incluídas, de forma a aumentar a confiabilidade das correlações medidas.
 
 \subsubsection{A configuração que se esperava mais demonstrar efeitos de compactação de cromatina não se diferenciou na análise.}
 Traçou-se o mesmo caminho das últimas subseções, porém tomando à parte a parcela de cópias cujo sentido era diferente do de seu gene vizinho e cuja posição se dava após a terminação 3' desse último. Nessa configuração, dado que não poderia haver \textit{readthrough} estando em fitas diferentes e os promotores provavelmente estariam o mais próximos possível, teríamos o melhor caso para observar coordenações de transcrição decorrentes da descompactação de cromatina no local. O p-valor, contudo permanece alto demais para constatar significância estatística, com o valor arredondado de \(0.1870\), demonstrando que, de fato ocorrendo, a influência do grau de empacotamento do DNA é demasiado sutil para ser averiguada da forma proposta, dentro da quantidade de dados utilizada.

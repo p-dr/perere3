@@ -7,10 +7,14 @@
 / Conseguir comprimentos reais;
 \ inteiras/incompletas, dentro/fora, jusante/montante, mesma/outra fita (wilcoxon);
 \ avaliar tamanho dos contigs que não tem gene vizinho
+\ corrigir as comparações;
 * comparar distribuição de transcrição das cópias com as dos genes;
-* corrigir as comparações;
-* pizza da quantidade de casos --> -----> | --> <----- | olap | etc
+* transcrição head vs transcrição gene
+* wilcoxon das transcrições de olap vs nolap.
+* transcrição head vs distância
+
 ------------------------------------------------------------------
+pizza da quantidade de casos --> -----> | --> <----- | olap | etc
 * explicar melhor a correlação com vizinho;
 * distribuição de transcrição das heads (?).
 * distribuição das distâncias (?)

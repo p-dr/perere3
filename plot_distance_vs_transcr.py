@@ -1,4 +1,4 @@
-# description: Plots distance from each head to its nearest or overlapped gene as a function of the correlation coeficient between their normalized read counts.
+# description: Plots distance from each head to its nearest or overlapped gene as a function of the transcription coeficient between their normalized read counts.
 # in: pardir/'genome_annotation/all_together_now.tsv'
 # out: 
 
@@ -18,18 +18,13 @@ head_data = head_data.dropna().reset_index(drop=True)
 
 # ################# CORRELATION ########################
 print("TABELA DE CORRELAÇÕES DE SPEARMAN")
-print(head_data[['transcription', 'correlation', 'distance']].corr(method='spearman'))
-
+print(head_data.corr(method='spearman'))
 
 # #################### SPLITS ##########################
 
 # ##### OVERLAPS OR NOT
 overlaps = head_data[(head_data.flag == 'olap') & head_data.same_strand]
-print("CORRELAÇÕES DOS OLAP")
-print(overlaps[['transcription', 'correlation']].corr(method='spearman'))
 noverlap = head_data.drop(overlaps.index)
-print("CORRELAÇÕES DOS NOLAP")
-print(noverlap[['transcription', 'correlation']].corr(method='spearman'))
 
 # drop overlapped
 head_data = head_data[head_data.flag != 'olap']
@@ -82,7 +77,7 @@ labels = ['Sobreposta ou não sobreposta ',
           'Promotor próximo ou promotor mais distante ']
 
 for label, pair in zip(labels, pairs):
-    a, b = [p.correlation for p in pair]
+    a, b = [p.transcription for p in pair]
     pvalue = mannwhitneyu(a, b).pvalue
     print(label, pvalue)
 
@@ -93,7 +88,7 @@ for label, pair in zip(labels, pairs):
         plt.hist(a, alpha=.5)
         plt.hist(b, alpha=.5)
         plt.legend(label[:-1].split(' ou '))
-        plt.xlabel('Correlação transcricional com o gene vizinho')
+        plt.xlabel('Transcrição')
         plt.ylabel('Frequência')
 
 if show_flag:
@@ -113,17 +108,17 @@ for pair, title in zip(pairs[1:], labels[1:]):
         cor = 'C' + str(i)
 
         data.sort_values('distance', inplace=True)
-        data.loc[:, 'lowess'] = lowess(data.correlation, data.distance, .6,
+        data.loc[:, 'lowess'] = lowess(data.transcription, data.distance, .6,
                                        return_sorted=False)
 
         plt.semilogx(*data[['distance', 'lowess']].values.T,
                      zorder=10, label=leg_labs[i], color=cor)
 
-        fig = plt.semilogx(*data[['distance', 'correlation']].values.T,
+        fig = plt.semilogx(*data[['distance', 'transcription']].values.T,
                            '.', alpha=.4, color=cor)
 
     plt.legend()
-    plt.ylabel('Correlação transcricional com o gene vizinho')
+    plt.ylabel('Transcrição')
     plt.xlabel('Distância ao gene vizinho (bp)')
     # plt.axis([1e3, 1e5, -.1, .4])
 

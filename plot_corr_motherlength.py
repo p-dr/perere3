@@ -20,7 +20,12 @@ corr = read_tsv(pardir/'genome_annotation/head_genes_correlations.tsv',
 ml_corr = pd.merge(ml, corr, left_index=True, right_index=True).dropna()
 #print(ml_corr)
 ml_corr.plot('ml', 'correlation', 'scatter', alpha=.2)
+plt.xlabel('Comprimento-mãe (bp)')
+plt.ylabel('Correlação transcricional com o gene vizinho')
+
 ml_corr.plot.hexbin('ml', 'correlation', gridsize=15, cmap='viridis')
+plt.xlabel('Comprimento-mãe (bp)')
+plt.ylabel('Correlação transcricional com o gene vizinho')
 
 #======================== heatmap ========================#
 
@@ -38,8 +43,10 @@ ml_corr.plot.hexbin('ml', 'correlation', gridsize=15, cmap='viridis')
 # plt.xlabel('motherlength')
 # plt.ylabel('coeficiente Pearson')
 
-ml_corr['bins'] = pd.cut(ml_corr['ml'], 15)
+ml_corr['bins'] = pd.cut(ml_corr['ml'], [0, 750, 3180, ml_corr.ml.max()])
 ml_corr.boxplot('correlation', 'bins')
+plt.xlabel('Comprimento-mãe (bp)')
+plt.ylabel('Correlação transcricional com o gene vizinho')
 
 print(ml_corr.groupby('bins').mean())
 save_all_figs()

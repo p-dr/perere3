@@ -119,12 +119,13 @@ Procurou-se investigar o efeito que genes próximos exercem sobre a transcriçã
 Nesta seção procura-se dividir a população de heads entre diferentes posições relativas ao seu gene mais próximo. Nota-se que, em alguns poucos casos, não havia nenhum gene no mesmo contig da head, de forma que essas situações tiveram de ser descartadas e restaram 7645 cópias em análise. Ao se calcular a correlação com o gene vizinho, houve muitos casos em que não foram alinhados sobre a head nenhum read de alguma determinada biblioteca, o que fazia com que a maioria dos pontos utilizados na determinação da correlação fossem nulos, e apenas um ponto que distasse significativamente dos demais era necessário para elevar a correlação a valores próximos a um, dado que a distribuição assumia características lineares. Foram então removidas dos dados as heads sobre as quais menos de quatro bibliotecas de reads, das oito bibliotecas utilizadas, geravam contagem de reads não nula. Isso impactou em perda considerável de dados: mativeram-se 3269 cópias na análise.
 
 \subsubsection{Cópias sobrepostas a genes sugerem forte correlação transcricional}
-Inicialmente, dividiu-se as cópias entre as que sobrepunham alguma região gênica e as que não. Tomou-se os valores de correlação de transcrição com o gene vizinho (ou o gene sobreposto) e comparou-se a distribuição desses valores nas duas populações por meio de teste U de Mann-Whitney\footnote{também conhecido como teste da soma dos postos de Wilcoxon.}. O p-valor obtido foi de aproximadamente \(1,972 \cdot 10^{-36}\), sugerindo muito fortemente que de fato há diferença entre os níveis de transcrição dos dois grupos, como aponta a figura \ref{histintegridade}.
+Inicialmente, dividiu-se as cópias entre as que sobrepunham alguma região gênica e as que não. Tomou-se os valores de correlação de transcrição com o gene vizinho (ou o gene sobreposto) e comparou-se a distribuição desses valores nas duas populações por meio de teste U de Mann-Whitney\footnote{também conhecido como teste da soma dos postos de Wilcoxon.}. O p-valor obtido foi de aproximadamente \(1,972 \cdot 10^{-36}\), sugerindo muito fortemente que de fato há diferença entre os níveis de transcrição dos dois grupos, como aponta a figura \ref{histolap}.
 
 \begin{figure}[H]
 	\centering
-	\label{histintegridade}
+	\label{histolap}
 	\includegraphics[width=.5\textwidth]{plot_distance_vs_corr_0.pdf}
+	\caption{Comparação dos histogramas dos valores de correlação entre o coeficiente de transcrição de cada cópia de Pererê-3 e o de seu gene mais próximo, nos casos em que a cópia não sobrepõe algum gene (em laranja), ou com o gene no qual a cópia está inserida (em azul), se ela de fato estiver em algum.}
 \end{figure}
 
 Nota-se muitas correlações próximas de 1, vistas a direita da figura \ref{histintegridade}, de forma que a transcrição das cópias é quase a mesma de seus genes próximos em uma grande quantidade de casos, o que suporta a ideia do \textit{readthrough}.
@@ -135,7 +136,8 @@ A fim de avaliar se a transcrição das heads já apresentava diferença apenas 
 \begin{figure}[H]
 	\centering
 	\label{completude}
-	\includegraphics[width=.5\textwidth]{plot_distance_vs_corr_6.pdf}
+	\includegraphics[width=.5\textwidth]{plot_distance_vs_corr_7.pdf}
+	\caption{Correlação com o gene mais próximo de cada cópia em função da distância entre os dois, para as cópias ditas completas, com comprimento maior que 3150 bp, e ditas incompletas, cujo comprimento é inferior a 750.}
 \end{figure}
 
 % \subsubsection{fitas diferentes}
@@ -155,7 +157,8 @@ O mesmo procedimento da subseção anterior foi executado separando-se das demai
 \begin{figure}[H]
 	\centering
 	\label{updownstream}
-	\includegraphics[width=.5\textwidth]{plot_distance_vs_corr_5.pdf}
+	\includegraphics[width=.5\textwidth]{plot_distance_vs_corr_6.pdf}
+	\caption{Correlação com o gene mais próximo de cada cópia em função da distância entre os dois, para as cópias \textit{downstream} a seu gene mais próximo (em azul) e para o restante dos dados (em laranja).}
 \end{figure}
 
 Pela figura \ref{updownstream}, as cópias \textit{downstream} parecem ainda revelar visível superioridade da correlação com o vizinho no gráfico apresentado, dado que sua curva LOWESS permanece superior a das demais cópias principalmente na região com maior número de amostras (distância entre \(5\cdot 10^3\) e \(2 \cdot 10^4\) pares de base), reforçando a hipótese de que há vazamento nas transcrições gênicas, ou seja, que o nível de transcrição das heads pode ser incrementado se ela estiver próxima à extremidade 3' de uma região codificante no genoma, provavelmente em decorrência de falha na terminação da transcrição.

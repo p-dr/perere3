@@ -88,7 +88,7 @@ for label, pair in zip(labels, pairs):
 
     if 1:
         plt.figure()
-        plt.title(label + str(pvalue))
+        plt.title(label)
 
         plt.hist(a, alpha=.5)
         plt.hist(b, alpha=.5)
@@ -98,8 +98,6 @@ for label, pair in zip(labels, pairs):
 
 if show_flag:
     plt.show()
-else:
-    save_all_figs()
 
 
 # ################# PLOT ######################

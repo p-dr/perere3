@@ -16,10 +16,6 @@ head_data = pd.read_table(pardir/'genome_annotation/all_together_now.tsv')
 head_data = head_data.dropna().reset_index(drop=True)
 
 
-# ################# CORRELATION ########################
-print("TABELA DE CORRELAÇÕES DE SPEARMAN")
-print(head_data.corr(method='spearman'))
-
 # #################### SPLITS ##########################
 
 # ##### OVERLAPS OR NOT

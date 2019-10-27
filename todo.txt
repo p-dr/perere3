@@ -8,15 +8,28 @@
 \ inteiras/incompletas, dentro/fora, jusante/montante, mesma/outra fita (wilcoxon);
 \ avaliar tamanho dos contigs que não tem gene vizinho
 \ corrigir as comparações;
+/ transcrição head vs distância : nada demais.
+
 * comparar distribuição de transcrição das cópias com as dos genes;
-* transcrição head vs transcrição gene
 * wilcoxon das transcrições de olap vs nolap.
-* transcrição head vs distância
+* encaixar valores de correlação de spearman
+* espaçamento 1,5
+* opacar histogramas
+---------------------------------------
+* Melhor que o histograma pra mostrar as populações, os boxplot.
+    + olap/nolap
+    + up/down-stream
+    + up/down-stream até 5e3 ou 1e4
+    + (in)completa
+
+* As discussões a arespeito do histograma são melhor deixadas de lado, pra não instigar a  banca. rs.
+* A análise é dependente da fita? (pelamordedeus)
+* Não vamos fazer nada com a transcrição diretamente? (Corrigir o rolê do downstream, já que pode ser downstream em fitas diferentes).
+* Menos pessimismo na hora de mostrar o p-valor
 
 ------------------------------------------------------------------
 pizza da quantidade de casos --> -----> | --> <----- | olap | etc
 * explicar melhor a correlação com vizinho;
-* distribuição de transcrição das heads (?).
-* distribuição das distâncias (?)
-* distância vs transcrição (não corr)
+-* distribuição das distâncias (?)
+-* distância vs transcrição (não corr)
 * entender Teste rank-sum Wilcoxon;

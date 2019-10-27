@@ -22,14 +22,6 @@ print(head_data[['transcription', 'correlation', 'distance']].corr(method='spear
 
 # #################### SPLITS ##########################
 
-# ##### OVERLAPS OR NOT
-overlaps = head_data[(head_data.flag == 'olap') & head_data.same_strand]
-print("CORRELAÇÕES DOS OLAP")
-print(overlaps[['transcription', 'correlation']].corr(method='spearman'))
-noverlap = head_data.drop(overlaps.index)
-print("CORRELAÇÕES DOS NOLAP")
-print(noverlap[['transcription', 'correlation']].corr(method='spearman'))
-
 # drop overlapped
 head_data = head_data[head_data.flag != 'olap']
 
@@ -42,12 +34,12 @@ downstream = same_strand[(same_strand.strand == '+') &
                          (same_strand.flag == 'dir')]
 downstream = downstream.append(same_strand[(same_strand.strand == '-') &
                                            (same_strand.flag == 'esq')])
-# upstream = same_strand.drop(downstream.index)
+
 upstream = same_strand[(same_strand.strand == '+') &
                          (same_strand.flag == 'esq')]
 upstream = upstream.append(same_strand[(same_strand.strand == '-') &
                                            (same_strand.flag == 'dir')])
-#upstream = same_strand[
+
 # ##==============================================================
 # downstream = head_data[(head_data.strand == '+') &
 #                        (head_data.flag == 'dir')]
@@ -67,6 +59,7 @@ abc = ('a) ', 'b) ', 'c) ')
 fig, axs = plt.subplots(1, len(thresholds), figsize=(11, 4.8))
 for ax in axs:
     ax.get_xaxis().set_ticks([])
+    ax.get_yaxis().set_ticks([])
 
 fig.add_subplot(111, frameon=False)
 plt.tick_params(labelcolor='none',
@@ -85,8 +78,6 @@ for i, thresh in enumerate(thresholds):
     print(label, pvalue)
 
     fig.add_subplot(1, len(thresholds), i + 1, frameon=False)
-    plt.tick_params(top=False, left=False, right=False, bottom=False,
-                    labelleft=False)
     plt.title(label)
 
     plt.boxplot([a, b], widths=.75)
@@ -115,8 +106,9 @@ plt.ylabel('p-valor')
 
 # ----------------------------------
 plt.subplot(212)
-plt.plot(xdistances, updataamounts)
-plt.plot(xdistances, downdataamounts)
+plt.plot(xdistances, updataamounts, label="Upstream")
+plt.plot(xdistances, downdataamounts, label="Downstream")
+plt.legend()
 
 plt.semilogx()
 plt.xlabel('Distância ao vizinho (pb)')

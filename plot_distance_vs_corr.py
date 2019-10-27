@@ -39,10 +39,15 @@ same_strand = head_data[head_data.same_strand]
 diff_strand = head_data.drop(same_strand.index)
 
 # ##### UP/DOWN-STREAM: ----->   -->
-downstream = same_strand[(same_strand.strand == '+') &
-                         (same_strand.flag == 'dir')]
-downstream = downstream.append(same_strand[(same_strand.strand == '-') &
-                                           (same_strand.flag == 'esq')])
+# downstream = same_strand[(same_strand.strand == '+') &
+#                          (same_strand.flag == 'dir')]
+# downstream = downstream.append(same_strand[(same_strand.strand == '-') &
+#                                            (same_strand.flag == 'esq')])
+
+downstream = head_data[(head_data.strand == '+') &
+                       (head_data.flag == 'dir')]
+downstream = downstream.append(head_data[(head_data.strand == '-') &
+                                         (head_data.flag == 'esq')])
 
 notdownstream = head_data.drop(downstream.index)
 
@@ -80,23 +85,34 @@ labels = ['Sobreposta ou não sobreposta ',
           'Downstream ou não downstream ',
           'Completa ou incompleta ',
           'Promotor próximo ou promotor mais distante ']
+abc = ('a) ', 'b) ', 'c) ')
+selected = (0, 2, 3)
 
-for label, pair in zip(labels, pairs):
+fig, axs = plt.subplots(1, 3, figsize=(11, 4.8))
+for ax in axs:
+    ax.get_xaxis().set_ticks([])
+
+fig.add_subplot(111, frameon=False)
+plt.tick_params(labelcolor='none',
+                top=False, bottom=False, left=False, right=False)
+plt.ylabel('Correlação transcricional com o gene vizinho')
+
+for i, label, pair in zip(range(len(labels)), labels, pairs):
     a, b = [p.correlation for p in pair]
     pvalue = mannwhitneyu(a, b).pvalue
     print(label, pvalue)
 
-    if 1:
-        plt.figure()
+    if i in selected:
+        fig.add_subplot(1, 3, selected.index(i) + 1, frameon=False)
+        plt.tick_params(top=False, left=False, right=False, bottom=False,
+                        labelleft=False)
         plt.title(label)
 
-        plt.hist(a, alpha=.5)
-        plt.hist(b, alpha=.5)
-        plt.legend(label[:-1].split(' ou '))
-        plt.xlabel('Correlação transcricional com o gene vizinho')
-        plt.ylabel('Frequência')
+        plt.boxplot([a, b], widths=.75)
+        plt.xticks([1, 2], labels=label[:-1].split(' ou '))
 
 if show_flag:
+    plt.tight_layout()
     plt.show()
 
 

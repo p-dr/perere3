@@ -24,10 +24,15 @@ print(head_data[['transcription', 'correlation', 'distance']].corr(method='spear
 # #################### SPLITS ##########################
 
 # ##### OVERLAPS OR NOT
-overlaps = head_data[(head_data.flag == 'olap') & head_data.same_strand]
+# overlaps = head_data[(head_data.flag == 'olap') & head_data.same_strand]
+overlaps = head_data[(head_data.flag == 'olap')]
 print("CORRELAÇÕES DOS OLAP")
 print(overlaps[['transcription', 'correlation']].corr(method='spearman'))
-noverlap = head_data.drop(overlaps.index)
+
+#noverlap = head_data.drop(overlaps.index)
+noverlap = head_data[head_data.flag != 'olap']
+
+print(noverlap[['correlation', 'flag']])
 print("CORRELAÇÕES DOS NOLAP")
 print(noverlap[['transcription', 'correlation']].corr(method='spearman'))
 
@@ -91,6 +96,7 @@ selected = (0, 2, 3)
 fig, axs = plt.subplots(1, 3, figsize=(11, 4.8))
 for ax in axs:
     ax.get_xaxis().set_ticks([])
+    ax.get_yaxis().set_ticks([])
 
 fig.add_subplot(111, frameon=False)
 plt.tick_params(labelcolor='none',
@@ -100,19 +106,18 @@ plt.ylabel('Correlação transcricional com o gene vizinho')
 for i, label, pair in zip(range(len(labels)), labels, pairs):
     a, b = [p.correlation for p in pair]
     pvalue = mannwhitneyu(a, b).pvalue
+    plabel = f'p-valor:\n{pvalue:.5}'
     print(label, pvalue)
 
     if i in selected:
         fig.add_subplot(1, 3, selected.index(i) + 1, frameon=False)
-        plt.tick_params(top=False, left=False, right=False, bottom=False,
-                        labelleft=False)
         plt.title(abc[selected.index(i)] + label)
 
         plt.boxplot([a, b], widths=.75)
+        plt.annotate(plabel, (.5, .2), xycoords='axes fraction', ha='center')
         plt.xticks([1, 2], labels=[s.capitalize() for s in label[:-1].split(' ou ')])
 
 if show_flag:
-    plt.tight_layout()
     plt.show()
 
 

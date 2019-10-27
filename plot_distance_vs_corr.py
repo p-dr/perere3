@@ -82,7 +82,7 @@ pairs = ((overlaps, noverlap),
 
 labels = ['Sobreposta ou não sobreposta ',
           'Mesma fita ou em fitas diferentes ',
-          'Downstream ou não downstream ',
+          'Downstream ou upstream ',
           'Completa ou incompleta ',
           'Promotor próximo ou promotor mais distante ']
 abc = ('a) ', 'b) ', 'c) ')
@@ -106,10 +106,10 @@ for i, label, pair in zip(range(len(labels)), labels, pairs):
         fig.add_subplot(1, 3, selected.index(i) + 1, frameon=False)
         plt.tick_params(top=False, left=False, right=False, bottom=False,
                         labelleft=False)
-        plt.title(label)
+        plt.title(abc[selected.index(i)] + label)
 
         plt.boxplot([a, b], widths=.75)
-        plt.xticks([1, 2], labels=label[:-1].split(' ou '))
+        plt.xticks([1, 2], labels=[s.capitalize() for s in label[:-1].split(' ou ')])
 
 if show_flag:
     plt.tight_layout()
@@ -121,7 +121,7 @@ if show_flag:
 for pair, title in zip(pairs[1:], labels[1:]):
     fig = plt.figure()
     plt.title(title)
-    leg_labs = title[:-2].split(' ou ')
+    leg_labs = [s.capitalize() for s in title[:-1].split(' ou ')]
 
     for i, data in enumerate(pair):
         cor = 'C' + str(i)

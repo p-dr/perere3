@@ -16,8 +16,8 @@ data.columns = ['heads', 'genes']
 # plt.hist(data.genes, bins=50, alpha=.2)
 # plt.hist(data.heads, bins=50)
 heads.hist(bins=30, log=True)
-plt.title('Distribuição de coeficientes de transcrição entre as cópias')
-plt.xlabel('Coeficiente de transcrição')
+plt.title('Distribuição de valores de RPKM entre as cópias')
+plt.xlabel('RPKM')
 plt.ylabel('Frequência')
 
 save_all_figs()

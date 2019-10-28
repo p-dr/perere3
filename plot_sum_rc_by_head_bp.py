@@ -9,9 +9,6 @@ from scipy.signal import find_peaks
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Minimum motherlength value to be plotted.
-ML_THRESH = 3000
-
 mask_map = pd.read_csv(pardir/'genome_annotation/mask_map.tsv',
                        sep='\t').groupby('seqid')
 
@@ -53,29 +50,30 @@ n_heads = len(heads_data)
 mask_count = [0]*1000
 count = 0
 
-### FIND AND PLOT REPETIVIVE REGIONS
-def plot_repetitive():
-    try:
-        for irow, row in heads_data.iterrows():
-            seqid, hstart, hend = row[['seqid', 'start', 'end']]
-
-            for j, mask in mask_map.get_group(seqid).iterrows():
-                # if mask does not overlaps
-                if mask.end < hstart or mask.start > hend:
-                    continue
-                else:
-                    olap_mask = (max(mask.start - hstart, 0), min(mask.end - hstart, 1000))
-                    for i in range(*olap_mask):
-                        mask_count[i] += 1
-                    # plt.fill_between(olap_mask, *axesy, alpha=.1)
-                    count += 1
-
-            print(irow, '/', n_heads, 'plotted:', count)
-
-    except KeyboardInterrupt:
-        pass
-
-    return mask_count
+# ## FIND AND PLOT REPETIVIVE REGIONS
+# def plot_repetitive():
+#     try:
+#         for irow, row in heads_data.iterrows():
+#             seqid, hstart, hend = row[['seqid', 'start', 'end']]
+# 
+#             for j, mask in mask_map.get_group(seqid).iterrows():
+#                 # if mask does not overlaps
+#                 if mask.end < hstart or mask.start > hend:
+#                     continue
+#                 else:
+#                     olap_mask = (max(mask.start - hstart, 0),
+#                                  min(mask.end - hstart, 1000))
+#                     for i in range(*olap_mask):
+#                         mask_count[i] += 1
+#                     # plt.fill_between(olap_mask, *axesy, alpha=.1)
+#                     count += 1
+# 
+#             print(irow, '/', n_heads, 'plotted:', count)
+# 
+#     except KeyboardInterrupt:
+#         pass
+# 
+#     return mask_count
 
 
 # NORMALIZE
@@ -84,9 +82,9 @@ complete_counts = [c/max(complete_counts) for c in complete_counts]
 
 plt.plot(complete_counts, label='Read count')
 #plt.plot(mask_count, label='Masked count')
-plt.title('Contagem de reads por base das heads')
-plt.xlabel('Posição na head')
-plt.ylabel('Contagem')
+plt.title('Perfil geral de transcrição das sequências sonda')
+plt.xlabel('Distância ao início da sonda (pb)')
+plt.ylabel('Contagem de reads normalizada')
 save_all_figs()
 plt.show()
 print('Pronto.')

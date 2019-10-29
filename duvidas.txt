@@ -18,6 +18,8 @@ Pico na distribuições de correlações com vizinho não me parece ser natural.
 Dizer "adimensional" nos gráficos?
 Enquadrar bonitinho as correlação X distância?
 
+Por que não fizemos a análise fita-específica?
+
 gene cópia
 --> ->
 <-- ->

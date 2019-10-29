@@ -11,7 +11,8 @@
 \ Parece que acabamos descartando o gene vizinho quando ele está em outra fita:a gente só usa os genes mais próximos e descartamos os de fita diferente, nem pra procurar o gene vizinho de restringindo à mesma fita. }} NÃO FAÇA ISSO!! Se houver um gene mais próximo na mesma fita, ele, sim, deve ser considerado, pois efeitos de cromatina advindos dele serão mais fortes (provavelmente) que o do mais distante. 
 
 Pouca transcrição pode ser ruído?
-Como se escreve Pererê-3?
+\Como se escreve Pererê-3? Perere-3
+Não tem como determinar o sinal de parada para saber onde terminam as sondas?
 Você retirou as bibliotecas com contagem nula pra calcular a correlação? (e tem que fazer isso?)
 Pico na distribuições de correlações com vizinho não me parece ser natural.
 Dizer "adimensional" nos gráficos?

@@ -80,6 +80,7 @@ count = 0
 complete_counts = [c/max(complete_counts) for c in complete_counts]
 #mask_count = [c/max(mask_count) for c in mask_count]
 
+plt.figure(figsize=(9, 4.8))
 plt.plot(complete_counts, label='Read count')
 #plt.plot(mask_count, label='Masked count')
 plt.title('Perfil geral de transcrição das sequências sonda')

@@ -16,11 +16,25 @@ head_data = pd.read_table(pardir/'genome_annotation/all_together_now.tsv')
 head_data = head_data.dropna().reset_index(drop=True)
 
 
+# ################# CORRELATION ########################
+print("TABELA DE CORRELAÇÕES DE SPEARMAN")
+print(head_data[['transcription', 'transcription', 'distance']].corr(method='spearman'))
+
+
 # #################### SPLITS ##########################
 
 # ##### OVERLAPS OR NOT
-overlaps = head_data[(head_data.flag == 'olap') & head_data.same_strand]
-noverlap = head_data.drop(overlaps.index)
+# overlaps = head_data[(head_data.flag == 'olap') & head_data.same_strand]
+overlaps = head_data[(head_data.flag == 'olap')]
+print("CORRELAÇÕES DOS OLAP")
+print(overlaps[['transcription', 'transcription']].corr(method='spearman'))
+
+#noverlap = head_data.drop(overlaps.index)
+noverlap = head_data[head_data.flag != 'olap']
+
+print(noverlap[['transcription', 'flag']])
+print("CORRELAÇÕES DOS NOLAP")
+print(noverlap[['transcription', 'transcription']].corr(method='spearman'))
 
 # drop overlapped
 head_data = head_data[head_data.flag != 'olap']
@@ -30,10 +44,15 @@ same_strand = head_data[head_data.same_strand]
 diff_strand = head_data.drop(same_strand.index)
 
 # ##### UP/DOWN-STREAM: ----->   -->
-downstream = same_strand[(same_strand.strand == '+') &
-                         (same_strand.flag == 'dir')]
-downstream = downstream.append(same_strand[(same_strand.strand == '-') &
-                                           (same_strand.flag == 'esq')])
+# downstream = same_strand[(same_strand.strand == '+') &
+#                          (same_strand.flag == 'dir')]
+# downstream = downstream.append(same_strand[(same_strand.strand == '-') &
+#                                            (same_strand.flag == 'esq')])
+
+downstream = head_data[(head_data.strand == '+') &
+                       (head_data.flag == 'dir')]
+downstream = downstream.append(head_data[(head_data.strand == '-') &
+                                         (head_data.flag == 'esq')])
 
 notdownstream = head_data.drop(downstream.index)
 
@@ -68,37 +87,46 @@ pairs = ((overlaps, noverlap),
 
 labels = ['Sobreposta ou não sobreposta ',
           'Mesma fita ou em fitas diferentes ',
-          'Downstream ou não downstream ',
+          'Downstream ou upstream ',
           'Completa ou incompleta ',
           'Promotor próximo ou promotor mais distante ']
+abc = ('a) ', 'b) ', 'c) ')
+selected = (0, 2, 3)
 
-for label, pair in zip(labels, pairs):
+fig, axs = plt.subplots(1, 3, figsize=(11, 4.8))
+for ax in axs:
+    ax.get_xaxis().set_ticks([])
+    ax.get_yaxis().set_ticks([])
+
+fig.add_subplot(111, frameon=False)
+plt.tick_params(labelcolor='none',
+                top=False, bottom=False, left=False, right=False)
+plt.ylabel('RPKM')
+
+for i, label, pair in zip(range(len(labels)), labels, pairs):
     a, b = [p.transcription for p in pair]
     pvalue = mannwhitneyu(a, b).pvalue
+    plabel = f'p-valor:\n{pvalue:.5}'
     print(label, pvalue)
 
-    if 1:
-        plt.figure()
-        plt.title(label + str(pvalue))
+    if i in selected:
+        fig.add_subplot(1, 3, selected.index(i) + 1, frameon=False)
+        plt.title(abc[selected.index(i)] + label)
 
-        plt.hist(a, alpha=.5)
-        plt.hist(b, alpha=.5)
-        plt.legend(label[:-1].split(' ou '))
-        plt.xlabel('Transcrição')
-        plt.ylabel('Frequência')
+        plt.boxplot([a, b], widths=.75, showfliers=False)
+        plt.annotate(plabel, (.5, .75), xycoords='axes fraction', ha='center')
+        plt.xticks([1, 2], labels=[s.capitalize() for s in label[:-1].split(' ou ')])
 
 if show_flag:
     plt.show()
-else:
-    save_all_figs()
 
 
 # ################# PLOT ######################
 
 for pair, title in zip(pairs[1:], labels[1:]):
-    fig = plt.figure()
+    fig = plt.figure(figsize=(9, 4.8), dpi=200)
     plt.title(title)
-    leg_labs = title[:-2].split(' ou ')
+    leg_labs = [s.capitalize() for s in title[:-1].split(' ou ')]
 
     for i, data in enumerate(pair):
         cor = 'C' + str(i)
@@ -110,11 +138,11 @@ for pair, title in zip(pairs[1:], labels[1:]):
         plt.semilogx(*data[['distance', 'lowess']].values.T,
                      zorder=10, label=leg_labs[i], color=cor)
 
-        fig = plt.semilogx(*data[['distance', 'transcription']].values.T,
+        fig = plt.loglog(*data[['distance', 'transcription']].values.T,
                            '.', alpha=.4, color=cor)
 
     plt.legend()
-    plt.ylabel('Transcrição')
+    plt.ylabel('RPKM')
     plt.xlabel('Distância ao gene vizinho (bp)')
     # plt.axis([1e3, 1e5, -.1, .4])
 

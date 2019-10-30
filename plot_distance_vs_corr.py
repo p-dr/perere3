@@ -124,7 +124,7 @@ if show_flag:
 # ################# PLOT ######################
 
 for pair, title in zip(pairs[1:], labels[1:]):
-    fig = plt.figure()
+    fig = plt.figure(figsize=(9, 4.8), dpi=200)
     plt.title(title)
     leg_labs = [s.capitalize() for s in title[:-1].split(' ou ')]
 

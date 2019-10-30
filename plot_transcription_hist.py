@@ -15,7 +15,8 @@ data.columns = ['heads', 'genes']
 # print(f'\n\nporcentagem de zeros: {zeros} / {l} = {100 * zeros / l}%')
 # plt.hist(data.genes, bins=50, alpha=.2)
 # plt.hist(data.heads, bins=50)
-heads.hist(bins=30, log=True)
+
+heads.hist(bins=30, log=True, figsize=(9, 4.8))
 plt.title('Distribuição de valores de RPKM entre as cópias')
 plt.xlabel('RPKM')
 plt.ylabel('Frequência')

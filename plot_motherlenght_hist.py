@@ -12,7 +12,7 @@ motherlengths = read_csv(str(pardir/'genome_annotation' /
                          sep='\t',
                          header=None,
                          names=['head_id', 'motherlength'])
-motherlengths.hist(bins=50)
+motherlengths.hist(bins=50, figsize=(9, 4.8))
 pyplot.xlabel('Comprimento-mãe (bp)')
 pyplot.ylabel('Frequência')
 pyplot.title('Distribuição de comprimentos-mãe das cópias de Pererê-3')

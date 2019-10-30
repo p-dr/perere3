@@ -14,12 +14,16 @@ Porque usar a mediana e não a média?
 \ Pouca transcrição pode ser ruído?
 \ Como se escreve Pererê-3?
 Você retirou as bibliotecas com contagem nula pra calcular a correlação?
+\ Não tem como determinar o sinal de parada para saber onde terminam as sondas?
+Você retirou as bibliotecas com contagem nula pra calcular a correlação? (e tem que fazer isso?)
 Dizer "adimensional" nos gráficos?
 Qual a função da região poli-GTAA?
 Constatar o decrescimento: teste estatístico entre as duas regiões.
 
 \ Pico na distribuições de correlações com vizinho não me parece ser natural. Tavam errados.
 \ Enquadrar bonitinho as correlação X distância? Não.
+
+Por que não fizemos a análise fita-específica?
 
 gene cópia
 --> ->

@@ -101,7 +101,7 @@ for ax in axs:
 fig.add_subplot(111, frameon=False)
 plt.tick_params(labelcolor='none',
                 top=False, bottom=False, left=False, right=False)
-plt.ylabel('Correlação transcricional com o gene vizinho')
+plt.ylabel('Correlação transcricional com o gene vizinho', labelpad=20)
 
 for i, label, pair in zip(range(len(labels)), labels, pairs):
     a, b = [p.correlation for p in pair]
@@ -117,6 +117,8 @@ for i, label, pair in zip(range(len(labels)), labels, pairs):
         plt.annotate(plabel, (.5, .2), xycoords='axes fraction', ha='center')
         plt.xticks([1, 2], labels=[s.capitalize() for s in label[:-1].split(' ou ')])
 
+plt.tight_layout()
+# plt.subplots_adjust()
 if show_flag:
     plt.show()
 

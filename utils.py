@@ -160,9 +160,15 @@ def save_all_figs():
     timestamp = dt.now().strftime('%Y-%-m-%-d-%Hh%Mm%Ss')
 
     for fignum in plt.get_fignums():
-        plt.figure(fignum, dpi=300)
-        plt.savefig(grafdir/f'old/{main_name}_{figcount}_{timestamp}.png')
-        plt.savefig(grafdir/f'{main_name}_{figcount}.png')
+        plt.figure(fignum)
+        save_kwargs = dict(transparent=True,
+                           bbox_inches='tight', # pad_inches=0,
+                           dpi=300)
+
+        plt.savefig(grafdir/f'old/{main_name}_{figcount}_{timestamp}.png',
+                    **save_kwargs)
+        plt.savefig(grafdir/f'{main_name}_{figcount}.png',
+                    **save_kwargs)
         figcount += 1
 
 

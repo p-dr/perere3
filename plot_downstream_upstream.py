@@ -116,11 +116,11 @@ plt.ylabel('Quantidade de pontos')
 
 # ===========================================
 # Só na faixa selecionada
-plt.figure(dpi=200)
-limits = 1e3, 1e4
-print(i.distance.between(*limits))
-plt.boxplot([[i.correlation.loc[i.distance.between(*limits)]]
-             for i in (upstream, downstream)])
+# plt.figure(dpi=200)
+# limits = 1e3, 1e4
+# print(i.distance.between(*limits))
+# plt.boxplot([[i.correlation.loc[i.distance.between(*limits)]]
+             # for i in (upstream, downstream)])
 
 # ===========================================
 if show_flag:

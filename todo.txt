@@ -14,9 +14,11 @@
 \ As discussões a respeito do histograma são melhor deixadas de lado, pra não instigar a  banca. rs.
 
 ===========================================
-* ANÁLISE FITA-ESPECÍFICA
-* Não vamos fazer nada com a transcrição diretamente? (Corrigir o rolê do downstream, já que pode ser downstream em fitas diferentes).
-* comportamento esquisito das nolap
+\ numerar direito as figuras
+* espaços antes de títulos
+
+\ Não vamos fazer nada com a transcrição diretamente? (Corrigir o rolê do downstream, já que pode ser downstream em fitas diferentes).
+\ comportamento esquisito das nolap
 
 \ Melhor que o histograma pra mostrar as populações, os boxplot.
     \ up/down-stream até 5e3 ou 1e4
@@ -27,7 +29,8 @@
 \ p-valor downuppstream em função da distância
 
 ------------------------------------------------------------------
-* encaixar valores de correlação de spearman
+-* ANÁLISE FITA-ESPECÍFICA
+/ encaixar valores de correlação de spearman
 * comparar distribuição de transcrição das cópias com as dos genes;
 - pizza da quantidade de casos --> -----> | --> <----- | olap | etc
 \ explicar melhor a correlação com vizinho;
@@ -36,5 +39,5 @@
 
 ------------------------------------------------------------------
 * entender Teste rank-sum Wilcoxon;
-* referência do Ricardo
-* Menos pessimismo na hora de mostrar o p-valor
+\ referência do Ricardo
+\ Menos pessimismo na hora de mostrar o p-valor

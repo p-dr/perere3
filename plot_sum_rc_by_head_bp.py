@@ -3,7 +3,8 @@
 # out: 
 # plot: 
 
-from utils import pardir, redo_flag, verbose, argv, overlaps, unfold_gff, GFF3_COLUMNS, save_all_figs
+from utils import (pardir, redo_flag, verbose, argv, overlaps,
+                   unfold_gff, GFF3_COLUMNS, save_all_figs, show_flag)
 from pickle import load
 from scipy.signal import find_peaks
 import pandas as pd
@@ -86,6 +87,9 @@ plt.plot(complete_counts, label='Read count')
 plt.title('Perfil geral de transcrição das sequências sonda')
 plt.xlabel('Distância ao início da sonda (pb)')
 plt.ylabel('Contagem de reads normalizada')
+
+if show_flag:
+    plt.show()
+
 save_all_figs()
-plt.show()
 print('Pronto.')

@@ -2,6 +2,7 @@ from pathlib import Path
 
 scripts_path = Path(__file__).parent
 pardir = scripts_path.parent
+genome_path = pardir/'seqs/schistosoma_mansoni.PRJEA36577.WBPS14.genomic.fa'
 
 GFF3_COLUMNS = ['seqid', 'source', 'type', 'start', 'end', 'score', 'strand', 'phase', 'attributes']
 BL_COLUMNS = ['qaccver', 'saccver', 'qstart', 'qend', 'sstart', 'send', 'length', 'pident', 'evalue', 'bitscore']
@@ -177,3 +178,19 @@ def plot_box(count_df, x, y, bins=20, *args):
     count_df[newy] = pd.cut(count_df[y], bins)
     count_df.boxplot(x, newy, rot=90, showfliers=False, *args)
     plt.tight_layout()
+
+
+def boxplot(data):
+    """data is list of list of values"""
+    for j, d in enumerate(data):
+        c = 'C' + str(j)
+        plt.boxplot(d, widths=.75, positions=[j], showfliers=False,
+                    patch_artist=True,
+                    boxprops=dict(facecolor=c, color=c),
+                    capprops=dict(color=c),
+                    whiskerprops=dict(color=c),
+                    flierprops=dict(color=c, markeredgecolor=c),
+                    medianprops=dict(solid_capstyle='projecting')
+                    )
+
+

@@ -93,3 +93,5 @@ qua set 25 08:15:02 -03 2019 | Separações: dentro/fora, jusante/montante, mesm
 qua set 25 08:15:44 -03 2019 | também inteiras/incompletas
 qui set 26 19:35:29 -03 2019 | A hipótese de que as cópias, tendo promotores iguais, se expressaria igualmente já não cai por terra ao observar contagem por bp em cada uma (são totalmente diferentes)?
 
+qui nov 14 08:07:00 -03 2019 | Acho que 'tag sequences' ou 'sequências etiqueta' é uma boa opção de nome.
+qui nov 14 12:11:27 -03 2019 | comincompletas externas não deviam se diferenciar?

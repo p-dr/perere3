@@ -1,4 +1,4 @@
-# description: Plots distance from each head to its nearest or overlapped gene as a function of the correlation coeficient between their normalized read counts.
+# description: Plots distance from each head to its nearest or overlapped gene as a function of the transcription coeficient between their normalized read counts.
 # in: pardir/'genome_annotation/all_together_now.tsv'
 # out: 
 
@@ -8,7 +8,9 @@ import matplotlib.pyplot as plt
 from scipy.stats import mannwhitneyu
 
 
-head_data = pd.read_table(pardir/'genome_annotation/all_together_now.tsv')
+head_data = pd.read_table(pardir/'genome_annotation/all_together_now.tsv',
+                          usecols=['transcription', 'distance', 'flag',
+                                   'motherlength', 'same_strand', 'strand'])
 
 # # Very important to drop NaN's! (we use stuff like data[data.flag != 'olap'])
 # This keeps only heads with neighbor genes.
@@ -17,7 +19,7 @@ head_data = head_data.dropna().reset_index(drop=True)
 
 # ################# CORRELATION ########################
 print("TABELA DE CORRELAÇÕES DE SPEARMAN")
-print(head_data[['transcription', 'correlation', 'distance']].corr(method='spearman'))
+print(head_data[['transcription', 'distance']].corr(method='spearman'))
 
 
 # #################### SPLITS ##########################
@@ -63,13 +65,14 @@ for ax in axs:
 
 ax = fig.add_subplot(111, frameon=False)
 ax.grid(False)
+
 plt.tick_params(labelcolor='none',
                 top=False, bottom=False, left=False, right=False)
-plt.ylabel('Correlação transcricional com o gene vizinho')
+plt.ylabel('RPKM')
 
 for i, thresh in enumerate(thresholds):
     # Data selection
-    a, b = [p.loc[p.distance <= thresh].correlation
+    a, b = [p.loc[p.distance <= thresh].transcription
             for p in [downstream, upstream]]
 
     pvalue = mannwhitneyu(a, b).pvalue
@@ -82,7 +85,7 @@ for i, thresh in enumerate(thresholds):
     plt.title(label)
 
     boxplot([a, b])
-    plt.annotate(plabel, (.5, .2), xycoords='axes fraction', ha='center')
+    plt.annotate(plabel, (.5, .5), xycoords='axes fraction', ha='center')
     plt.xticks([0, 1], labels=['Downstream', 'Upstream'])
 
 plt.tight_layout()
@@ -94,8 +97,8 @@ plt.figure(figsize=(11, 4.8))
 plt.subplot(211)
 
 xdistances = range(100, int(upstream.distance.max()), 100)
-ypvalues = [mannwhitneyu(downstream.loc[downstream.distance <= thresh].correlation,
-                         upstream.loc[upstream.distance <= thresh].correlation).pvalue
+ypvalues = [mannwhitneyu(downstream.loc[downstream.distance <= thresh].transcription,
+                         upstream.loc[upstream.distance <= thresh].transcription).pvalue
             for thresh in xdistances]
 
 updataamounts = [len(upstream.loc[upstream.distance <= thresh]) for thresh in xdistances]
@@ -120,7 +123,7 @@ plt.ylabel('Quantidade de pontos')
 # plt.figure(dpi=200)
 # limits = 1e3, 1e4
 # print(i.distance.between(*limits))
-# plt.boxplot([[i.correlation.loc[i.distance.between(*limits)]]
+# plt.boxplot([[i.transcription.loc[i.distance.between(*limits)]]
              # for i in (upstream, downstream)])
 
 # ===========================================

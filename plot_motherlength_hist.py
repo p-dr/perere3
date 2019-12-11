@@ -5,7 +5,7 @@
 
 from pandas import read_csv
 from matplotlib import pyplot
-from utils import pardir, save_all_figs
+from utils import pardir, save_all_figs, show_flag
 
 motherlengths = read_csv(str(pardir/'genome_annotation' /
                              'heads_motherlength.tsv'),
@@ -18,4 +18,5 @@ pyplot.ylabel('Frequência')
 pyplot.title('Distribuição de comprimentos das regiões conservadas das cópias de Perere-3')
 save_all_figs()
 
-pyplot.show()
+if show_flag:
+    pyplot.show()

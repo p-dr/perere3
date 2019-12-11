@@ -1,5 +1,5 @@
 import pandas as pd
-from utils import pardir, save_all_figs
+from utils import pardir, save_all_figs, show_flag
 import matplotlib.pyplot as plt
 
 inpath = pardir/'counted_reads/aggregated_unconsidering_sense.tsv'
@@ -21,5 +21,7 @@ plt.title('Distribuição de valores de RPKM entre as cópias')
 plt.xlabel('RPKM')
 plt.ylabel('Frequência')
 
+if show_flag:
+    plt.show()
+
 save_all_figs()
-plt.show()

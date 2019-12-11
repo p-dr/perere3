@@ -8,13 +8,15 @@ from pprint import pprint
 CMAP = get_cmap('cool').reversed()
 pipeline = Digraph()
 scripts_dir = pardir/'scripts'
-
+ignore_list = ['*.swp']
+ext = ['.py', '.sh']
 
 def parse_script(script_path):
 
     script_tags = {}
 
     with script_path.open('r') as script_file:
+        print('Processing', script_path)
 
         for line in script_file:
             if line.startswith('#'):
@@ -71,7 +73,7 @@ if __name__ == '__main__':
     all_iofiles_ctime = {}
     all_scripts_tags = {}
     
-    for script_path in scripts_dir.glob('*[.py,.sh]'):
+    for script_path in (p for p in scripts_dir.glob('*') if p.suffix in ext):
 
         script_name = script_path.name
         script_tags = parse_script(script_path)
@@ -80,23 +82,32 @@ if __name__ == '__main__':
             all_scripts_tags.update({script_name: script_tags})
 
             for io_str_path in script_tags.get('in', []) + script_tags.get('out', []):
-                if io_str_path != '(cloud)':
-                    # trim out 'pardir/"' and '"'
-                    io_path = pardir/io_str_path[8:-1]
 
-                    if io_path.is_dir():
+                # trim out 'pardir/"' and '"'
+                io_path = pardir/io_str_path[8:-1]
+                ignored = any(io_path.match(patt) for patt in ignore_list)
+                print(io_path, ignore_list, ignored)
 
-                        dir_children = list(io_path.glob('*'))
+                if io_str_path == '(cloud)' or ignored:
+                    continue
 
-                        if dir_children:
-                            creation_time = max(map(getctime, dir_children))
-                        else:
-                            creation_time = 0
-                            
+                elif not io_path.exists():
+                    # Future: annotate it does not exist.
+                    creation_time = 0
+
+                elif io_path.is_dir():
+
+                    dir_children = list(io_path.glob('*'))
+
+                    if dir_children:
+                        creation_time = max(map(getctime, dir_children))
                     else:
-                        creation_time = io_path.stat().st_mtime
+                        creation_time = 0
+                        
+                else:
+                    creation_time = io_path.stat().st_mtime
 
-                    all_iofiles_ctime[io_str_path] = all_iofiles_ctime.get(io_str_path, creation_time)
+                all_iofiles_ctime[io_str_path] = all_iofiles_ctime.get(io_str_path, creation_time)
                 
         else:
             untagged_scripts.append(script_name)

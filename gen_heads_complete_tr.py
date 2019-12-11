@@ -7,12 +7,12 @@ from Bio.SeqIO import to_dict, parse
 import matplotlib.pyplot as plt
 from pandas import read_csv, DataFrame
 from sys import argv
-from utils import find_gtaa_break, pardir, verbose, prinf
+from utils import find_gtaa_break, pardir, verbose, prinf, genome_path
 
 # A filtragem por evalue é feita no próprio BLAST.
 
-HEAD_LEN = 1000                 # final head length
-GTAA_WINDOW_LEN = 1500          # search window length for GTAA repetitions
+HEAD_LEN = 100                # final head length
+GTAA_WINDOW_LEN = 500         # search window length for GTAA repetitions
 PREFIX_LEN = 12
 
 if __name__ == '__main__':
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     print(f"'{inpath}' lido.")
 
     print('Lendo genoma de S. mansoni...')
-    genomedict = to_dict(parse(str(pardir/'seqs/smgenome.fa'), 'fasta'))
+    genomedict = to_dict(parse(str(genome_path), 'fasta'))
     print('Dicionário criado.')
 
 

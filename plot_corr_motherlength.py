@@ -3,11 +3,10 @@
 # out: 
 # plot: 
 
-from utils import read_tsv, pardir, save_all_figs
+from utils import read_tsv, pardir, save_all_figs, show_flag
 import pandas as pd
 from seaborn import heatmap
 from matplotlib import pyplot as plt
-import numpy as np
 from plot_read_counts import plot_heatmap
 
 ml = read_tsv(pardir/'genome_annotation/heads_motherlength.tsv', header=None,
@@ -50,4 +49,6 @@ plt.ylabel('Correlação transcricional com o gene vizinho')
 
 print(ml_corr.groupby('bins').mean())
 save_all_figs()
-plt.show()
+
+if show_flag:
+    plt.show()

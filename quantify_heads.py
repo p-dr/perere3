@@ -1,9 +1,10 @@
 # description: Aligns (BLAST) heads between themselves. Plots the number of head sequences aligned N times to other heads as a function of N itself.
 # in: pardir/'seqs/heads.fa'
 # out: pardir/'alinhamentos/heads_vs_heads.bl'
+# out: pardir/'alinhamentos/heads_repetitions.tsv'
 # plot: 
 
-from utils import pardir, redo_flag, show_flag, save_all_figs
+from utils import pardir, safe_open, show_flag, save_all_figs
 from subprocess import run
 from os.path import exists
 from pandas import read_csv
@@ -17,20 +18,14 @@ COLUMNS = 'qaccver saccver pident mismatch gapopen qstart qend sstart send lengt
 
 heads_path = pardir/'seqs/heads.fa'
 out_path = pardir/'alinhamentos/heads_vs_heads.bl'
-out_not_exists = not exists(out_path)
+out_file = safe_open(out_path)  # Check out_path.
+repetitions_outpath = pardir/'genome_annotation/heads_repetitions.tsv'
 
-if out_not_exists:
-    print(f'{out_path} não existe.')
-
-if out_not_exists or redo_flag:
-    print('Procurando alinhamentos entre heads...')
-
+if out_file is not None:
     # Remember you are using megablast.
     run(f"blastn -task 'megablast' -query '{heads_path}' -subject '{heads_path}' -outfmt '6 {COLUMNS}' -out '{out_path}' -evalue 1e-10", shell=True)
     print(f'Alinhamentos salvos em {out_path}.\n')
 
-else:
-    print(f'Arquivo {out_path} já existe e será utilizado.')
 
 #======================== LER ARQUIVO ========================#
 
@@ -42,6 +37,10 @@ print(f"'{out_path}' lido.")
 #======================== HISTOGRAMA ========================#
 
 counts = (heads_vs_heads['qaccver'].value_counts()-1)
+counts_df = counts.to_frame().reset_index()
+counts_df.columns = ['head_id', 'repetitions']
+counts_df.to_csv(repetitions_outpath, sep='\t', index=False)
+
 hist = counts.value_counts()
 print(hist)
 soma = hist.sum()
@@ -50,7 +49,7 @@ print('soma:', soma, 'fração de 0 repetições:',
 
 for log in (False, True):
 
-    print(f'Construindo countsograma, log={log}')
+    print(f'Construindo histograma, log={log}')
     plt.figure(figsize=(11, 4.8))
 
     # ax = counts.hist(bins=200, figsize=(4, 4.8))
@@ -65,6 +64,7 @@ for log in (False, True):
     if show_flag:
         plt.show()
 
+if show_flag:
+    save_all_figs()
 
-save_all_figs()
 plt.close()

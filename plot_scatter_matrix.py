@@ -5,6 +5,7 @@
 # in: pardir/'genome_annotation/head_annotations.gff3'
 # in: pardir/'counted_reads/aggregated_unconsidering_sense.tsv'
 # in: pardir/'genome_annotation/gene_annotations.gff3'
+# in: pardir/'genome_annotation/heads_repetitions.tsv'
 # out: pardir/'genome_annotation/all_together_now.tsv'
 
 import pandas as pd
@@ -39,6 +40,9 @@ gff_data.set_index('gene_id', inplace=True)
 gff_data.motherlength = gff_data.motherlength.astype(dtype='int')
 gff_data.drop(['source', 'type', 'score', 'phase'], 1, inplace=True)
 
+# ##### HEAD REPETITIONS (# OF INTERHEAD BLAST ALIGNMENTS)
+heads_repetitions = pd.read_table(pardir/'genome_annotation/heads_repetitions.tsv', index_col='head_id')
+
 # ##### READ COUNTS DATA
 count_data = pd.read_table(pardir/'counted_reads' /
                            'aggregated_unconsidering_sense.tsv')
@@ -50,20 +54,27 @@ genes_count = count_data.loc[used_genes]
 # ##### GENE ANNOTATIONS DATA
 gene_gff = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3',
                          header=None, names=GFF3_COLUMNS)
-gene_gff = unfold_gff(gene_gff)
-gene_gff = gene_gff.set_index('gene_id').loc[used_genes]
-gene_gff.drop(['source', 'type', 'score', 'phase', 'seqid'], 1, inplace=True)
+SELECTED_COLS = ['start', 'end', 'strand', 'length', 'Name']
+gene_gff = unfold_gff(gene_gff)[SELECTED_COLS]
+gene_gff = gene_gff.set_index('Name').loc[used_genes]
+#gene_gff.drop(['source', 'type', 'score', 'phase', 'seqid'], 1, inplace=True)
 
 # ##### COMPILE GENES DATA
 genes_data = pd.concat([gene_gff, genes_count], 1)
 genes_data.columns = ['gene_' + name for name in genes_data.columns]
 
 # ##### ALL TOGETHER NOW!
-data = pd.concat([gff_data, rel_data, corr_data.correlation, heads_count], 1)
+data = pd.concat([gff_data, rel_data, corr_data.correlation, heads_count, heads_repetitions], 1)
+print(heads_repetitions)
+print('='*100)
+print(data)
+print('='*100)
+print(genes_data)
+print('='*100)
 data = data.merge(genes_data, left_on='neighbor_gene', right_index=True,
                   how='left')
 
-print('Dados não faltantes:')
+print('Quantidade de dados não faltantes:')
 print((~data.isna()).sum())
 
 data['same_strand'] = data.strand == data.gene_strand
@@ -77,8 +88,12 @@ print('''\nNotas: Só são exibidos os genes que foram relacionados a alguma hea
       calcular a correlação, já que muitas sondas tiveram RPKM não-nulo em
       menos de 4 bibliotecas e foram então descartadas.''')
 
+data.index.name = 'head_id'
+data = data.reset_index()
+
 ##############################
-data.to_csv(outpath, sep='\t')
+print(data)
+data.to_csv(outpath, sep='\t', index=False)
 print('\nDados agregados salvos.')
 ##############################
 
@@ -108,4 +123,5 @@ data.transcription.hist()
 
 if not show_flag:
     save_all_figs()
-plt.show()
+else:
+    plt.show()

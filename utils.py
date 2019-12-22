@@ -167,6 +167,9 @@ def safe_open(path, mode='w', exist_ok=True):
 
 import matplotlib.pyplot as plt
 grafdir = pardir/'graficos'
+oldgrafdir = grafdir/'old'
+for folder in (grafdir, oldgrafdir):
+    folder.mkdir(exist_ok=True)
 figcount = 0
 
 
@@ -180,9 +183,9 @@ def save_all_figs():
                            bbox_inches='tight', # pad_inches=0,
                            dpi=300)
 
-        plt.savefig(grafdir/f'old/{main_name}_{figcount}_{timestamp}.png',
+        plt.savefig(str(oldgrafdir/f'{main_name}_{figcount}_{timestamp}.png'),
                     **save_kwargs)
-        plt.savefig(grafdir/f'{main_name}_{figcount}.png',
+        plt.savefig(str(grafdir/f'{main_name}_{figcount}.png'),
                     **save_kwargs)
         figcount += 1
 

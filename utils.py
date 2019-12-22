@@ -31,8 +31,15 @@ def prinf(text, *args, **kwargs):
         print(text, *args, **kwargs)
 
 from datetime import datetime as dt
-import __main__
-main_name = Path(__main__.__file__).stem
+
+# If not in interactive shell, get main script's path.
+from sys import __stdin__
+if not __stdin__.isatty():
+    import __main__
+    main_name = Path(__main__.__file__).stem
+else:
+    main_name = 'shell'
+    
 
 def log(text, author_script=main_name):
     """Writes text to log file in pardir/logs.
@@ -128,7 +135,9 @@ def read_tsv(*args, **kwargs):
 
 def parse_gff_attributes(attr, id_as_index=True, gene_id='gene_id'):
     expanded_attr = attr.str.split(';')
-    expanded_attr = expanded_attr.apply(lambda l: dict([i.split('=') for i in l]))
+    # WARNING: if attribute has multiple values (eg. 'key=value1; value2; value3;'),
+    # only first value is considered.
+    expanded_attr = expanded_attr.apply(lambda l: dict([i.split('=') for i in l if '=' in i]))
     ret = DataFrame(list(expanded_attr))
     if id_as_index:
         ret.set_index(gene_id, inplace=True)
@@ -143,12 +152,17 @@ def unfold_gff(df):
     return ret
 
 
-def safe_open(path, mode):
-    if path.exists() and not redo_flag:
-        print(f"'{path}' já existe, nada será feito. Use '-r' se quiser sobrescrever.")
-        exit()
+def safe_open(path, mode='w', exist_ok=True):
+    message = f"'{path}' já existe, nada será feito. Use '-r' se quiser sobrescrever."
 
-    return open(path, mode)
+    if path.exists() and not redo_flag:
+        if exist_ok:
+            print(message)
+        else:
+            raise FileExistsError(message)
+
+    else:
+        return open(path, mode)
 
 
 import matplotlib.pyplot as plt

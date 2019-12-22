@@ -1,9 +1,10 @@
 # description: Plots scatter matrix comparing all new parameters and generate
 # all_together_now.tsv compilation.
-# in:
-# pardir/'genome_annotation/head_genes_correlations_unconsidering_sense.tsv'
-# pardir/'genome_annotation/head_annotations.gff3'
-# pardir/'counted_reads/aggregated_unconsidering_sense.tsv
+# in: pardir/'genome_annotation/head_genes_relations_unconsidering_sense.tsv'
+# in: pardir/'genome_annotation/head_genes_correlations_unconsidering_sense.tsv'
+# in: pardir/'genome_annotation/head_annotations.gff3'
+# in: pardir/'counted_reads/aggregated_unconsidering_sense.tsv'
+# in: pardir/'genome_annotation/gene_annotations.gff3'
 # out: pardir/'genome_annotation/all_together_now.tsv'
 
 import pandas as pd

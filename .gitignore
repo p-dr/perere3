@@ -174,3 +174,5 @@ dmypy.json
 .pyre/
 /Trimmomatic-0.39
 *@*
+# Vim swap files
+*.swp

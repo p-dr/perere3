@@ -25,11 +25,15 @@ def parse_script(script_path):
 
                 if len(tag) == 1:
                     continue
+                else:
+                    tag, value = tag
 
-                if tag[0] != 'description':
-                    tag[1] = tag[1].split(' ')
+                if tag == 'description':
+                    script_tags[tag] = value
 
-                script_tags.update([tag])
+                else:
+                    value = value.split(' ')
+                    script_tags[tag] = script_tags.get(tag, []) + value
                 
             elif line != '\n':
                 break
@@ -86,7 +90,6 @@ if __name__ == '__main__':
                 # trim out 'pardir/"' and '"'
                 io_path = pardir/io_str_path[8:-1]
                 ignored = any(io_path.match(patt) for patt in ignore_list)
-                print(io_path, ignore_list, ignored)
 
                 if io_str_path == '(cloud)' or ignored:
                     continue

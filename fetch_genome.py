@@ -1,5 +1,6 @@
 from wget import download
 from pathlib import Path
+from subprocess import call
 
 out_dir = Path('../seqs')
 out_dir.mkdir(exist_ok=True)
@@ -10,4 +11,5 @@ annotations_url = 'ftp://ftp.ebi.ac.uk/pub/databases/wormbase/parasite/releases/
 
 
 for url in (genome_url, annotations_url):
-	download(url, out_dir)
+	download(url, str(out_dir))
+	call(f'gunzip {str(out_dir)}/*.gz', shell=True)

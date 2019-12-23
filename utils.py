@@ -31,14 +31,8 @@ def prinf(text, *args, **kwargs):
         print(text, *args, **kwargs)
 
 from datetime import datetime as dt
-
-# If not in interactive shell, get main script's path.
-from sys import __stdin__
-if not __stdin__.isatty():
-    import __main__
-    main_name = Path(__main__.__file__).stem
-else:
-    main_name = 'shell'
+import __main__
+main_name = Path(__main__.__file__).stem
     
 
 def log(text, author_script=main_name):
@@ -166,6 +160,9 @@ def safe_open(path, mode='w', exist_ok=True):
 
 
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('GTK3Agg')
+
 grafdir = pardir/'graficos'
 oldgrafdir = grafdir/'old'
 for folder in (grafdir, oldgrafdir):
@@ -179,8 +176,7 @@ def save_all_figs():
 
     for fignum in plt.get_fignums():
         plt.figure(fignum)
-        save_kwargs = dict(transparent=True,
-                           bbox_inches='tight', # pad_inches=0,
+        save_kwargs = dict(bbox_inches='tight', # pad_inches=0,
                            dpi=300)
 
         plt.savefig(str(oldgrafdir/f'{main_name}_{figcount}_{timestamp}.png'),
@@ -207,7 +203,7 @@ def boxplot(data):
                     capprops=dict(color=c),
                     whiskerprops=dict(color=c),
                     flierprops=dict(color=c, markeredgecolor=c),
-                    medianprops=dict(solid_capstyle='projecting')
+                    medianprops=dict(solid_capstyle='projecting', color='black')
                     )
 
 

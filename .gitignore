@@ -177,3 +177,4 @@ dmypy.json
 # Vim swap files
 *.swp
 *.tmp
+*.swo

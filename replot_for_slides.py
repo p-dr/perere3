@@ -7,6 +7,7 @@ plt.style.use('seaborn')
 mpl.rcParams['axes.prop_cycle'] = mpl.cycler(color=['#22848e',
                                                     '#f88904',
                                                     '#78c18c'])
+mpl.rcParams['savefig.transparent'] = True
 mpl.rcParams['lines.linewidth'] = 2.5
 mpl.rcParams['lines.markersize'] = 6
 mpl.rcParams['font.family'] = 'Montserrat'
@@ -44,13 +45,13 @@ mpl.rcParams['boxplot.medianprops.color'] = bgcolor
 Path('../graficos').mkdir(exist_ok=True)
 
 file_queue = [
-              'quantify_heads',
+#              'quantify_heads',
               'plot_distance_vs_corr',
               'plot_distance_vs_transcr',
-              'plot_motherlength_hist',
-              'plot_corr_motherlength',
-              'plot_transcription_hist',
-              'plot_sum_rc_by_head_bp',
+#              'plot_motherlength_hist',
+#              'plot_corr_motherlength',
+#              'plot_transcription_hist',
+#              'plot_sum_rc_by_head_bp',
               'plot_downstream_upstream',
               'plot_downstream_upstream_transcr',
               ]

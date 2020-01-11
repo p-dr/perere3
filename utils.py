@@ -161,7 +161,7 @@ def safe_open(path, mode='w', exist_ok=True):
 
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('GTK3Agg')
+#matplotlib.use('GTK3Agg')
 
 grafdir = pardir/'graficos'
 oldgrafdir = grafdir/'old'
@@ -188,7 +188,7 @@ def save_all_figs():
 
 def plot_box(count_df, x, y, bins=20, *args):
     newy = str(y)+'_bins'
-    count_df[newy] = pd.cut(count_df[y], bins)
+    count_df.loc[:, newy] = pd.cut(count_df[y], bins)
     count_df.boxplot(x, newy, rot=90, showfliers=False, *args)
     plt.tight_layout()
 

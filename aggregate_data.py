@@ -19,7 +19,8 @@ outpath = pardir/'genome_annotation/all_together_now.tsv'
 rel_data = pd.read_table(pardir/'genome_annotation' /
                          'head_genes_relations_unconsidering_sense.tsv')
 rel_data.set_index('head_id', inplace=True)
-rel_data.rename(columns={'gene_id': 'neighbor_gene'}, inplace=True)
+rel_data.rename(columns={'gene_id': 'neighbor_gene',
+                         'flag':'relative_position'}, inplace=True)
 
 #############
 used_genes = rel_data.neighbor_gene.unique()
@@ -64,7 +65,7 @@ genes_data = pd.concat([gene_gff, genes_count], 1)
 genes_data.columns = ['gene_' + name for name in genes_data.columns]
 
 # ##### ALL TOGETHER NOW!
-data = pd.concat([gff_data, rel_data, corr_data.correlation, heads_count, heads_repetitions], 1)
+data = pd.concat([gff_data, rel_data, corr_data.correlation, heads_count, heads_repetitions], 1, sort=False)
 print(heads_repetitions)
 print('='*100)
 print(data)
@@ -74,10 +75,27 @@ print('='*100)
 data = data.merge(genes_data, left_on='neighbor_gene', right_index=True,
                   how='left')
 
+# ##### FURTHER INFO APPENDS
+
+# If there is no neighbor gene, 'same_strand' = False.
+data['same_strand'] = (data.strand==data.gene_strand) & ~data.gene_strand.isna()
+
+# Annotate stream.
+data['stream'] = pd.np.nan
+data.loc[data.flag == 'olap', 'stream'] = 'olap'
+
+# Remember up(down) means head is up(down)stream to the neighbor gene, not the contrary.
+data.loc[((data.strand == '+') & (data.flag == 'dir')) | 
+         ((data.strand == '-') & (data.flag == 'esq')), 'stream'] = 'down'
+
+data.loc[((data.strand == '+') & (data.flag == 'esq')) | 
+         ((data.strand == '-') & (data.flag == 'dir')), 'stream'] = 'up'
+
+
+# ##### FINAL PRINTS
+
 print('Quantidade de dados não faltantes:')
 print((~data.isna()).sum())
-
-data['same_strand'] = data.strand == data.gene_strand
 
 print('\nDados com sondas relacionadas a genes mas sem correlação')
 print((data.flag.isna() ^ data.correlation.isna()).sum())
@@ -88,14 +106,17 @@ print('''\nNotas: Só são exibidos os genes que foram relacionados a alguma hea
       calcular a correlação, já que muitas sondas tiveram RPKM não-nulo em
       menos de 4 bibliotecas e foram então descartadas.''')
 
+
+############ RESET INDEX AND SAVE ##################
+
 data.index.name = 'head_id'
 data = data.reset_index()
 
-##############################
-print(data)
 data.to_csv(outpath, sep='\t', index=False)
-print('\nDados agregados salvos.')
-##############################
+print('\nDados agregados salvos. Plotando...')
+
+####################################################
+
 
 # ###### PLOT ALL NUMERIC!
 data.dropna(inplace=True)

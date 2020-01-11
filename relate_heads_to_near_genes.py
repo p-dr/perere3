@@ -1,5 +1,6 @@
 # description: Maps each head to its nearest (or overlapped) gene.
-# in: pardir/'genome_annotation/head_annotations.gff3' pardir/'genome_annotation/gene_annotations.gff3'
+# in: pardir/'genome_annotation/head_annotations.gff3'
+# in: pardir/'genome_annotation/gene_annotations.gff3'
 # out: pardir/'genome_annotation/head_genes_relations.tsv'
 # out: pardir/'genome_annotation/head_genes_relations_unconsidering_sense.tsv'
 
@@ -83,7 +84,7 @@ if __name__ == '__main__':
 
                         if new_distance < distance:
                             chosen_gene_id = gene_row.id
-                            flag = ["esq", "dir"][fill_back]
+                            flag = ["gh", "hg"][fill_back]
                             distance = new_distance
 
                     except KeyError:

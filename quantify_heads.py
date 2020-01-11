@@ -1,7 +1,7 @@
 # description: Aligns (BLAST) heads between themselves. Plots the number of head sequences aligned N times to other heads as a function of N itself.
 # in: pardir/'seqs/heads.fa'
 # out: pardir/'alinhamentos/heads_vs_heads.bl'
-# out: pardir/'alinhamentos/heads_repetitions.tsv'
+# out: pardir/'genome_annotation/heads_repetitions.tsv'
 # plot: 
 
 from utils import pardir, safe_open, show_flag, save_all_figs

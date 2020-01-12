@@ -15,6 +15,10 @@ from utils import (pardir, save_all_figs, GFF3_COLUMNS,
 
 outpath = pardir/'genome_annotation/all_together_now.tsv'
 
+def reverse(s):
+    return s[::-1]
+
+
 # ##### RELATION FLAG WITH NEIGHBOR GENE
 rel_data = pd.read_table(pardir/'genome_annotation' /
                          'head_genes_relations_unconsidering_sense.tsv')
@@ -80,16 +84,24 @@ data = data.merge(genes_data, left_on='neighbor_gene', right_index=True,
 # If there is no neighbor gene, 'same_strand' = False.
 data['same_strand'] = (data.strand==data.gene_strand) & ~data.gene_strand.isna()
 
-# Annotate stream.
-data['stream'] = pd.np.nan
-data.loc[data.flag == 'olap', 'stream'] = 'olap'
+# ## Annotate stream.
 
-# Remember up(down) means head is up(down)stream to the neighbor gene, not the contrary.
-data.loc[((data.strand == '+') & (data.flag == 'dir')) | 
-         ((data.strand == '-') & (data.flag == 'esq')), 'stream'] = 'down'
+# data['gene_stream'] = pd.np.nan
+# data.loc[data.relative_position == 'olap', 'stream'] = 'olap'
 
-data.loc[((data.strand == '+') & (data.flag == 'esq')) | 
-         ((data.strand == '-') & (data.flag == 'dir')), 'stream'] = 'up'
+# data.loc[((data.strand == '+') & (data.relative_position == 'gh')) | 
+#          ((data.strand == '-') & (data.relative_position == 'hg')), 'gene_stream'] = 'gh'
+# 
+# data.loc[((data.strand == '+') & (data.relative_position == 'hg')) | 
+#          ((data.strand == '-') & (data.relative_position == 'gh')), 'gene_stream'] = 'hg'
+
+data['gene_stream'] = data.relative_position
+mask = (data.gene_strand == '-') & data.relative_position.isin({'hg', 'gh'}) 
+data.loc[mask, 'gene_stream'] = data.loc[mask, 'gene_stream'].apply(reverse)
+
+data['head_stream'] = data.relative_position
+mask = (data.strand == '-') & data.relative_position.isin({'hg', 'gh'}) 
+data.loc[mask, 'head_stream'] = data.loc[mask, 'head_stream'].apply(reverse)
 
 
 # ##### FINAL PRINTS
@@ -98,7 +110,7 @@ print('Quantidade de dados não faltantes:')
 print((~data.isna()).sum())
 
 print('\nDados com sondas relacionadas a genes mas sem correlação')
-print((data.flag.isna() ^ data.correlation.isna()).sum())
+print((data.relative_position.isna() ^ data.correlation.isna()).sum())
 
 print('''\nNotas: Só são exibidos os genes que foram relacionados a alguma head/sonda. Tem
       menos dados de genes porque tem algumas poucas sondas que não tinham

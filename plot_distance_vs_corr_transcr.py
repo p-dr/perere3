@@ -1,121 +1,91 @@
-# description: Plots distance from each head to its nearest or overlapped gene as a function of the correlation coeficient between their normalized read counts.
+# description: Plots distance from each head to its nearest or overlapping gene as a function of the correlation coeficient between their normalized read counts.
 # in: pardir/'genome_annotation/all_together_now.tsv'
 # out: 
 
 import pandas as pd
+import string
 from utils import (pardir, save_all_figs,
                    show_flag, boxplot)
 import matplotlib.pyplot as plt
 from statsmodels.nonparametric.smoothers_lowess import lowess
 from scipy.stats import mannwhitneyu
 
-plt.rcParams['font.size'] = 6
+plt.rcParams['font.size'] = 8
 
-head_data = pd.read_table(pardir/'genome_annotation/all_together_now.tsv')
+data = pd.read_table(pardir/'genome_annotation/all_together_now.tsv')
+data = data[data.repetitions == 0]
+# WARNING: There are missing neighbor genes. Consider these NaN values while analysing data.
 
-# # Very important to drop NaN's! (we use stuff like data[data.flag != 'olap'])
-# This keeps only heads with neighbor genes.
-#head_data = head_data.dropna().reset_index(drop=True)
-print(head_data.head())
-print(len(head_data))
-
-
-# ################# CORRELATION ########################
-print("TABELA DE CORRELAÇÕES DE SPEARMAN")
-print(head_data[['transcription',
-                 'correlation',
-                 'distance']].corr(method='spearman'))
+COMPLETE_THRESHOLD = 3150
+INCOMPLETE_THRESHOLD = 750
+abc = [l + ') ' for l in string.ascii_letters]
 
 
-def main(corr_transcr):
-    
-    global head_data
-    ylabel = ['Correlação transcricional com o gene vizinho', 'RPKM'][corr_transcr == 'transcription']
+def split(data):
 
-    # #################### SPLITS ##########################
+    splits = dict()
 
     # ##### OVERLAPS OR NOT
-    # overlaps = head_data[(head_data.flag == 'olap') & head_data.same_strand]
-    overlaps = head_data[(head_data.flag == 'olap')]
-    print("CORRELAÇÕES DOS OLAP")
-    print(overlaps[['transcription', 'correlation']].corr(method='spearman'))
-
-    # noverlap = head_data.drop(overlaps.index)
-    noverlap = head_data[head_data.flag != 'olap']
-
-    print(noverlap[[corr_transcr, 'flag']])
-    print("CORRELAÇÕES DOS NOLAP")
-    print(noverlap[['transcription', 'correlation']].corr(method='spearman'))
+    overlapping = data[data.relative_position == 'olap']
+    # ## Heads with no neighbor gene are also not overlapping.
+    # not_overlapping = data[data.relative_position.isin({'hg', 'gh'})]
+    not_overlapping = data.drop(overlapping.index)
+    splits[('Overlapping', 'Not overlapping')] = (overlapping, not_overlapping)
 
     # ##### COMPLETE OR NOT
-    complete = head_data[head_data.motherlength > 3150]
-    notcomplete = head_data[head_data.motherlength < 750]
+    complete = data[data.motherlength > COMPLETE_THRESHOLD]
+    incomplete = data[data.motherlength < INCOMPLETE_THRESHOLD]
+    splits[('Complete', 'Incomplete')] = (complete, incomplete)
 
-    nolap = (complete.flag == 'olap').sum()
-    tot = complete.flag.count()
+    # ## scaff.
+    nolap = (complete.relative_position == 'olap').sum()
+    tot = complete.relative_position.count()
     print(f'Quantos completos sobrepõem: {nolap} / {tot} = {100 * nolap / tot}%')
 
-    nolap = (notcomplete.flag == 'olap').sum()
-    tot = notcomplete.flag.count()
+    nolap = (incomplete.relative_position == 'olap').sum()
+    tot = incomplete.relative_position.count()
     print(f'Quantos não completos sobrepõem: {nolap} / {tot} = {100 * nolap / tot}%')
+    ###
 
 
-    # ###################### DROP OVERLAPPED ############################ #
-    head_data = head_data[head_data.flag != 'olap']
+    # ###################### DROP OVERLAPPING ############################ #
+    # data = not_overlapping
     # ################################################################### #
 
 
     # ##### SAME/DIFF STRAND
-    same_strand = head_data[head_data.same_strand]
-    diff_strand = head_data.drop(same_strand.index)
+    same_strand = not_overlapping[not_overlapping.same_strand]
+    different_strand = not_overlapping.drop(same_strand.index)
+    splits[('Same strand n.o.', 'Different strand n.o.')] = (same_strand, different_strand)
 
-    # ##### UP/DOWN-STREAM: ----->   -->
-    # downstream = same_strand[(same_strand.strand == '+') &
-    #                          (same_strand.flag == 'dir')]
-    # downstream = downstream.append(same_strand[(same_strand.strand == '-') &
-    #                                            (same_strand.flag == 'esq')])
+    # ##### UP/DOWN-STREAM
+    # (... of the neighbor gene)
+    downstream = data[data.gene_stream == 'gh']
+    upstream = data[data.gene_stream == 'hg']
+    splits[('Downstream of NG', 'Upstream of NG')] = (downstream, upstream)
 
-    downstream = head_data[(head_data.strand == '+') &
-                           (head_data.flag == 'dir')]
-    downstream = downstream.append(head_data[(head_data.strand == '-') &
-                                             (head_data.flag == 'esq')])
-
-    notdownstream = head_data.drop(downstream.index)
-
-    # ##### COMPLETE OR NOT AND NOT OVERLAPPED
-    complete_nolap = head_data[head_data.motherlength > 3150]
-    notcomplete_nolap = head_data[head_data.motherlength < 750]
+    # ##### COMPLETE OR NOT AND NOT OVERLAPPING
+    complete_not_overlapping = not_overlapping[not_overlapping.motherlength > COMPLETE_THRESHOLD]
+    incomplete_not_overlapping = not_overlapping[not_overlapping.motherlength < INCOMPLETE_THRESHOLD]
+    splits[('Complete n.o.', 'Incomplete n.o.')] = (complete_not_overlapping, incomplete_not_overlapping)
 
     # ##### CLOSE PROMOTER: <--   -------->
-    close_promoter = diff_strand[(diff_strand.strand == '+') &
-                                 (diff_strand.flag == 'dir')]
-    close_promoter.append(diff_strand[(diff_strand.strand == '-') &
-                                      (diff_strand.flag == 'esq')])
+    close_promoters = data[(data.gene_stream == 'hg') & ~data.same_strand]
+    distant_promoters = data[(data.gene_stream == 'gh') & ~data.same_strand]
+    splits[('Close promoters', 'Distant promoters')] = (close_promoters, distant_promoters)
 
-    not_close_promoter = head_data.drop(close_promoter.index)
-
-
-    # ################# Wilcoxon #####################
-
-    pairs = ((overlaps, noverlap),
-             (same_strand, diff_strand),
-             (downstream, notdownstream),
-    #         (complete, notcomplete),
-             (complete_nolap, notcomplete_nolap),
-             (close_promoter, not_close_promoter))
-
-    labels = ['Sobreposta ou não sobreposta ',
-              'Mesma fita ou em fitas diferentes ',
-              'Downstream ou upstream ',
-    #          'Completa ou incompleta ',
-              'Completa externa ou incompleta externa ',
-              'Promotor próximo ou promotor mais distante ']
-
-    abc = ('a) ', 'b) ', 'c) ', 'd) ')
-    selected = (0, 2, 3, 4)
+    return splits
 
 
-    fig, axs = plt.subplots(1, len(selected), figsize=(11, 4.8))
+def plot_as_boxes(corr_transcr, splits, ylabel, selected=None):
+    
+    if selected is None:
+        selected = list(range(len(splits)))
+
+    n_splits = len(selected)
+
+    # ## Create outer frame.
+    fig, axs = plt.subplots(1, n_splits, figsize=(4 * n_splits, 4.8))
     for ax in axs:
         ax.get_xaxis().set_ticks([])
         ax.get_yaxis().set_ticks([])
@@ -125,47 +95,55 @@ def main(corr_transcr):
 
     plt.tick_params(labelcolor='none',
                     top=False, bottom=False, left=False, right=False)
+    print('\n***** ', ylabel, ' *****\n')
     plt.ylabel(ylabel, labelpad=20)
 
-    for i, label, pair in zip(range(len(labels)), labels, pairs):
-        a, b = [p[corr_transcr] for p in pair]
+    # ## Plot pair comparisons.
+    i = 0
+    for labels, data_pair in splits.items():
+        a, b = [p[corr_transcr].dropna() for p in data_pair]
         pvalue = mannwhitneyu(a, b).pvalue
         plabel = f'p-valor:\n{pvalue:.5}'
-        print(label, pvalue)
+        title = ' / '.join(labels)
+        median_ratio = data_pair[0][corr_transcr].median() / data_pair[1][corr_transcr].median()
+        print(f'{title:<40}', '|  p-value:',
+              pvalue, ['???', '!!!'][pvalue < .05],
+              '| Median ratio:', median_ratio, sep='\t')
 
         if i in selected:
             fig.add_subplot(1, len(selected), selected.index(i) + 1, frameon=False)
-            plt.title(abc[selected.index(i)] + label)
+            plt.title(abc[selected[i]] + title)
 
             boxplot([a, b])
 
-            plt.annotate(plabel, (.5, .05), xycoords='axes fraction', ha='center')
-            labels = [s.capitalize() for s in label[:-1].split(' ou ')]
-            labels = [l + str(len(data)) for l, data in zip(labels, [a, b])]
+            plt.annotate(plabel, (.5, .885), xycoords='axes fraction', ha='center')
+            labels = [l + '\n' + str(len(data)) for l, data in zip(labels, [a, b])]
             plt.xticks([0, 1], labels=labels)
+    
+        i += 1
 
     #plt.tight_layout()
     # plt.subplots_adjust()
-    if show_flag:
-        plt.show()
 
 
-    # ################# PLOT ######################
+def plot_as_scatter(corr_transcr, splits, ylabel):
 
-    for pair, title in zip(pairs[1:], labels[1:]):
+    # ################# SCATTER PLOT ######################
+
+    for labels, data_pair in splits.items():
+        title = ' / '.join(labels)
         fig = plt.figure(figsize=(9, 4.8), dpi=200)
         plt.title(title)
-        leg_labs = [s.capitalize() for s in title[:-1].split(' ou ')]
 
-        for i, data in enumerate(pair):
+        for i, data in enumerate(data_pair):
             cor = 'C' + str(i)
 
             data.sort_values('distance', inplace=True)
-            data.loc[:, 'lowess'] = lowess(data[corr_transcr], data.distance, .6,
+            data['lowess'] = lowess(data[corr_transcr], data.distance, .6,
                                            return_sorted=False)
 
-            plt.semilogx(*data[['distance', 'lowess']].values.T)#,
-                         #zorder=10, label=leg_labs[i], color=cor)
+            plt.semilogx(*data[['distance', 'lowess']].values.T,
+                         zorder=10, label=labels[i], color=cor)
 
             fig = plt.semilogx(*data[['distance', corr_transcr]].values.T,
                                '.', alpha=.4, color=cor)
@@ -176,13 +154,24 @@ def main(corr_transcr):
         # plt.axis([1e3, 1e5, -.1, .4])
 
 
+def main(corr_transcr, splits):
+
+    if corr_transcr == 'transcription':
+        ylabel = 'RPKM'
+    elif corr_transcr == 'correlation':
+        ylabel = 'Correlação transcricional com o gene vizinho'
+
+    plot_as_boxes(corr_transcr, splits, ylabel)   
+    #plot_as_scatter(corr_transcr, splits, ylabel)   
+
+
 ################# MAIN #########################
+splits = split(data)
+
 for corr_transcr in ('transcription', 'correlation'):
+    main(corr_transcr, splits)
 
-    main(corr_transcr)
-
-    if show_flag:
-        plt.show()
-    else:
-        save_all_figs()
-
+if show_flag:
+    plt.show()
+else:
+    save_all_figs()

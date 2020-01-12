@@ -36,9 +36,9 @@ heads['id'] = parse_gff_attributes(heads.attributes).index
 genes['id'] = parse_gff_attributes(genes.attributes, gene_id='Name').index 
 head_groups = heads.groupby(COLS_TO_GROUP)
 
-# ### alterar um pouquinho as duplicatas muahahah
-genes.loc[genes.duplicated('start', 'last'), 'start'] += 1
-genes.loc[genes.duplicated('end', 'last'), 'end'] += 1
+# ### Houve genes duplicados em alugm momento, as linhas abaixo resolveriam isso. 
+# genes.loc[genes.duplicated('start', 'last'), 'start'] += 1
+# genes.loc[genes.duplicated('end', 'last'), 'end'] += 1
 
 gene_groups = genes.groupby(COLS_TO_GROUP)
 

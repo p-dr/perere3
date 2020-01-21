@@ -32,8 +32,11 @@ def prinf(text, *args, **kwargs):
 
 from datetime import datetime as dt
 import __main__
-main_name = Path(__main__.__file__).stem
-    
+
+try:
+    main_name = Path(__main__.__file__).stem
+except AttributeError:
+   main_name = '(shell)' 
 
 def log(text, author_script=main_name):
     """Writes text to log file in pardir/logs.
@@ -207,3 +210,37 @@ def boxplot(data):
                     )
 
 
+from scipy.stats import mannwhitneyu
+
+def box_compare(a, b, labels=None):
+    if labels is None:
+        labels = a.name, b.name
+    pvalue = mannwhitneyu(a, b).pvalue
+    plabel = f'p-valor:\n{pvalue:.5}'
+    title = ' / '.join(labels)
+    median_ratio = a.median() / b.median()
+    print(f'{title:<40}', '|  p-value:',
+          pvalue, ['x', 'o'][pvalue < .05],
+          '| Median ratio:', median_ratio, sep='\t')
+
+    boxplot([a, b])
+
+    plt.annotate(plabel, (.5, .885), xycoords='axes fraction', ha='center')
+    labels = [l + '\n' + str(len(data)) for l, data in zip(labels, [a, b])]
+    plt.xticks([0, 1], labels=labels)
+    
+    return pvalue
+
+
+def get_subsets(d, cols=None):
+    d = d.dropna(subset=['neighbor_gene'])  # discard heads with no NG
+
+    if cols is None:
+        cols = d.columns
+
+    subsets = dict()
+    subsets['-->->'] = d.loc[(d.gene_stream == 'gh') & d.same_strand, cols]
+    subsets['<--<-'] = d.loc[(d.gene_stream == 'hg') & d.same_strand, cols]
+    subsets['--><-'] = d.loc[(d.gene_stream == 'gh') & ~d.same_strand, cols]
+    subsets['<--->'] = d.loc[(d.gene_stream == 'hg') & ~d.same_strand, cols]
+    return subsets

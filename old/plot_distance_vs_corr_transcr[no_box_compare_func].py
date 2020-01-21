@@ -5,9 +5,10 @@
 import pandas as pd
 import string
 from utils import (pardir, save_all_figs,
-                   show_flag, boxplot, box_compare)
+                   show_flag, boxplot)
 import matplotlib.pyplot as plt
 from statsmodels.nonparametric.smoothers_lowess import lowess
+from scipy.stats import mannwhitneyu
 
 plt.rcParams['font.size'] = 8
 
@@ -64,7 +65,7 @@ def split(data):
 
     # ##### CLOSE PROMOTER: <--   -------->
     close_promoters = data[(data.gene_stream == 'hg') & ~data.same_strand]
-    distant_promoters = data[(data.gene_stream == 'gh') & ~data.same_strand]  # It's catching unneighbored heads.
+    distant_promoters = data[(data.gene_stream == 'gh') & ~data.same_strand]
     splits[('Close promoters', 'Distant promoters')] = (close_promoters, distant_promoters)
 
     return splits
@@ -94,12 +95,25 @@ def plot_as_boxes(corr_transcr, splits, ylabel, selected=None):
     # ## Plot pair comparisons.
     i = 0
     for labels, data_pair in splits.items():
+        a, b = [p[corr_transcr].dropna() for p in data_pair]
+        pvalue = mannwhitneyu(a, b).pvalue
+        plabel = f'p-valor:\n{pvalue:.5}'
+        title = ' / '.join(labels)
+        median_ratio = data_pair[0][corr_transcr].median() / data_pair[1][corr_transcr].median()
+        print(f'{title:<40}', '|  p-value:',
+              pvalue, ['x', 'o'][pvalue < .05],
+              '| Median ratio:', median_ratio, sep='\t')
+
         if i in selected:
-            a, b = [p[corr_transcr].dropna() for p in data_pair]
             fig.add_subplot(1, len(selected), selected.index(i) + 1, frameon=False)
-            title = ' / '.join(labels)
             plt.title(abc[selected[i]] + title)
-            box_compare(a, b, labels)   
+
+            boxplot([a, b])
+
+            plt.annotate(plabel, (.5, .885), xycoords='axes fraction', ha='center')
+            labels = [l + '\n' + str(len(data)) for l, data in zip(labels, [a, b])]
+            plt.xticks([0, 1], labels=labels)
+    
         i += 1
 
     #plt.tight_layout()

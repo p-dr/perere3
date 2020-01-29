@@ -136,7 +136,7 @@ def plot_as_scatter(corr_transcr, splits, ylabel):
 
 def main(corr_transcr, splits):
 
-    if corr_transcr == 'transcription':
+    if corr_transcr in ('transcription', 'gene_transcription'):
         ylabel = 'RPKM'
     elif corr_transcr == 'correlation':
         ylabel = 'Correlação transcricional com o gene vizinho'
@@ -148,7 +148,7 @@ def main(corr_transcr, splits):
 ################# MAIN #########################
 splits = split(data)
 
-for corr_transcr in ('transcription', 'correlation'):
+for corr_transcr in ('transcription', 'gene_transcription', 'correlation'):
     main(corr_transcr, splits)
 
 if show_flag:

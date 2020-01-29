@@ -226,8 +226,8 @@ def box_compare(a, b, labels=None):
     boxplot([a, b])
 
     plt.annotate(plabel, (.5, .885), xycoords='axes fraction', ha='center')
-    labels = [l + '\n' + str(len(data)) for l, data in zip(labels, [a, b])]
-    plt.xticks([0, 1], labels=labels)
+    label_string = [l + '\n' + str(len(data)) for l, data in zip(labels, [a, b])]
+    plt.xticks([0, 1], labels=label_string)
     
     return pvalue
 
@@ -244,3 +244,36 @@ def get_subsets(d, cols=None):
     subsets['--><-'] = d.loc[(d.gene_stream == 'gh') & ~d.same_strand, cols]
     subsets['<--->'] = d.loc[(d.gene_stream == 'hg') & ~d.same_strand, cols]
     return subsets
+
+
+def multibox_compare(ds, labels=None, arch_height=None, margin=None):
+    if labels is None:
+        labels = [d.name for d in ds]
+    labels = [f'{l}\n{len(d)}'for l, d in zip(labels, ds)]
+
+    boxplot(ds)
+    plt.xticks(range(len(ds)), labels=labels)
+    height = plt.axis()[-1]
+    fig_height = height - plt.axis()[-2]
+
+    if arch_height is None:
+        arch_height = .02 * fig_height
+
+    if margin is None:
+        margin = .04 * fig_height
+
+    for i in range(len(ds)):
+        for j in range(i+1, len(ds)):
+            plt.plot((i, i, j, j),
+                    (height,
+                     height + arch_height,
+                     height + arch_height,
+                     height), '-k', lw=1)
+
+            pvalue = mannwhitneyu(ds[i], ds[j]).pvalue
+            plabel = f'p: {pvalue:.5}'
+            print(plabel)
+            plt.annotate(plabel, ((i+j)/2, height + arch_height),
+                         ha='center', va='bottom')
+            height += arch_height + margin
+

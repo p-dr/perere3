@@ -1,11 +1,11 @@
-# description: compare p-value between different head-gene configurations, considering strands.
+# description: Compare p-value between different head-gene configurations, considering strands.
 # in: pardir/'genome_annotation/all_together_now.tsv'
 
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-from utils import pardir, show_flag, box_compare, save_all_figs, get_subsets
+from utils import pardir, show_flag, box_compare, multibox_compare, save_all_figs, get_subsets
 
 d = pd.read_table(pardir/'genome_annotation/all_together_now.tsv')
 d = d[d.repetitions == 0]
@@ -37,6 +37,10 @@ def main(subsets):
         pmatrix.append(line)
 
     plt.tight_layout()
+
+    ### PLOT BOXES TOGETHER
+    plt.figure(figsize=(4, 8))
+    multibox_compare(*list(zip(*[(df.dropna(), key) for key, df in subsets.items()])))
     
     ### PLOT MEDIANS COMPARISON MATRIX
     plt.figure()
@@ -60,7 +64,7 @@ def main(subsets):
 
 
 if __name__ == '__main__':
-    for corr_transcr in ('transcription', 'correlation'):
+    for corr_transcr in ('transcription', 'gene_transcription', 'correlation'):
         print('\n', corr_transcr.upper(), '\n')
         subsets = get_subsets(d, corr_transcr)
         main(subsets)

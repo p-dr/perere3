@@ -40,8 +40,10 @@ def main(subsets):
 
     ### PLOT BOXES TOGETHER
     plt.figure(figsize=(4, 8))
+    plt.title(corr_transcr)
+    plt.ylabel(corr_transcr)
+    #multibox_compare(*list(zip(*[(df.replace(0, pd.np.nan).dropna(), key) for key, df in subsets.items()])))
     multibox_compare(*list(zip(*[(df.dropna(), key) for key, df in subsets.items()])))
-    
     ### PLOT MEDIANS COMPARISON MATRIX
     plt.figure()
     plt.title('log da razão das medianas (positivo => coluna maior)')
@@ -64,7 +66,7 @@ def main(subsets):
 
 
 if __name__ == '__main__':
-    for corr_transcr in ('transcription', 'gene_transcription', 'correlation'):
+    for corr_transcr in ('transcription', 'complement_transcription', 'gene_transcription', 'gene_complement_transcription', 'correlation'):
         print('\n', corr_transcr.upper(), '\n')
         subsets = get_subsets(d, corr_transcr)
         main(subsets)

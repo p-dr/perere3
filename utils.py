@@ -4,6 +4,13 @@ scripts_path = Path(__file__).parent
 pardir = scripts_path.parent
 genome_path = pardir/'seqs/schistosoma_mansoni.PRJEA36577.WBPS14.genomic.fa'
 
+LOG_DIR = pardir/'logs'
+GRAF_DIR = pardir/'graficos'
+OLDGRAF_DIR = GRAF_DIR/'old'
+
+for folder in (LOG_DIR, GRAF_DIR, OLDGRAF_DIR):
+    folder.mkdir(exist_ok=True)
+
 GFF3_COLUMNS = ['seqid', 'source', 'type', 'start', 'end', 'score', 'strand', 'phase', 'attributes']
 BL_COLUMNS = ['qaccver', 'saccver', 'qstart', 'qend', 'sstart', 'send', 'length', 'pident', 'evalue', 'bitscore']
 
@@ -41,22 +48,26 @@ except AttributeError:
 def log(text, author_script=main_name):
     """Writes text to log file in pardir/logs.
     """
-    log_path = pardir/'logs'/(author_script+'.log')
+    log_path = LOG_DIR/(author_script+'.log')
     date = dt.now().strftime('%c')
 
     with log_path.open('a') as log_file:
         log_file.write(f"{date}: {text}\n")
 
 
-def overlaps(t1, t2):
+def overlaps(*args):
     """ Test if two closed intervals (boundaries included) respresented
     by two tuples of the form '(start pos., end pos.)' overlap. As this
     is designed to deal with DNA sequences, it can only return True if
     boundary values are on the same sense.
     """
+    if len(args) == 2:
+        t1, t2 = args
+    elif len(args) == 4:
+        t1, t2 = args[:2], args[2:]
+
     if isinstance(t1, int):
         t1 = (t1, t1)
-
     if isinstance(t2, int):
         t2 = (t2, t2)
 
@@ -117,18 +128,16 @@ def find_gtaa_break(seq, max_dirty_blocks=2, max_errors=2, verbose=False):
 
 from time import time
 
+# timeit does exactly the same, but better.
 def time_func(func, nt=1000, *args, **kwargs):
     t0 = time()
     for i in range(nt):
         func(*args, **kwargs)
     return time()-t0
 
-from pandas import read_csv, DataFrame
+
+from pandas import DataFrame
 import pandas as pd
-
-def read_tsv(*args, **kwargs):
-    return read_csv(*args, sep='\t', **kwargs)
-
 
 def parse_gff_attributes(attr, id_as_index=True, gene_id='gene_id'):
     expanded_attr = attr.str.split(';')
@@ -164,12 +173,9 @@ def safe_open(path, mode='w', exist_ok=True):
 
 import matplotlib.pyplot as plt
 import matplotlib
+from tqdm import tqdm
 #matplotlib.use('GTK3Agg')
 
-grafdir = pardir/'graficos'
-oldgrafdir = grafdir/'old'
-for folder in (grafdir, oldgrafdir):
-    folder.mkdir(exist_ok=True)
 figcount = 0
 
 
@@ -177,14 +183,14 @@ def save_all_figs():
     global figcount
     timestamp = dt.now().strftime('%Y-%-m-%-d-%Hh%Mm%Ss')
 
-    for fignum in plt.get_fignums():
+    for fignum in tqdm(plt.get_fignums(), desc='Saving figures'):
         plt.figure(fignum)
         save_kwargs = dict(bbox_inches='tight', # pad_inches=0,
                            dpi=300)
 
-        plt.savefig(str(oldgrafdir/f'{main_name}_{figcount}_{timestamp}.png'),
+        plt.savefig(str(OLDGRAF_DIR/f'{main_name}_{figcount}_{timestamp}.png'),
                     **save_kwargs)
-        plt.savefig(str(grafdir/f'{main_name}_{figcount}.png'),
+        plt.savefig(str(GRAF_DIR/f'{main_name}_{figcount}.png'),
                     **save_kwargs)
         figcount += 1
 

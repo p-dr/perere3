@@ -4,9 +4,10 @@
 # out: pardir/'genome_annotation/head_genes_relations.tsv'
 # out: pardir/'genome_annotation/head_genes_relations_unconsidering_sense.tsv'
 
-from utils import (pardir, read_tsv, overlaps,
+from utils import (pardir, overlaps,
                    redo_flag, parse_gff_attributes,
                    prinf, GFF3_COLUMNS, safe_open)
+import pandas as pd
 from sys import argv
 from tqdm import tqdm
 
@@ -29,11 +30,11 @@ else:
 outpath = pardir/f'genome_annotation/head_genes_relations{nosense_flag}.tsv'
 outfile = safe_open(outpath)
 
-heads = read_tsv(pardir/'genome_annotation/head_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
-genes = read_tsv(pardir/'genome_annotation/gene_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
+heads = pd.read_table(pardir/'genome_annotation/head_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
+genes = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
 heads['id'] = parse_gff_attributes(heads.attributes).index
 # Below: ID (instead of Name) should be default, but comes with 'gene:' prefix.
-genes['id'] = parse_gff_attributes(genes.attributes, gene_id='Name').index 
+genes['id'] = parse_gff_attributes(genes.attributes).index 
 head_groups = heads.groupby(COLS_TO_GROUP)
 
 # ### Houve genes duplicados em alugm momento, as linhas abaixo resolveriam isso. 
@@ -70,11 +71,17 @@ if __name__ == '__main__':
             # if none overlaps
             else:
                 # b f de forward ou backfill
-                distance = 9e99
+                distance = 9e99  # create Inf() class for that?
                 for meth in ['b', 'f']:
                     fill_back = meth == 'b'
                     gene_pos = ['end', 'start'][fill_back]
                     head_pos = ['end', 'start'][not fill_back]
+
+                    if gene_group[gene_pos].duplicated().sum():
+                        raise pd.core.indexes.base.InvalidIndexError(
+                            'You appear to have duplicated gene positions.'
+                            'Indexes won\'t work properly.')
+
                     indexed_group = gene_group.sort_values(gene_pos).set_index(gene_pos)
 
                     try:

@@ -1,8 +1,9 @@
 # description: Counts how many reads were aligned to each gene and head, using HTSeq. Saves it as an attribute on GFF file.
 # in: pardir/'alinhamentos/SRA_vs_genoma'
 # in: pardir/'genome_annotation/head_annotations.gff3'
-# in: pardir/'genome_annotation/head_complement_annotations.gff3'
 # in: pardir/'genome_annotation/gene_annotations.gff3'
+# in: pardir/'genome_annotation/head_complement_annotations.gff3'
+# in: pardir/'genome_annotation/gene_complement_annotations.gff3'
 # out: pardir/'counted_reads'
 
 from glob import glob
@@ -38,12 +39,13 @@ def count_reads(args):
 
 alignment_files = glob(str(alignment_dir/'*'))
 print('Arquivos de alinhamento encontrados: ', *alignment_files)
-types = ['head', 'gene', 'head_complement']
+types = ['head', 'gene', 'head_complement', 'gene_complement']
 
 with mp.Pool(processes=mp.cpu_count()) as pool:
     t0 = datetime.now()
     pool.map(count_reads, ((af, t) for af in alignment_files for t in types))
-    print('')
 
+dt = datetime.now() - t0
 print('\nTodos os arquivos foram processados.')
-print(f'Tempo total decorrido: {datetime.now() - t0}')
+print(f'Tempo total decorrido: {dt}')
+log('Sessão de contagem encerrada com duração {dt}.')

@@ -22,6 +22,7 @@ def reverse(s):
 # ##### RELATION FLAG WITH NEIGHBOR GENE
 rel_data = pd.read_table(pardir/'genome_annotation' /
                          'head_genes_relations_unconsidering_sense.tsv')
+print(rel_data)
 rel_data.set_index('head_id', inplace=True)
 rel_data.rename(columns={'gene_id': 'neighbor_gene',
                          'flag':'relative_position'}, inplace=True)
@@ -33,6 +34,7 @@ used_genes = rel_data.neighbor_gene.unique()
 # ##### CORRELATION WITH NEIGHBOR GENE
 corr_data = pd.read_table(pardir/'genome_annotation' /
                           'head_genes_correlations_unconsidering_sense.tsv')
+print(corr_data)
 corr_data.set_index('head_id', inplace=True)
 corr_data.rename(columns={'gene_id': 'neighbor_gene'}, inplace=True)
 
@@ -52,6 +54,15 @@ heads_repetitions = pd.read_table(pardir/'genome_annotation/heads_repetitions.ts
 count_data = pd.read_table(pardir/'counted_reads' /
                            'aggregated_unconsidering_sense.tsv')
 count_data = count_data.sum()[1:]
+
+complement_count = count_data.loc[count_data.index.str.endswith('_complement')]
+count_data = count_data.drop(complement_count.index)
+
+complement_count.index = complement_count.index.str.strip('_complement')
+complement_count.rename('complement_transcription', inplace=True)
+complement_heads_count = complement_count.loc[complement_count.index.str.startswith('head')]
+complement_genes_count = complement_count.loc[used_genes]
+
 count_data.rename('transcription', inplace=True)
 heads_count = count_data.loc[count_data.index.str.startswith('head')]
 genes_count = count_data.loc[used_genes]
@@ -62,16 +73,24 @@ gene_gff = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3',
 SELECTED_COLS = ['start', 'end', 'strand', 'length', 'Name']
 gene_gff = unfold_gff(gene_gff)[SELECTED_COLS]
 gene_gff = gene_gff.set_index('Name').loc[used_genes]
-#gene_gff.drop(['source', 'type', 'score', 'phase', 'seqid'], 1, inplace=True)
 
 # ##### COMPILE GENES DATA
-genes_data = pd.concat([gene_gff, genes_count], 1)
+genes_data = pd.concat([gene_gff, genes_count, complement_genes_count], 1)
+print(genes_data.columns)
 genes_data.columns = ['gene_' + name for name in genes_data.columns]
 
 # ##### ALL TOGETHER NOW!
-data = pd.concat([gff_data, rel_data, corr_data.correlation, heads_count, heads_repetitions], 1, sort=False)
-print(heads_repetitions)
-print('='*100)
+data = pd.concat(
+    [
+        gff_data,
+        rel_data,
+        corr_data.correlation,
+        heads_count,
+        complement_heads_count,
+        heads_repetitions
+    ],
+    1, sort=False)
+
 print(data)
 print('='*100)
 print(genes_data)

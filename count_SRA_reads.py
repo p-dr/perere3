@@ -13,10 +13,12 @@ from utils import pardir, redo_flag, log
 import multiprocessing as mp
 from datetime import datetime
 
-alignment_dir = pardir/'alinhamentos/SRA_vs_genoma'
+alignment_dir = pardir/'alinhamentos/SRA_vs_genoma_bam'
 annotations_dir = pardir/'genome_annotation'
 out_dir = pardir/'counted_reads'
+out_dir.mkdir(exist_ok=True)
 
+in_format = 'bam'
 
 def count_reads(args):
     alignment_file, kind = args
@@ -28,7 +30,7 @@ def count_reads(args):
     if not out_path.exists() or redo_flag:
         print (f"Contando reads de {acc} em cada anotação de {kind}...")
         t0 = datetime.now()
-        call((f'python -m HTSeq.scripts.count {alignment_file} '
+        call((f'python -m HTSeq.scripts.count {alignment_file} -f {in_format} '
               f'{annotations_file} -t gene -q > {str(out_path)}'), shell=True)
         dt = datetime.now() - t0
         print (f'\n{out_path.name}: htseq-count terminou de rodar. Tempo decorrido: {dt}')
@@ -37,7 +39,7 @@ def count_reads(args):
         print (f"'{str(out_path)}' já existe. Pulando '{acc}_{kind}'.")
 
 
-alignment_files = glob(str(alignment_dir/'*'))
+alignment_files = [f for f in alignment_dir.glob('*.' + in_format) if 'tmp' not in f.name]
 print('Arquivos de alinhamento encontrados: ', *alignment_files)
 types = ['head', 'gene', 'head_complement', 'gene_complement']
 

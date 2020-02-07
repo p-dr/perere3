@@ -11,6 +11,7 @@ scripts_dir = pardir/'scripts'
 ignore_list = ['*.swp']
 ext = ['.py', '.sh']
 
+
 def parse_script(script_path):
 
     script_tags = {}
@@ -41,7 +42,7 @@ def parse_script(script_path):
     return script_tags
 
 
-def build_edges(script_tags, script_name):
+def build_edges(script_tags, script_name, file2color_map):
     pipeline.attr('node', color='black', shape='box', style='solid', tooltip=script_tags['description'])
     pipeline.node(script_name)
 
@@ -71,7 +72,7 @@ def ctimes2color(all_iofiles_ctime):
     return ret
 
 
-if __name__ == '__main__':
+def main():
 
     untagged_scripts = []
     all_iofiles_ctime = {}
@@ -118,9 +119,13 @@ if __name__ == '__main__':
     file2color_map = ctimes2color(all_iofiles_ctime)
     
     for script_name, script_tags in all_scripts_tags.items():
-        build_edges(script_tags, script_name)
+        build_edges(script_tags, script_name, file2color_map)
         
 
     print('Não utilizados:', *untagged_scripts)
     pipeline.render(pardir/'pipeline', format='svg', cleanup=True)
     pipeline.render(pardir/'pipeline', format='pdf', cleanup=True)#, view=True)
+
+
+if __name__ == '__main__':
+    main()

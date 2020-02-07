@@ -1,5 +1,5 @@
 # description: Removes non-gene annotations from S. mansoni genome annotations. Calculates gene length.
-# in: pardir/'genome_annotation/schistosoma_mansoni.PRJEA36577.WBPS12.annotations.gff3'
+# in: pardir/'genome_annotation/sm_annotations.gff3'
 # out: pardir/'genome_annotation/gene_annotations.gff3'
 
 from pandas import read_csv

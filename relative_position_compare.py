@@ -9,9 +9,11 @@ from utils import pardir, show_flag, box_compare, multibox_compare, save_all_fig
 
 d = pd.read_table(pardir/'genome_annotation/all_together_now.tsv')
 d = d[d.repetitions == 0]
+d = d.sort_values('distance')  # Keep only closest copy to each G
+d = d.drop_duplicates(subset='neighbor_gene')
 
 
-def main(subsets):
+def main(subsets, corr_transcr):
     plt.figure(figsize=(12, 12))
     pmatrix = []
     tri_ind = np.triu(np.arange(16).reshape(4, 4), k=1)
@@ -20,12 +22,17 @@ def main(subsets):
 
     n = 0
     for label_i, subset_i in subsets.items():
+        # if corr_transcr.startswith('gene'):
+        #     subset_i = subset_i.drop_duplicates()
         line = []
 
         for label_j, subset_j in subsets.items():
+            # if corr_transcr.startswith('gene'):
+            #     subset_j = subset_j.drop_duplicates()
 
             if n in tri_ind:
                 plt.subplot(4, 4, n+1)
+                print('lengths:', len(subset_i), len(subset_j))
                 pvalue = box_compare(subset_i.dropna(),
                                      subset_j.dropna(),
                                      labels=(label_i, label_j))
@@ -69,7 +76,7 @@ if __name__ == '__main__':
     for corr_transcr in ('transcription', 'complement_transcription', 'gene_transcription', 'gene_complement_transcription', 'correlation'):
         print('\n', corr_transcr.upper(), '\n')
         subsets = get_subsets(d, corr_transcr)
-        main(subsets)
+        main(subsets, corr_transcr)
 
     if show_flag:
         plt.show()

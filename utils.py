@@ -256,6 +256,8 @@ def multibox_compare(ds, labels=None, arch_height=None, margin=None):
     if labels is None:
         labels = [d.name for d in ds]
     labels = [f'{l}\n{len(d)}'for l, d in zip(labels, ds)]
+    print('labels:', labels)
+    print('lengths from multibox:', *[len(d) for d in ds])
 
     boxplot(ds)
     plt.xticks(range(len(ds)), labels=labels)

@@ -1,5 +1,5 @@
 # description: Gets HEAD_LEN posterior bases in S. mansoni genome for each perere3 to genome alignment, generating now called head sequences. Annotates lenght of the parent alignment for each head (motherlength).
-# in: pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl' pardir/'seqs/smgenome.fa'
+# in: pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl' pardir/'seqs/sm_genome.fa'
 # out: pardir/'seqs/heads.fa' pardir/'genome_annotation/head_annotations.gff3' pardir/'genome_annotation/heads_motherlength.tsv'
 # plot:
 

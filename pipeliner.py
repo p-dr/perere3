@@ -124,7 +124,7 @@ def main():
 
     print('Não utilizados:', *untagged_scripts)
     pipeline.render(pardir/'pipeline', format='svg', cleanup=True)
-    pipeline.render(pardir/'pipeline', format='pdf', cleanup=True)#, view=True)
+    pipeline.render(pardir/'pipeline', format='pdf')#, view=True)
 
 
 if __name__ == '__main__':

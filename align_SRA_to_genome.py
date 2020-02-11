@@ -40,13 +40,14 @@ def main():
     ## Deixar paralização por conta do Hisat2.
     # with mp.Pool() as pool:
     #     pool.map(align_acc, accs)
+    log(f'Nova sessão de alinhamentos iniciada.')
 
     t = datetime.now()
     for acc in accs:
         align_acc(acc)
     dt = datetime.now() - t
 
-    print (f'Sessão concluída em {dt}.')
+    log(f'Sessão concluída em {dt}.')
 
 
 if __name__ == '__main__':

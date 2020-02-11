@@ -10,6 +10,7 @@
 
 import networkx as nx
 from utils import pardir
+from sys import argv
 
 graph = nx.drawing.nx_pydot.read_dot(pardir/'pipeline')
 start = 'quantify_heads.py'
@@ -50,4 +51,4 @@ def parent_scripts(graph, start, flag=True):
 
     return ret
 
-print(parent_scripts(graph, start))
+print(parent_scripts(graph, "pardir/\n/'genome_annotation/\n/all_together_now.tsv'"))

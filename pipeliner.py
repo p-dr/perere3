@@ -35,7 +35,7 @@ def parse_script(script_path):
                 else:
                     value = value.split(' ')
                     script_tags[tag] = script_tags.get(tag, []) + value
-                
+
             elif line != '\n':
                 break
 
@@ -47,7 +47,7 @@ def build_edges(script_tags, script_name, file2color_map):
     pipeline.node(script_name)
 
     pipeline.attr('node', shape='folder', tooltip='File or folder.', style='filled')
-    
+
     for inpath in script_tags.get('in', ()):
         pipeline.attr('node', color=file2color_map[inpath])
         pipeline.edge(inpath.replace('/','/\n/'), script_name)
@@ -77,7 +77,7 @@ def main():
     untagged_scripts = []
     all_iofiles_ctime = {}
     all_scripts_tags = {}
-    
+
     for script_path in (p for p in scripts_dir.glob('*') if p.suffix in ext):
 
         script_name = script_path.name
@@ -107,24 +107,24 @@ def main():
                         creation_time = max(map(getctime, dir_children))
                     else:
                         creation_time = 0
-                        
+
                 else:
                     creation_time = io_path.stat().st_mtime
 
                 all_iofiles_ctime[io_str_path] = all_iofiles_ctime.get(io_str_path, creation_time)
-                
+
         else:
             untagged_scripts.append(script_name)
 
     file2color_map = ctimes2color(all_iofiles_ctime)
-    
+
     for script_name, script_tags in all_scripts_tags.items():
         build_edges(script_tags, script_name, file2color_map)
-        
+
 
     print('Não utilizados:', *untagged_scripts)
     pipeline.render(pardir/'pipeline', format='svg', cleanup=True)
-    pipeline.render(pardir/'pipeline', format='pdf')#, view=True)
+    pipeline.render(pardir/'pipeline', format='pdf')#, cleanup=True)#, view=True)
 
 
 if __name__ == '__main__':

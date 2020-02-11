@@ -1,5 +1,5 @@
 # description: Gets HEAD_LEN posterior bases in S. mansoni genome for each perere3 to genome alignment, generating now called head sequences. Annotates lenght of the parent alignment for each head (motherlength).
-# in: pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl' pardir/'seqs/sm_genome.fa'
+# in: pardir/'alinhamentos/filtered_perere3_vs_genome.bl' pardir/'seqs/sm_genome.fa'
 # out: pardir/'seqs/heads.fa' pardir/'genome_annotation/head_annotations.gff3' pardir/'genome_annotation/heads_motherlength.tsv'
 # plot:
 
@@ -18,33 +18,31 @@ PREFIX_LEN = 12
 if __name__ == '__main__':
     #======================== LEITURA ========================#
 
-    print('Lendo alinhamentos filtrados do Perere3...')
-    inpath = pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl'
+    print('Lendo alinhamentos filtrados do Perere3...', end=' ')
+    inpath = pardir/'alinhamentos/filtered_perere3_vs_genome.bl'
     filtered_perere3_vs_genoma = read_csv(inpath, sep='\t')
     print(f"'{inpath}' lido.")
 
-    print('Lendo genoma de S. mansoni...')
+    print('Lendo genoma de S. mansoni...', end=' ')
     genomedict = to_dict(parse(str(genome_path), 'fasta'))
     print('Dicionário criado.')
 
 
-    print ('Abrindo arquivos de output e anotação...')
-
+    print ('Abrindo arquivos de output e anotação...', end=' ')
     heads_annotations_path = pardir/'genome_annotation/head_annotations.gff3'
     heads_outpath = pardir/'seqs/heads.fa'
     motherlength_path = pardir/'genome_annotation/heads_motherlength.tsv'
 
     heads_annotations_file = heads_annotations_path.open('w')
-    # heads_annotations_file.write('\t'.join(GFF3_COLUMNS)+'\n') # Write header.
-    
     heads_outfile = heads_outpath.open('w')
     motherlength_outfile = motherlength_path.open('w')
-    
+    print('Pronto.')
+
     #======================== GET HEADS ========================#
 
-    print('Buscando as sequências head no genoma...')
-    
-    with (pardir/'seqs'/'perere3complete.fa').open() as per_file:
+    print('Buscando as sequências head no genoma...', end=' ')
+
+    with (pardir/'seqs/perere3.fa').open() as per_file:
         perere_len = len(''.join([l.strip() for l in per_file.readlines()][1:]))
 
     MAX_DISTANCE_FROM_END = 3
@@ -59,7 +57,7 @@ if __name__ == '__main__':
             if plus_sense:
                 head_slice = slice(row['send'], row['send'] + GTAA_WINDOW_LEN)
                 proto_head = genome_piece[head_slice]
-                
+
                 # verbose use only
                 prefix = genome_piece[head_slice.start-PREFIX_LEN : head_slice.start]
 
@@ -74,7 +72,7 @@ if __name__ == '__main__':
             if head_slice.start < 0 or head_slice.stop < 0:
                 prinf(f'Head descartada com posições:', head_slice)
                 continue
-            
+
             skip_gtaa = find_gtaa_break(proto_head)
             head = proto_head[skip_gtaa : skip_gtaa + HEAD_LEN]
 

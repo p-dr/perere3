@@ -2,7 +2,7 @@ from pathlib import Path
 
 scripts_path = Path(__file__).parent
 pardir = scripts_path.parent
-genome_path = pardir/'seqs/schistosoma_mansoni.PRJEA36577.WBPS14.genomic.fa'
+genome_path = pardir/'seqs/sm_genome.fa'
 
 LOG_DIR = pardir/'logs'
 GRAF_DIR = pardir/'graficos'
@@ -164,6 +164,9 @@ def safe_open(path, mode='w', exist_ok=True):
     if path.exists() and not redo_flag:
         if exist_ok:
             print(message)
+            if exist_ok == 'exit':
+                exit()
+
         else:
             raise FileExistsError(message)
 

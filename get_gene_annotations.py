@@ -8,22 +8,12 @@ from wget import download
 from subprocess import call
 import os
 
-#raw_annotations_path = pardir/'genome_annotation/schistosoma_mansoni.PRJEA36577.WBPS12.annotations'
-annotations_path = pardir/'genome_annotation/gene_annotations.gff3'
-annotations_url = ('ftp://ftp.ebi.ac.uk/pub/databases/wormbase/parasite/releases/WBPS13/species/schistosoma_mansoni/PRJEA36577/schistosoma_mansoni.PRJEA36577.WBPS13.annotations.gff3.gz')
-raw_annotations_path = pardir/'genome_annotation'/annotations_url.split('/')[-1]
-
-if not raw_annotations_path.with_suffix('').exists() or redo_flag:
-    print('Downloading gff...')
-    download(annotations_url, str(raw_annotations_path))
-    print(f'\nDownloaded {raw_annotations_path}. Unzipping...')
-    call(f'gunzip "{raw_annotations_path}"', shell=True)
-    
+raw_annotations_path = pardir/'genome_annotation/sm_annotations.gff3'
+outpath = pardir/'genome_annotation/gene_annotations.gff3'
 
 #============== REMOVER ANOTAÇÕES NÃO-GÊNICAS ===============#
 
-print(f"Lendo '{str(raw_annotations_path).strip('.gz')}'...")
-raw_annotations = read_csv(raw_annotations_path.with_suffix(''),
+raw_annotations = read_csv(raw_annotations_path,
                            sep='\t', comment='#',
                            header=None, names=GFF3_COLUMNS)
 
@@ -31,7 +21,7 @@ raw_annotations = read_csv(raw_annotations_path.with_suffix(''),
 print('Leitura encerrada. Removendo anotações não-gênicas...')
 
 genes_gff = raw_annotations.loc[raw_annotations['type'] == 'gene']
-genes_gff[['start', 'end']].astype(int, inplace=True)
+genes_gff.loc[:, ['start', 'end']] = genes_gff[['start', 'end']].astype(int)
 
 lengths = genes_gff.end - genes_gff.start
 genes_gff.loc[:, 'attributes'] = genes_gff.attributes.str.replace('ID=gene:', 'gene_id=')
@@ -54,6 +44,6 @@ if genes_gff.duplicated(['seqid', 'start']).sum() or genes_gff.duplicated(['seqi
     raise ValueError
 
 genes_gff = genes_gff.sort_values(['seqid', 'start'])
-genes_gff.to_csv(annotations_path, sep='\t', index=False, header=None)
+genes_gff.to_csv(outpath, sep='\t', index=False, header=None)
 
-print(f"Anotações gênicas mantidas em '{str(annotations_path)}'.")
+print(f"Anotações gênicas mantidas em '{str(outpath)}'.")

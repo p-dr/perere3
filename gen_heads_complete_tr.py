@@ -36,14 +36,14 @@ if __name__ == '__main__':
 
     heads_annotations_file = heads_annotations_path.open('w')
     # heads_annotations_file.write('\t'.join(GFF3_COLUMNS)+'\n') # Write header.
-    
+
     heads_outfile = heads_outpath.open('w')
     motherlength_outfile = motherlength_path.open('w')
-    
+
     #======================== GET HEADS ========================#
 
     print('Buscando as sequências head no genoma...')
-    
+
     with (pardir/'seqs'/'perere3complete.fa').open() as per_file:
         perere_len = len(''.join([l.strip() for l in per_file.readlines()][1:]))
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             if plus_sense:
                 head_slice = slice(row['send'], row['send'] + GTAA_WINDOW_LEN)
                 proto_head = genome_piece[head_slice]
-                
+
                 # verbose use only
                 prefix = genome_piece[head_slice.start-PREFIX_LEN : head_slice.start]
 
@@ -74,7 +74,7 @@ if __name__ == '__main__':
             if head_slice.start < 0 or head_slice.stop < 0:
                 prinf(f'Head descartada com posições:', head_slice)
                 continue
-            
+
             skip_gtaa = find_gtaa_break(proto_head)
             head = proto_head[skip_gtaa : skip_gtaa + HEAD_LEN]
 

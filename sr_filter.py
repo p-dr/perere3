@@ -1,10 +1,11 @@
 # description:  Generates filtered_perere3_vs_genoma, which is perere3_vs_genoma without alignments also and better found for SR3. i.e. Removes each perere alignment overlapped with SR3 alignment of best score. Also writes filtered out line's indices.
-# in: pardir/'alinhamentos/perere3complete_vs_genoma.bl' pardir/'alinhamentos/sr3complete_vs_genoma.bl'
-# out: pardir/'alinhamentos/filtered_perere3complete_vs_genoma.bl' pardir/'alinhamentos/perere3complete_indices_filtrados.csv'
+# in: pardir/'alinhamentos/perere3_vs_genome.bl'
+# in: pardir/'alinhamentos/sr3_vs_genome.bl'
+# out: pardir/'alinhamentos/filtered_perere3_vs_genome.bl'
+# out: pardir/'alinhamentos/perere3_indices_filtrados.csv'
 
 from pandas import read_csv
 from utils import overlaps, pardir, verbose, BL_COLUMNS
-from time import time, gmtime, strftime
 from tqdm import tqdm
 
 # Usar biopython para blastear?
@@ -12,10 +13,14 @@ from tqdm import tqdm
 
 #================== LER E FILTRAR ALINHAMENTOS ==================#
 
-print('Lendo resultados do Blast...')
-perere3_vs_genoma = read_csv(pardir/'alinhamentos/perere3complete_vs_genoma.bl', header=None, names=BL_COLUMNS, sep='\\s+')
-sr3_vs_genoma = read_csv(pardir/'alinhamentos/sr3complete_vs_genoma.bl', header=None, names=BL_COLUMNS, sep='\\s+')
+print('Lendo resultados do Blast...', end=' ')
+perere3_vs_genoma = read_csv(pardir/'alinhamentos/perere3_vs_genome.bl',
+                             header=None, names=BL_COLUMNS, sep='\\s+')
+sr3_vs_genoma = read_csv(pardir/'alinhamentos/sr3_vs_genome.bl',
+                         header=None, names=BL_COLUMNS, sep='\\s+')
 print('Resultados lidos.')
+
+print(perere3_vs_genoma)
 
 for data in (perere3_vs_genoma, sr3_vs_genoma):
     data.sort_values('sstart', inplace=True)
@@ -25,13 +30,7 @@ print('Filtrando alinhamentos em que o SR3 é melhor...')
 total_len = len(perere3_vs_genoma)
 filtered_perere3_vs_genoma = perere3_vs_genoma.copy()
 
-sr3_scaffold_groups = sr3_vs_genoma.groupby(['saccver'])
-start_time = time()
-count = 0
-discarded = []
-pos = 0
-
-
+exit()
 for i, p in tqdm(list(perere3_vs_genoma.iterrows())):
 
     count += 1

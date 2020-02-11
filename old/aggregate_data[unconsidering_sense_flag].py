@@ -1,9 +1,9 @@
 # description: Plots scatter matrix comparing all new parameters and generate
 # all_together_now.tsv compilation.
-# in: pardir/'counted_reads/aggregated.tsv'
-# in: pardir/'genome_annotation/head_genes_relations.tsv'
-# in: pardir/'genome_annotation/head_genes_correlations.tsv'
+# in: pardir/'genome_annotation/head_genes_relations_unconsidering_sense.tsv'
+# in: pardir/'genome_annotation/head_genes_correlations_unconsidering_sense.tsv'
 # in: pardir/'genome_annotation/head_annotations.gff3'
+# in: pardir/'counted_reads/aggregated_unconsidering_sense.tsv'
 # in: pardir/'genome_annotation/gene_annotations.gff3'
 # in: pardir/'genome_annotation/heads_repetitions.tsv'
 # out: pardir/'genome_annotation/all_together_now.tsv'
@@ -21,7 +21,7 @@ def reverse(s):
 
 # ##### RELATION FLAG WITH NEIGHBOR GENE
 rel_data = pd.read_table(pardir/'genome_annotation' /
-                         'head_genes_relations.tsv')
+                         'head_genes_relations_unconsidering_sense.tsv')
 print(rel_data)
 rel_data.set_index('head_id', inplace=True)
 rel_data.rename(columns={'gene_id': 'neighbor_gene',
@@ -33,7 +33,7 @@ used_genes = rel_data.neighbor_gene.unique()
 
 # ##### CORRELATION WITH NEIGHBOR GENE
 corr_data = pd.read_table(pardir/'genome_annotation' /
-                          'head_genes_correlations.tsv')
+                          'head_genes_correlations_unconsidering_sense.tsv')
 print(corr_data)
 corr_data.set_index('head_id', inplace=True)
 corr_data.rename(columns={'gene_id': 'neighbor_gene'}, inplace=True)
@@ -52,7 +52,7 @@ heads_repetitions = pd.read_table(pardir/'genome_annotation/heads_repetitions.ts
 
 # ##### READ COUNTS DATA
 count_data = pd.read_table(pardir/'counted_reads' /
-                           'aggregated.tsv')
+                           'aggregated_unconsidering_sense.tsv')
 count_data = count_data.sum()[1:]
 
 complement_count = count_data.loc[count_data.index.str.endswith('_complement')]

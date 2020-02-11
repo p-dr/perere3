@@ -3,6 +3,8 @@
 # in: pardir/'genome_annotation/gene_annotations.gff3'
 # out: pardir/'genome_annotation/head_genes_relations.tsv'
 
+# out: pardir/'genome_annotation/head_genes_relations_unconsidering_sense.tsv'
+
 from utils import (pardir, overlaps,
                    redo_flag, parse_gff_attributes,
                    prinf, GFF3_COLUMNS, safe_open)
@@ -12,21 +14,35 @@ from tqdm import tqdm
 
 # Achar genes sobrepostos (ou o mais próximo se não se sobrepuserem), às heads pra correlacionar as expressões
 # em um script posterior. Gera tsv em outpath.
-# LEGENDA: 'gh' ou 'hg' representam a posição relativa entre cópia e NG ('hg'
-# == cópia antes do gene vizinho), considerado a fita + e o sentido de escrita.
+# LEGENDA: gene está à dir(direita)/esq(esquerda)/olap(overlappado com) a head, considerado a fita + e o sentido de escrita.
 
 GFF_COLS_SUBSET = ['seqid', 'start', 'end', 'strand', 'attributes']
 
 # sequid é o nome do cromossomo (contig)
+# if '--sem-sentido' in argv:
 COLS_TO_GROUP = 'seqid'
+#     nosense_flag = '_unconsidering_sense'
+
+# else:
+#     print('Estamos considerando sentido por default (--sem-sentido para não considerar).')
+#     COLS_TO_GROUP = ['seqid', 'strand']
+#     nosense_flag = ''
+
+# outpath = pardir/f'genome_annotation/head_genes_relations{nosense_flag}.tsv'
 outpath = pardir/f'genome_annotation/head_genes_relations.tsv'
 outfile = safe_open(outpath, exist_ok='exit')
 
 heads = pd.read_table(pardir/'genome_annotation/head_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
 genes = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
 heads['id'] = parse_gff_attributes(heads.attributes).index
+# Below: ID (instead of Name) should be default, but comes with 'gene:' prefix.
 genes['id'] = parse_gff_attributes(genes.attributes).index
 head_groups = heads.groupby(COLS_TO_GROUP)
+
+# ### Houve genes duplicados em alugm momento, as linhas abaixo resolveriam isso. 
+# genes.loc[genes.duplicated('start', 'last'), 'start'] += 1
+# genes.loc[genes.duplicated('end', 'last'), 'end'] += 1
+
 gene_groups = genes.groupby(COLS_TO_GROUP)
 
 

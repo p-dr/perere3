@@ -27,6 +27,7 @@ for url, out_name, out_dir in ((genome_url, 'sm_genome.fa', genome_out_dir),
     if not out_path.exists() or redo_flag:
         print(f'Baixando {str(out_name)}')
         download(url, str(out_dir))
+        print()
         call(f'gunzip {str(raw_out_path)}', shell=True)
         raw_out_path.rename(out_path)
     else:

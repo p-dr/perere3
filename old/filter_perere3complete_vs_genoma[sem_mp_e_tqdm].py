@@ -5,7 +5,6 @@
 from pandas import read_csv
 from utils import overlaps, pardir, verbose, BL_COLUMNS
 from time import time, gmtime, strftime
-from tqdm import tqdm
 
 # Usar biopython para blastear?
 
@@ -21,7 +20,7 @@ for data in (perere3_vs_genoma, sr3_vs_genoma):
     data.sort_values('sstart', inplace=True)
     data.reset_index(drop=True, inplace=True)
 
-print('Filtrando alinhamentos em que o SR3 é melhor...')
+print('Filtrando alinhamentos em que o SR3 é melhor...\n')
 total_len = len(perere3_vs_genoma)
 filtered_perere3_vs_genoma = perere3_vs_genoma.copy()
 
@@ -32,7 +31,7 @@ discarded = []
 pos = 0
 
 
-for i, p in tqdm(list(perere3_vs_genoma.iterrows())):
+for i, p in perere3_vs_genoma.iterrows():
 
     count += 1
 
@@ -54,6 +53,12 @@ for i, p in tqdm(list(perere3_vs_genoma.iterrows())):
                     filtered_perere3_vs_genoma.drop(i, inplace=True)
                     # print(f'Alinhamento {i} descartado.\n')
                     discarded.append(str(i))
+
+                    if verbose:
+                        elapsed = time() - start_time
+                        elapsed_str = strftime('%H:%M:%S', gmtime(elapsed))
+                        remaining_str = strftime('%H:%M:%S', gmtime(elapsed*total_len/count))
+                        print(f'{elapsed_str}/{remaining_str} ({count/total_len*100:.4f}%) {pos}', end='\r')
 
                     break
 

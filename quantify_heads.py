@@ -22,6 +22,7 @@ out_file = safe_open(out_path)  # Check out_path.
 repetitions_outpath = pardir/'genome_annotation/heads_repetitions.tsv'
 
 if out_file is not None:
+    print('Alinhando heads contra heads...')
     # Remember you are using megablast.
     run(f"blastn -task 'megablast' -query '{heads_path}' -subject '{heads_path}' -outfmt '6 {COLUMNS}' -out '{out_path}' -evalue 1e-10", shell=True)
     print(f'Alinhamentos salvos em {out_path}.\n')

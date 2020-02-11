@@ -7,10 +7,12 @@
 from utils import pardir, safe_open, show_flag, save_all_figs
 from subprocess import run
 from os.path import exists
-from pandas import read_csv
+from pandas import read_table
 from sys import argv
 from matplotlib import pyplot as plt
+from multiprocessing import cpu_count
 
+n_cpu = cpu_count()
 COLUMNS = 'qaccver saccver pident mismatch gapopen qstart qend sstart send length evalue bitscore'
 
 
@@ -22,16 +24,18 @@ out_file = safe_open(out_path)  # Check out_path.
 repetitions_outpath = pardir/'genome_annotation/heads_repetitions.tsv'
 
 if out_file is not None:
-    print('Alinhando heads contra heads...')
+    print('Alinhando heads contra heads...', end=' ')
     # Remember you are using megablast.
-    run(f"blastn -task 'megablast' -query '{heads_path}' -subject '{heads_path}' -outfmt '6 {COLUMNS}' -out '{out_path}' -evalue 1e-10", shell=True)
+    run(f"blastn -task 'megablast' -query '{heads_path}' -subject '{heads_path}'"
+        f" -outfmt '6 {COLUMNS}' -out '{out_path}' -evalue 1e-10"
+        f" -n_threads {n_cpu}", shell=True)
     print(f'Alinhamentos salvos em {out_path}.\n')
 
 
 #======================== LER ARQUIVO ========================#
 
-print('Lendo alinhamentos heads_vs_heads...')
-heads_vs_heads = read_csv(out_path, sep='\\s+', header=None, names=COLUMNS.split())
+print('Lendo alinhamentos heads_vs_heads...', end=' ')
+heads_vs_heads = read_table(out_path, header=None, names=COLUMNS.split())
 print(f"'{out_path}' lido.")
 
 

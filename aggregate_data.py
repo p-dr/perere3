@@ -161,7 +161,7 @@ data.plot.scatter('distance', 'transcription', alpha=.2)
 plot_box(data[data.distance > 0], 'distance', 'transcription', bins=50)
 
 genome_map = data.sort_values('start')[['start', 'transcription']]
-genome_map['start'] = pd.cut(genome_map.start, 1e4)
+genome_map['start'] = pd.cut(genome_map.start, int(1e4))
 genome_map = genome_map.groupby('start').sum()
 le = len(genome_map.transcription)
 plt.figure()

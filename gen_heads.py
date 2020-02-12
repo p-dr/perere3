@@ -1,5 +1,5 @@
 # description: Gets HEAD_LEN posterior bases in S. mansoni genome for each perere3 to genome alignment, generating now called head sequences. Annotates lenght of the parent alignment for each head (motherlength).
-# in: pardir/'alinhamentos/filtered_perere3_vs_genome.bl' pardir/'seqs/sm_genome.fa'
+# in: pardir/'alinhamentos/filtered_perere3_vs_genoma.bl' pardir/'seqs/sm_genome.fa'
 # out: pardir/'seqs/heads.fa' pardir/'genome_annotation/head_annotations.gff3' pardir/'genome_annotation/heads_motherlength.tsv'
 # plot:
 
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     #======================== LEITURA ========================#
 
     print('Lendo alinhamentos filtrados do Perere3...', end=' ')
-    inpath = pardir/'alinhamentos/filtered_perere3_vs_genome.bl'
+    inpath = pardir/'alinhamentos/filtered_perere3_vs_genoma.bl'
     filtered_perere3_vs_genoma = read_csv(inpath, sep='\t')
     print(f"'{inpath}' lido.")
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     #======================== GET HEADS ========================#
 
-    print('Buscando as sequências head no genoma...', end=' ')
+    print('Buscando as sequências head no genoma...')
 
     with (pardir/'seqs/perere3.fa').open() as per_file:
         perere_len = len(''.join([l.strip() for l in per_file.readlines()][1:]))

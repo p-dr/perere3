@@ -20,47 +20,16 @@ sr3_vs_genoma = read_csv(pardir/'alinhamentos/sr3_vs_genome.bl',
                          header=None, names=BL_COLUMNS, sep='\\s+')
 print('Resultados lidos.')
 
-print(perere3_vs_genoma)
+perere3_vs_genoma = perere3_vs_genoma.sort_values(['saccver', 'sstart'])
+sr3_vs_genoma = sr3_vs_genoma.sort_values(['saccver', 'sstart'])
 
-for data in (perere3_vs_genoma, sr3_vs_genoma):
-    data.sort_values('sstart', inplace=True)
-    data.reset_index(drop=True, inplace=True)
+sr3_grouped = sr3_vs_genoma.groupby('saccver')
+perere3_grouped = perere3_vs_genoma.groupby('saccver')
 
-print('Filtrando alinhamentos em que o SR3 é melhor...')
-total_len = len(perere3_vs_genoma)
-filtered_perere3_vs_genoma = perere3_vs_genoma.copy()
-
-exit()
-for i, p in tqdm(list(perere3_vs_genoma.iterrows())):
-
-    count += 1
-
-    if p['saccver'] in sr3_scaffold_groups.groups:
-        for j, s in sr3_scaffold_groups.get_group(p['saccver']).loc[pos:].iterrows():
-
-
-            if overlaps((p['sstart'], p['send']), (s['sstart'], s['send'])):
-
-                # print('Alinhamentos coincidentes encontrados:')
-                # print(f"{p['sstart']}-{p['send']}\n{s['sstart']}-{s['send']}")
-
-                if s['bitscore'] > p['bitscore']:
-
-                    # print('SR3 tem mais bitscore:')
-                    # print(f"SR3 = {s['bitscore']}\nPer = {p['bitscore']}")
-                    pos = j
-
-                    filtered_perere3_vs_genoma.drop(i, inplace=True)
-                    # print(f'Alinhamento {i} descartado.\n')
-                    discarded.append(str(i))
-
-                    break
-
-                # else:
-                #     print('Perere3 tem mais bitscore:')
-                #     print(f"SR3 = {s['bitscore']}\nPer = {p['bitscore']}")
-                #     print(f'Alinhamento {i} mantido.\n')
-
+for group_name in perere3_grouped.groups:
+    p_group = perere3_grouped.get_group(group_name)
+    s_group = sr3_grouped.get_group(group_name)
+    print(p_group, s_group)
 
 print('\nFiltragem concluída')
 

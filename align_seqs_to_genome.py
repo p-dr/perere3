@@ -25,5 +25,5 @@ for query in QUERIES:
     print(f'Procurando alinhamentos de {query} contra genoma...')
     run((f"blastn -task blastn -query {str(query_path)} -db {str(genomedb_path)} "
          f"-outfmt '6 {' '.join(BL_COLUMNS)}' -out {str(out_path)} "
-         f"-evalue 1e-10 -num_threads '{n_cpu}'"), shell=True)
+         f"-evalue 1e-10 -num_threads {n_cpu}"), shell=True)
     print(f'Alinhamentos salvos em {str(out_path)}.\n')

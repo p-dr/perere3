@@ -172,9 +172,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-/Trimmomatic-0.39
 *@*
+
 # Vim swap files
 *.swp
 *.tmp
 *.swo
+
+# Big folders
+test/alignments

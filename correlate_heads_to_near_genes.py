@@ -70,7 +70,7 @@ for count_path in (pardir/'counted_reads').glob('*.csv'):
 
         ### NORMALIZE FOR FEATURE LENGTH (IN KBP):
         count[lib_name] /= lengths/1000  # This makes final flag rows (__no_feature etc.) become NaN.
-        count.dropna(inplace=True)  # This eliminates final flags.
+        count.dropna(inplace=True)  # This eliminates final flags. 
 
         # count final meaning (RPKM):
         # read count by library size (in million reads) by feature length (in bp)
@@ -98,7 +98,7 @@ for _, relation_row in relations.iterrows():
 
     hid = relation_row.head_id
     gid = relation_row.gene_id
-
+    
     if hid not in counts:
         prinf(f'WARNING: {hid} não presente nas contagens, só nas relações head-gene. Talvez a contagem deva ser refeita.')
         continue
@@ -128,7 +128,7 @@ for _, relation_row in relations.iterrows():
             plt.show()
 
         i += 1
-
+        
     if outfile is not None:
         outfile.write('\t'.join([*relation_row.astype(str), str(corr)])+'\n')
 

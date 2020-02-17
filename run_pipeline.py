@@ -9,9 +9,11 @@
 # )
 
 import networkx as nx
-from utils import pardir
+import subprocess as sp
+from utils import pardir, scripts_dir, LOG_PATH
 from sys import argv
 
+log_file = LOG_PATH.open('a')
 graph = nx.drawing.nx_pydot.read_dot(pardir/'pipeline')
 start = "pardir/\n/'genome_annotation/\n/all_together_now.tsv'"
 
@@ -80,4 +82,31 @@ def parent_scripts(graph, start, flag=True):
     return ret
 
 
-list(map(print, parent_scripts(graph, start)))
+def run_script(name):
+    script_path = scripts_dir/name
+    suffix = script_path.suffix
+    interpreter = {'.py': 'python', '.sh': 'sh'}
+    command = (interpreter[suffix], str(script_path))
+    print('Running', name, '...', end=' ')
+    sp.run(command, stdout=log_file, stderr=log_file)
+    print('Done.')
+
+
+def main(start=start):
+    ps = parent_scripts(graph, start)
+   
+    if '--from' in argv:
+        start_script = argv[argv.index('--from') + 1]
+        ps = ps[ps.index(start_script):]
+
+    for script in ps:
+        if '--list' in argv:
+            print(script)
+        else:
+            run_script(script)
+
+
+if __name__ == '__main__':
+    main()
+
+log_file.close()

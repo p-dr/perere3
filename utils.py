@@ -1,7 +1,7 @@
 from pathlib import Path
 
-scripts_path = Path(__file__).parent
-pardir = scripts_path.parent
+scripts_dir = Path(__file__).resolve().parent
+pardir = scripts_dir.parent
 genome_path = pardir/'seqs/sm_genome.fa'
 
 LOG_DIR = pardir/'logs'
@@ -10,6 +10,16 @@ OLDGRAF_DIR = GRAF_DIR/'old'
 
 for folder in (LOG_DIR, GRAF_DIR, OLDGRAF_DIR):
     folder.mkdir(exist_ok=True)
+
+import __main__
+
+try:
+    main_name = Path(__main__.__file__).stem
+except AttributeError:
+   main_name = '(shell)' 
+
+LOG_PATH = (LOG_DIR/main_name).with_suffix('.log')
+
 
 GFF3_COLUMNS = ['seqid', 'source', 'type', 'start', 'end', 'score', 'strand', 'phase', 'attributes']
 BL_COLUMNS = ['qaccver', 'saccver', 'qstart', 'qend', 'sstart', 'send', 'length', 'pident', 'evalue', 'bitscore']
@@ -37,21 +47,15 @@ def prinf(text, *args, **kwargs):
     if verbose:
         print(text, *args, **kwargs)
 
+
 from datetime import datetime as dt
-import __main__
 
-try:
-    main_name = Path(__main__.__file__).stem
-except AttributeError:
-   main_name = '(shell)' 
-
-def log(text, author_script=main_name):
+def log(text):
     """Writes text to log file in pardir/logs.
     """
-    log_path = LOG_DIR/(author_script+'.log')
     date = dt.now().strftime('%c')
 
-    with log_path.open('a') as log_file:
+    with LOG_PATH.open('a') as log_file:
         log_file.write(f"{date}: {text}\n")
 
 

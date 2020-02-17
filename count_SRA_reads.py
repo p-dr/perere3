@@ -18,7 +18,7 @@ annotations_dir = pardir/'genome_annotation'
 out_dir = pardir/'counted_reads'
 out_dir.mkdir(exist_ok=True)
 
-in_format = 'bam'
+in_format = 'sam'
 
 def count_reads(args):
     alignment_file, kind = args
@@ -31,7 +31,7 @@ def count_reads(args):
         print (f"Contando reads de {acc} em cada anotação de {kind}...")
         t0 = datetime.now()
         call((f'python -m HTSeq.scripts.count {alignment_file} -f {in_format} '
-              f'{annotations_file} -t gene -q > {str(out_path)}'), shell=True)
+              f'{annotations_file} -t gene -q --stranded=yes > {str(out_path)}'), shell=True)
         dt = datetime.now() - t0
         print (f'\n{out_path.name}: htseq-count terminou de rodar. Tempo decorrido: {dt}')
         log(f"'{str(out_path)}' finalizado em {dt}.", __file__)
@@ -39,15 +39,20 @@ def count_reads(args):
         print (f"'{str(out_path)}' já existe. Pulando '{acc}_{kind}'.")
 
 
-alignment_files = [f for f in alignment_dir.glob('*.' + in_format) if 'tmp' not in f.name]
-print('Arquivos de alinhamento encontrados: ', *alignment_files)
-types = ['head', 'gene', 'head_complement', 'gene_complement']
+def main():
+    alignment_files = [f for f in alignment_dir.glob('*.' + in_format) if 'tmp' not in f.name]
+    print('Arquivos de alinhamento encontrados: ', *alignment_files)
+    types = ['head', 'gene', 'head_complement', 'gene_complement']
 
-with mp.Pool(processes=mp.cpu_count()) as pool:
-    t0 = datetime.now()
-    pool.map(count_reads, ((af, t) for af in alignment_files for t in types))
+    with mp.Pool(processes=mp.cpu_count()) as pool:
+        t0 = datetime.now()
+        pool.map(count_reads, ((af, t) for af in alignment_files for t in types))
+        dt = datetime.now() - t0
 
-dt = datetime.now() - t0
-print('\nTodos os arquivos foram processados.')
-print(f'Tempo total decorrido: {dt}')
-log('Sessão de contagem encerrada com duração {dt}.')
+    print('\nTodos os arquivos foram processados.')
+    print(f'Tempo total decorrido: {dt}')
+    log('Sessão de contagem encerrada com duração {dt}.')
+
+ 
+if __name__ == '__main__':
+    main()

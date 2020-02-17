@@ -24,6 +24,7 @@ GFF_COLS_SUBSET = ['seqid', 'start', 'end', 'strand', 'attributes']
 COLS_TO_GROUP = 'seqid'
 outpath = pardir/f'genome_annotation/head_genes_relations.tsv'
 outfile = safe_open(outpath, exist_ok='exit')
+use_multiprocessing = '--multiprocess' in argv
 n_cpu = mp.cpu_count()
 
 # ##### READ DATA
@@ -37,7 +38,9 @@ head_groups = heads.groupby(COLS_TO_GROUP)
 gene_groups = genes.groupby(COLS_TO_GROUP)
 
 
-def parse_head_row(head_row, gene_group, outfile):
+def parse_head_row(head_row, gene_group):
+    global outfile
+
     parse_head_row.last_args = head_row, gene_group, outfile
 
     for _, gene_row in gene_group.iterrows():
@@ -103,7 +106,7 @@ def main():
             parse_chunk.bar_pos += 1
             print(parse_chunk.bar_pos, '****', n_cpu)
             parse_chunk.bar_pos %= n_cpu
-            return df.progress_apply(parse_head_row, axis=1, args=(gene_group, outfile))
+            return df.progress_apply(parse_head_row, axis=1, args=(gene_group))
 
         parse_chunk.bar_pos = 0
 

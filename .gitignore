@@ -178,3 +178,4 @@ dmypy.json
 *.swp
 *.tmp
 *.swo
+test/alignments

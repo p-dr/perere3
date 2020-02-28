@@ -3,15 +3,14 @@
 # in: pardir/'genome_annotation/gene_annotations.gff3'
 # out: pardir/'genome_annotation/head_genes_relations.tsv'
 
-### MULTIPROCESSING STILL BETA
 from utils import (pardir, overlaps,
                    redo_flag, parse_gff_attributes,
                    prinf, GFF3_COLUMNS, safe_open)
 import pandas as pd
+import numpy as np
 from sys import argv
-import multiprocessing as mp
 from tqdm import tqdm
-tqdm.pandas()
+import multiprocessing as mp
 
 # Achar genes sobrepostos (ou o mais próximo se não se sobrepuserem), às heads pra correlacionar as expressões
 # em um script posterior. Gera tsv em outpath.
@@ -27,11 +26,8 @@ outfile = safe_open(outpath, exist_ok='exit')
 use_multiprocessing = '--multiprocess' in argv
 n_cpu = mp.cpu_count()
 
-# ##### READ DATA
-heads = pd.read_table(pardir/'genome_annotation/head_annotations.gff3',
-                      names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
-genes = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3',
-                      names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
+heads = pd.read_table(pardir/'genome_annotation/head_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
+genes = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
 heads['id'] = parse_gff_attributes(heads.attributes).index
 genes['id'] = parse_gff_attributes(genes.attributes).index
 head_groups = heads.groupby(COLS_TO_GROUP)
@@ -80,38 +76,34 @@ def parse_head_row(head_row, gene_group):
             except KeyError as e:
                 prinf(f'\nNão há gene {meth.upper()} de {head_row.id}. (B=atrás, F=à frente)\n')
 
+    print('\t'.join([head_row.id, chosen_gene_id, flag, str(distance)])+'\n')
     outfile.write('\t'.join([head_row.id, chosen_gene_id, flag, str(distance)])+'\n')
+
+
+def parse_chunk(df, gene_group, n):
+    global n_cpu
+    tqdm.pandas(position=n+2, desc=str(n), leave=False)
+    return df.progress_apply(parse_head_row, axis=1, args=[gene_group])
 
 
 def main():
     # write header
     outfile.write('\t'.join(['head_id', 'gene_id', 'flag', 'distance'])+'\n')
-    print('Iterate for each contig.')
+    print('Iterate for each contig and for each head in contig.')
 
-    for head_group_name, head_group in tqdm(head_groups):
+    for head_group_name, head_group in tqdm(head_groups, desc='Contigs'):
         try:
             gene_group = gene_groups.get_group(head_group_name)
+            chunks = np.array_split(head_group, n_cpu)
+
+            with mp.Pool() as pool:
+                pool.starmap(parse_chunk, ((c, gene_group, cn) for cn, c in enumerate(chunks)))
 
         except KeyError:
             prinf('Não há nenhum gene no cromossomo. As heads abaixo são "desgenadas".')
             prinf(head_group)
             continue
 
-        # parse head_row for each head_row
-        head_group_chunks = pd.np.array_split(head_group, mp.cpu_count())
-
-        def parse_chunk(df):
-            global n_cpu
-            tqdm.pandas(position=parse_chunk.bar_pos + 1)
-            parse_chunk.bar_pos += 1
-            print(parse_chunk.bar_pos, '****', n_cpu)
-            parse_chunk.bar_pos %= n_cpu
-            return df.progress_apply(parse_head_row, axis=1, args=(gene_group))
-
-        parse_chunk.bar_pos = 0
-
-        with mp.Pool() as pool:
-            pool.map(parse_chunk, head_group_chunks)
 
     print(f'\nConcluído. Relações salvas em {str(outpath)}.')
 

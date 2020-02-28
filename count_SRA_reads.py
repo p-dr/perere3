@@ -8,11 +8,12 @@
 
 from glob import glob
 from pathlib import Path
-from subprocess import call
-from utils import pardir, redo_flag, log
+import subprocess as sp
+from utils import pardir, redo_flag, log, LOG_PATH
 import multiprocessing as mp
 from datetime import datetime
 
+logfile = LOG_PATH.open('a')
 alignment_dir = pardir/'alinhamentos/SRA_vs_genoma_bam'
 annotations_dir = pardir/'genome_annotation'
 out_dir = pardir/'counted_reads'
@@ -30,11 +31,12 @@ def count_reads(args):
     if not out_path.exists() or redo_flag:
         print (f"Contando reads de {acc} em cada anotação de {kind}...")
         t0 = datetime.now()
-        call((f'python -m HTSeq.scripts.count {alignment_file} -f {in_format} '
-              f'{annotations_file} -t gene -q --stranded=yes > {str(out_path)}'), shell=True)
+        sp.run((f'python -m HTSeq.scripts.count {alignment_file} --format {in_format} '
+                f'{annotations_file} --type=gene -q --stranded=yes --order=pos > {str(out_path)}'),
+              shell=True, stdout=LOG_PATH.open('a'), stderr=sp.STDOUT)
         dt = datetime.now() - t0
         print (f'\n{out_path.name}: htseq-count terminou de rodar. Tempo decorrido: {dt}')
-        log(f"'{str(out_path)}' finalizado em {dt}.", __file__)
+        log(f"'{str(out_path)}' finalizado em {dt}.")
     else:
         print (f"'{str(out_path)}' já existe. Pulando '{acc}_{kind}'.")
 

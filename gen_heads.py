@@ -1,13 +1,13 @@
 # description: Gets HEAD_LEN posterior bases in S. mansoni genome for each perere3 to genome alignment, generating now called head sequences. Annotates lenght of the parent alignment for each head (motherlength).
-# in: pardir/'alinhamentos/filtered_perere3_vs_genome.bl' pardir/'seqs/sm_genome.fa'
+# in: pardir/'alinhamentos/perere3_vs_genome_sr3_filtered.bl' pardir/'seqs/sm_genome.fa'
 # out: pardir/'seqs/heads.fa' pardir/'genome_annotation/head_annotations.gff3' pardir/'genome_annotation/heads_motherlength.tsv'
 # plot:
 
 from Bio.SeqIO import to_dict, parse
 import matplotlib.pyplot as plt
-from pandas import read_csv, DataFrame
+from pandas import read_table, DataFrame
 from sys import argv
-from utils import find_gtaa_break, pardir, verbose, prinf, genome_path
+from utils import find_gtaa_break, pardir, verbose, prinf, genome_path, safe_open
 
 # A filtragem por evalue é feita no próprio BLAST.
 
@@ -15,12 +15,19 @@ HEAD_LEN = 100                # final head length
 GTAA_WINDOW_LEN = 500         # search window length for GTAA repetitions
 PREFIX_LEN = 12
 
-if __name__ == '__main__':
+
+def main():
     #======================== LEITURA ========================#
+    heads_annotations_path = pardir/'genome_annotation/head_annotations.gff3'
+    heads_outpath = pardir/'seqs/heads.fa'
+    motherlength_path = pardir/'genome_annotation/heads_motherlength.tsv'
+    heads_annotations_file = safe_open(heads_annotations_path, exist_ok=False)
+    heads_outfile = safe_open(heads_outpath, exist_ok=False)
+    motherlength_outfile = safe_open(motherlength_path, exist_ok=False)
 
     print('Lendo alinhamentos filtrados do Perere3...', end=' ')
-    inpath = pardir/'alinhamentos/filtered_perere3_vs_genome.bl'
-    filtered_perere3_vs_genoma = read_csv(inpath, sep='\t')
+    inpath = pardir/'alinhamentos/perere3_vs_genome_sr3_filtered.bl'
+    filtered_perere3_vs_genoma = read_table(inpath)
     print(f"'{inpath}' lido.")
 
     print('Lendo genoma de S. mansoni...', end=' ')
@@ -28,15 +35,6 @@ if __name__ == '__main__':
     print('Dicionário criado.')
 
 
-    print ('Abrindo arquivos de output e anotação...', end=' ')
-    heads_annotations_path = pardir/'genome_annotation/head_annotations.gff3'
-    heads_outpath = pardir/'seqs/heads.fa'
-    motherlength_path = pardir/'genome_annotation/heads_motherlength.tsv'
-
-    heads_annotations_file = heads_annotations_path.open('w')
-    heads_outfile = heads_outpath.open('w')
-    motherlength_outfile = motherlength_path.open('w')
-    print('Pronto.')
 
     #======================== GET HEADS ========================#
 
@@ -110,6 +108,7 @@ if __name__ == '__main__':
 
     heads_annotations_file.close()
     heads_outfile.close()
+    motherlength_outfile.close()
 
     #======================== PLOTAR HISTOGRAMAS ========================#
 
@@ -124,3 +123,6 @@ if __name__ == '__main__':
                 heads_df[i+j*12].value_counts().plot(kind='bar')
 
             plt.show()
+
+if __name__ == '__main__':
+    main()

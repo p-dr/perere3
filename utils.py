@@ -24,39 +24,38 @@ LOG_PATH = (LOG_DIR/main_name).with_suffix('.log')
 GFF3_COLUMNS = ['seqid', 'source', 'type', 'start', 'end', 'score', 'strand', 'phase', 'attributes']
 BL_COLUMNS = ['qaccver', 'saccver', 'qstart', 'qend', 'sstart', 'send', 'length', 'pident', 'evalue', 'bitscore']
 
-from sys import argv
+import argparse
 
-redo_flag = '-r' in argv
-if redo_flag:
-    argv.remove('-r')
+argparser = argparse.ArgumentParser()
+argparser.add_argument('-r', '--redo', action='store_true', help='overwrite existing files')
+argparser.add_argument('-v', '--verbose', action='store_true', help='increase verbosity')
+argparser.add_argument('-s', '--show', action='store_true', help='show created plots')
+argparser.add_argument('-p', '--progress', action='store_true', help='show progress information')
+args = argparser.parse_args()
 
-verbose = '-v' in argv
-if verbose:
-    argv.remove('-v')
+# only for back compatibility
+redo_flag = args.redo
+verbose = args.verbose
+show_flag = args.show
+progress_flag = args.progress
 
-show_flag = '-s' in argv
-if show_flag:
-    argv.remove('-s')
-
-progress_flag = '-p' in argv
-if progress_flag:
-    argv.remove('-p')
 
 def prinf(text, *args, **kwargs):
-    global verbose
     if verbose:
         print(text, *args, **kwargs)
 
 
 from datetime import datetime as dt
 
-def log(text):
+def log(*args, tee=True, **kwargs):
     """Writes text to log file in pardir/logs.
     """
     date = dt.now().strftime('%c')
 
     with LOG_PATH.open('a') as log_file:
-        log_file.write(f"{date}: {text}\n")
+        print(f"{date}:", *args, file=log_file, **kwargs)
+        if tee:
+            print(*args, **kwargs)
 
 
 def overlaps(*args):
@@ -65,6 +64,8 @@ def overlaps(*args):
     is designed to deal with DNA sequences, it can only return True if
     boundary values are on the same sense.
     """
+    if len(args) == 1:
+        args = args[0]
     if len(args) == 2:
         t1, t2 = args
     elif len(args) == 4:
@@ -292,3 +293,17 @@ def multibox_compare(ds, labels=None, arch_height=None, margin=None):
                          ha='center', va='bottom')
             height += arch_height + margin
 
+
+import os
+
+def print_header(*args, sep=' ', write_log=False, **kwargs):
+    outs = [LOG_PATH.open('a'), None][not write_log:]  # You let an open file.
+    cols, _ = os.get_terminal_size()
+    args = [a.upper() if type(a) == str else str(a) for a in args]
+    argstr = f'{sep.join(args):^{cols}}'
+
+    for outfile in outs:
+        print('=' * cols, file=outfile)
+        print(argstr, file=outfile, **kwargs)
+        print('=' * cols, file=outfile)
+        print(file=outfile)

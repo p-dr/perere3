@@ -5,22 +5,27 @@
 # out: pardir/'genome_annotation/gene_complement_annotations.gff3' 
 
 import pandas as pd
-from utils import redo_flag, pardir, GFF3_COLUMNS
+from utils import redo_flag, pardir, GFF3_COLUMNS, safe_open
 
-for kind, pattern in (('head', r'head\d+'), ('gene', r'Smp_\d+')):
-    out_path = pardir/f'genome_annotation/{kind}_complement_annotations.gff3' 
-    gff = pd.read_table(pardir/f'genome_annotation/{kind}_annotations.gff3', names=GFF3_COLUMNS)
+def main():
+    for kind, pattern in (('head', r'head\d+'), ('gene', r'Smp_\d+')):
+        outfile = safe_open(pardir/f'genome_annotation/{kind}_complement_annotations.gff3', exist_ok=False)
+        gff = pd.read_table(pardir/f'genome_annotation/{kind}_annotations.gff3', names=GFF3_COLUMNS)
 
-    print(gff.strand.head())
-    gff.loc[gff.strand == '+', 'strand'] = 'plus'
-    gff.loc[gff.strand == '-', 'strand'] = '+'
-    gff.loc[gff.strand == 'plus', 'strand'] = '-'
-    print(gff.strand.head())
+        print(gff.strand.head())
+        gff.loc[gff.strand == '+', 'strand'] = 'plus'
+        gff.loc[gff.strand == '-', 'strand'] = '+'
+        gff.loc[gff.strand == 'plus', 'strand'] = '-'
+        print(gff.strand.head())
 
-    gff['attributes'] = gff.attributes.str.replace(
-        pattern,
-        lambda match: match.group(0) + '_complement',
-        regex=True)
+        gff['attributes'] = gff.attributes.str.replace(
+            pattern,
+            lambda match: match.group(0) + '_complement',
+            regex=True)
 
-    gff.to_csv(out_path, sep='\t', header=False, index=False)
-    print(f"Wrote to '{str(out_path)}'.")
+        gff.to_csv(outfile, sep='\t', header=False, index=False)
+        print(f"Wrote to '{str(out_path)}'.")
+        outfile.close()
+ 
+if __name__ == '__main__':
+    main()

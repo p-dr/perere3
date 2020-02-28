@@ -17,19 +17,23 @@ genome_url = 'ftp://ftp.ebi.ac.uk/pub/databases/wormbase/parasite/releases/WBPS1
 annotations_url = 'ftp://ftp.ebi.ac.uk/pub/databases/wormbase/parasite/releases/WBPS14/species/schistosoma_mansoni/PRJEA36577/schistosoma_mansoni.PRJEA36577.WBPS14.annotations.gff3.gz'
 
 
-for url, out_name, out_dir in ((genome_url, 'sm_genome.fa', genome_out_dir),
-                               (annotations_url, 'sm_annotations.gff3', annot_out_dir)):
+def main():
+    for url, out_name, out_dir in ((genome_url, 'sm_genome.fa', genome_out_dir),
+                                   (annotations_url, 'sm_annotations.gff3', annot_out_dir)):
 
-    out_path = out_dir/out_name
-    raw_out_name = url.split('/')[-1].strip('.gz')
-    raw_out_path = out_dir/raw_out_name
+        out_path = out_dir/out_name
+        raw_out_name = url.split('/')[-1].strip('.gz')
+        raw_out_path = out_dir/raw_out_name
 
-    if not out_path.exists() or redo_flag:
-        print(f'Baixando {str(out_name)}')
-        download(url, str(out_dir))
-        print()
-        call(f'gunzip {str(raw_out_path)}', shell=True)
-        raw_out_path.rename(out_path)
-    else:
-        print(f'{out_path} já se encontra no disco.')
+        if not out_path.exists() or redo_flag:
+            print(f'Baixando {str(out_name)}')
+            download(url, str(out_dir))
+            print()
+            call(f'gunzip {str(raw_out_path)}', shell=True)
+            raw_out_path.rename(out_path)
+        else:
+            print(f'{out_path} já se encontra no disco.')
 
+
+if __name__ == '__main__':
+    main()

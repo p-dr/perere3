@@ -10,12 +10,26 @@
 
 import networkx as nx
 import subprocess as sp
-from utils import pardir, scripts_dir, LOG_PATH
-from sys import argv
+import argparse
+from utils import pardir, scripts_dir, LOG_PATH, print_header, log
 
-log_file = LOG_PATH.open('a')
+logfile = LOG_PATH.open('a')
 graph = nx.drawing.nx_pydot.read_dot(pardir/'pipeline')
 start = "pardir/\n/'genome_annotation/\n/all_together_now.tsv'"
+
+argparser = argparse.ArgumentParser(
+    description='Run necessary scripts for creating ' + start.replace('/\n', ''))
+
+argparser.add_argument('-f', '--startfrom',
+    default=None,
+    help='Start running pipeline from <script>')
+argparser.add_argument('-l', '--list', '--print',
+    action='store_true',
+    help='Only prints the pipeline to be run')
+argparser.add_argument('-e', '--exclude',
+    nargs='*',
+    help='Do not run selected scripts')
+
 
 def above_tree(graph, start):
     ret = []
@@ -83,24 +97,47 @@ def parent_scripts(graph, start, flag=True):
 
 
 def run_script(name):
+    print_header(f'Running {name}...', write_log=True)
     script_path = scripts_dir/name
     suffix = script_path.suffix
-    interpreter = {'.py': 'python', '.sh': 'sh'}
-    command = (interpreter[suffix], str(script_path))
-    print('Running', name, '...', end=' ')
-    sp.run(command, stdout=log_file, stderr=log_file)
-    print('Done.')
+
+    if suffix == '.py':
+        sname = name.strip('.py')
+        try:
+            exec(f'import {sname}; {sname}.main()')  # del after?
+        except FileExistsError:
+            log('FILEEXISTS')
+            
+
+    elif suffix == '.sh':
+        process = sp.Popen(
+            ['sh', name],
+            stdout=sp.PIPE,
+            stderr=sp.STDOUT,
+            universal_newlines=True,
+        )
+
+        while process.poll() is None:
+            line = process.stdout.readline()
+            logfile.write(line)
+            print(line, end='')
+
+        print('Child process returned', process.returncode)
+        if process.returncode:
+            exit()
 
 
 def main(start=start):
     ps = parent_scripts(graph, start)
-   
-    if '--from' in argv:
-        start_script = argv[argv.index('--from') + 1]
-        ps = ps[ps.index(start_script):]
+    args = argparser.parse_args()
+
+    if args.startfrom is not None:
+        ps = ps[ps.index(args.startfrom):]
+
+    log('Iniciando sessão com os seguintes scripts:\n', *ps)
 
     for script in ps:
-        if '--list' in argv:
+        if args.list:
             print(script)
         else:
             run_script(script)
@@ -109,4 +146,4 @@ def main(start=start):
 if __name__ == '__main__':
     main()
 
-log_file.close()
+logfile.close()

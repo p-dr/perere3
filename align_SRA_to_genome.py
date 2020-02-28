@@ -15,7 +15,6 @@ genome_prefix = str(pardir/'genome_ht2/sm_genome')
 
 out_dir = pardir/'alinhamentos/SRA_vs_genoma'
 out_dir.mkdir(parents=True, exist_ok=True)
-log_file = LOG_PATH.open('a')
 
 accs = set(Path(filepath).stem.split('_')[0] for filepath in iglob(str(trimmed_data_dir/'*')))
 
@@ -29,7 +28,7 @@ def align_acc(acc):
         t = datetime.now()
         sp.run((f'hisat2 -q -x {genome_prefix} -1 {input_prefix}_1_paired* -2 {input_prefix}_2_paired* '
                 f'--rna-strandness FR -S {str(out_path)+".sam"} -p {mp.cpu_count()}'),
-                shell=True, stdout=log_file, stderr=log_file)
+                shell=True, stdout=LOG_PATH.open('a'), stderr=sp.STDOUT)
         dt = datetime.now() - t
 
         # sp.call(f'samtools sort -O BAM -no {str(out_path)+".bam"}')  # Will we use bam?
@@ -53,5 +52,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-log_file.close()

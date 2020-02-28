@@ -1,0 +1,6 @@
+tqdm
+scipy
+matplotlib
+pandas
+graphviz
+seaborn

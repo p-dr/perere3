@@ -14,7 +14,7 @@ import multiprocessing as mp
 from datetime import datetime
 
 logfile = LOG_PATH.open('a')
-alignment_dir = pardir/'alinhamentos/SRA_vs_genoma_bam'
+alignment_dir = pardir/'alinhamentos/SRA_vs_genoma'
 annotations_dir = pardir/'genome_annotation'
 out_dir = pardir/'counted_reads'
 out_dir.mkdir(exist_ok=True)
@@ -31,9 +31,12 @@ def count_reads(args):
     if not out_path.exists() or redo_flag:
         print (f"Contando reads de {acc} em cada anotação de {kind}...")
         t0 = datetime.now()
-        sp.run((f'python -m HTSeq.scripts.count {alignment_file} --format {in_format} '
-                f'{annotations_file} --type=gene -q --stranded=yes --order=pos > {str(out_path)}'),
-              shell=True, stdout=LOG_PATH.open('a'), stderr=sp.STDOUT)
+        htseq = sp.Popen((f'python -m HTSeq.scripts.count {alignment_file} --format {in_format} '
+                          f'{annotations_file} --type=gene --stranded=yes --order=pos > {str(out_path)}'),
+                          stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True, shell=True)
+        while htseq.poll() is None:
+            log(out_path.stem + ':', htseq.stdout.readline().strip())  # won't it print stem endlessly?
+
         dt = datetime.now() - t0
         print (f'\n{out_path.name}: htseq-count terminou de rodar. Tempo decorrido: {dt}')
         log(f"'{str(out_path)}' finalizado em {dt}.")
@@ -53,7 +56,7 @@ def main():
 
     print('\nTodos os arquivos foram processados.')
     print(f'Tempo total decorrido: {dt}')
-    log('Sessão de contagem encerrada com duração {dt}.')
+    log(f'Sessão de contagem encerrada com duração {dt}.')
 
  
 if __name__ == '__main__':

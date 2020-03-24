@@ -7,27 +7,34 @@ import subprocess as sp
 from pathlib import Path
 import utils as u
 
-align.out_dir = Path('./alignments')
-count.out_dir = Path('./counts')
+print('WARNING: Always run from pardir/test directory.')
+logs_dir = Path('./logs')
+alignments_dir = Path('./alignments')
+trimmed_dir = Path('./trimmed')
+counts_dir = Path('./counts')
 
-acc = 'ERR022874'
+for d in logs_dir, alignments_dir, trimmed_dir, counts_dir:
+    d.mkdir(exist_ok=True)
+
+u.LOG_DIR = logs_dir
+align.out_dir = alignments_dir
+align.trimmed_data_dir = trimmed_dir
+count.out_dir = counts_dir
+
+acc = 'SRX7450678_head100000'
 
 if len(sys.argv) < 2:
     print("'a' para alinhar e 'c' contar.")
     exit()
 
-if 'a' in sys.argv[-1]:
-    #align.align_acc(acc)
-    sp.run(['hisat2',
-        '-x', u.pardir/'sm_genome_ht2',
-        '--rna-strandness', 'FR',
-        '--sra-acc', acc,
-        '-S', f'./alignments/{acc}_online.sam',
-    ])
+#if 'a' in sys.argv[-1]:
+if u.redo_flag:
+    align.align_acc(acc)
 
-sam = list(align.out_dir.glob('*'))[0]
-
-if 'c' in sys.argv[-1]:
+#if 'c' in sys.argv[-1]:
+if u.verbose:
+    sam = list(align.out_dir.glob(acc + '*'))[0]
+    print(f'Contando reads do arquivo {str(sam)}.')
     count.count_reads((sam, 'gene'))
     count.count_reads((sam, 'gene_complement'))
 

@@ -6,11 +6,13 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from utils import pardir, show_flag, box_compare, multibox_compare, save_all_figs, get_subsets
+import utils as u
 
 d = pd.read_table(pardir/'genome_annotation/all_together_now.tsv')
 d = d[d.repetitions == 0]
-d = d.sort_values('distance')  # Keep only closest copy to each G
-d = d.drop_duplicates(subset='neighbor_gene')
+
+# d = d.sort_values('distance')  # Keep only closest copy to each G
+# d = d.drop_duplicates(subset='neighbor_gene')
 
 
 def main(subsets, corr_transcr):
@@ -51,18 +53,31 @@ def main(subsets, corr_transcr):
     plt.ylabel(corr_transcr)
     #multibox_compare(*list(zip(*[(df.replace(0, pd.np.nan).dropna(), key) for key, df in subsets.items()])))
     multibox_compare(*list(zip(*[(df.dropna(), key) for key, df in subsets.items()])))
+
     ### PLOT MEDIANS COMPARISON MATRIX
+    # plt.figure()
+    # plt.title('log da razão das medianas (positivo => coluna maior)')
+    #     
+    # medians = np.array([subset.median() for subset in subsets.values()])
+    # print(medians)
+    # median_matrix = np.log(medians/ medians[:, np.newaxis])
+    # median_matrix = pd.DataFrame(median_matrix,
+    #                              columns=subsets.keys(),
+    #                              index=subsets.keys())
+    # sns.heatmap(median_matrix, annot=True)
+
+    ### PLOT MEANS COMPARISON MATRIX
     plt.figure()
-    plt.title('log da razão das medianas (positivo => coluna maior)')
+    plt.title('log da razão das meanas (positivo => coluna maior)')
         
-    medians = np.array([subset.median() for subset in subsets.values()])
-    print(medians)
-    median_matrix = np.log(medians/ medians[:, np.newaxis])
-    median_matrix = pd.DataFrame(median_matrix,
+    means = np.array([subset.mean() for subset in subsets.values()])
+    print(means)
+    mean_matrix = np.log(means/ means[:, np.newaxis])
+    mean_matrix = pd.DataFrame(mean_matrix,
                                  columns=subsets.keys(),
                                  index=subsets.keys())
-    sns.heatmap(median_matrix, annot=True)
-    
+    sns.heatmap(mean_matrix, cmap='RdYlBu', annot=True)
+ 
     ### PLOT P-VALUES MATRIX
     plt.figure()
     plt.title('p-valores')
@@ -73,9 +88,17 @@ def main(subsets, corr_transcr):
 
 
 if __name__ == '__main__':
-    for corr_transcr in ('transcription', 'complement_transcription', 'gene_transcription', 'gene_complement_transcription', 'correlation'):
-        print('\n', corr_transcr.upper(), '\n')
-        subsets = get_subsets(d, corr_transcr)
+    for corr_transcr in ('transcription', 'complement_transcription',
+                         'gene_transcription', 'gene_complement_transcription',
+                         'correlation', 'complement_correlation'):
+        u.print_header(corr_transcr.upper())
+
+        if 'gene' in corr_transcr:
+            D = d.drop_duplicates(subset='neighbor_gene')
+        else:
+            D = d
+
+        subsets = get_subsets(D, corr_transcr)
         main(subsets, corr_transcr)
 
     if show_flag:

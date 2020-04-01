@@ -4,6 +4,7 @@
 # in: pardir/'genome_annotation/gene_annotations.gff3'
 # in: pardir/'genome_annotation/head_annotations.gff3'
 # out: pardir/'genome_annotation/head_genes_correlations.tsv'
+# out: pardir/f'genome_annotation/head_genes_complements_correlations.tsv'
 # out: pardir/'counted_reads/aggregated.tsv'
 
 from utils import (pardir, show_flag, safe_open, parse_gff_attributes,
@@ -12,9 +13,12 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from sys import argv
 
-outpath = pardir/f'genome_annotation/head_genes_correlations.tsv'
 out_aggregated_counts = pardir/f'counted_reads/aggregated.tsv'
+
+outpath = pardir/f'genome_annotation/head_genes_correlations.tsv'
+complements_outpath = pardir/f'genome_annotation/head_genes_complements_correlations.tsv'
 outfile = safe_open(outpath, exist_ok='exit')
+complements_outfile = safe_open(complements_outpath, exist_ok='exit')
 
 print('Buscando comprimentos de genes e heads...')
 gene_attibutes = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3',
@@ -36,6 +40,7 @@ relations = pd.read_table(pardir/f'genome_annotation/head_genes_relations.tsv')
 
 # Escrever cabeçalho
 outfile.write('\t'.join(relations.columns) + '\tcorrelation\n')
+complements_outfile.write('\t'.join(relations.columns) + '\tcorrelation\n')
 
 
 # ###################### AGREGATE COUNTS ###############################
@@ -45,7 +50,7 @@ print('Conclúido. Agregando contagens em um DataFrame...')
 counts = pd.DataFrame()
 
 # for each SRA library
-for count_path in (pardir/'counted_reads').glob('*.csv'):
+for count_path in (pardir/'counted_reads').glob('*.csv'):  # WARNING: A extensão será mudada para tsv no futuro.
     print(f'Processing {str(count_path)}')
 
     lib_name = count_path.stem.split('_')[0]
@@ -94,43 +99,51 @@ plt.rcParams['font.size'] = 4
 plt.rcParams['figure.figsize'] = (16, 9)
 i = 0
 
-for _, relation_row in relations.iterrows():
+for complement_flag in (False, True):
+    for _, relation_row in relations.iterrows():
 
-    hid = relation_row.head_id
-    gid = relation_row.gene_id
+        hid = relation_row.head_id
+        gid = relation_row.gene_id
 
-    if hid not in counts:
-        prinf(f'WARNING: {hid} não presente nas contagens, só nas relações head-gene. Talvez a contagem deva ser refeita.')
-        continue
-    head_col = counts[hid]
-    gene_col = counts[gid]
+        if complement_flag:
+            hid += '_complement'
+            gid += '_complement'
 
-    n_non_zero = (head_col.astype(bool) & gene_col.astype(bool)).sum()
-    # if number of significative points (head and gene counts != 0) is less than 4
-    if n_non_zero < 4:
-        prinf('\nCorrelação descartada:\n', counts[[gid, hid]])
-        continue
+        if hid not in counts:
+            print(f'WARNING: {hid} não presente nas contagens, só nas relações head-gene. Talvez a contagem deva ser refeita.')
+            continue
 
-    prinf('\nCorrelação plotada:\n', pd.concat([counts[[gid, hid]], head_col.astype(bool) & gene_col.astype(bool)], 1))
+        head_col = counts[hid]
+        gene_col = counts[gid]
 
-    corr = head_col.corr(gene_col)
+        n_non_zero = (head_col.astype(bool) & gene_col.astype(bool)).sum()
+        # if number of significative points (head and gene counts != 0) is less than 4
+        if n_non_zero < 4:
+            prinf('\nCorrelação descartada:\n', counts[[gid, hid]])
+            continue
 
-    if show_flag:
-        gridi = i % (gridx*gridy) + 1
-        plt.subplot(gridx, gridy, gridi)
-        plt.plot(head_col, gene_col, 'o', label=corr)
-        plt.legend()
-        plt.title('_'.join(list(relation_row.astype(str)) + [str(n_non_zero)]))
+        prinf('\nCorrelação plotada:\n', pd.concat([counts[[gid, hid]], head_col.astype(bool) & gene_col.astype(bool)], 1))
 
-        if gridi == gridx*gridy:
-            plt.tight_layout()
-            save_all_figs()
-            plt.show()
+        corr = head_col.corr(gene_col)
 
-        i += 1
+        if show_flag:
+            gridi = i % (gridx*gridy) + 1
+            plt.subplot(gridx, gridy, gridi)
+            plt.plot(head_col, gene_col, 'o', label=corr)
+            plt.legend()
+            plt.title('_'.join(list(relation_row.astype(str)) + [str(n_non_zero)]))
 
-    if outfile is not None:
-        outfile.write('\t'.join([*relation_row.astype(str), str(corr)])+'\n')
+            if gridi == gridx*gridy:
+                plt.tight_layout()
+                save_all_figs()
+                plt.show()
 
-if outfile is not None:
-    outfile.close()
+            i += 1
+
+        line = '\t'.join([*relation_row.astype(str), str(corr)])+'\n'
+        (outfile, complements_outfile)[complement_flag].write(line)
+
+outfile.close()
+complements_outfile.close()
+
+print(f'Arquivos de correlações salvos:\n{str(outpath)}\n{str(complements_outpath)}')

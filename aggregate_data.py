@@ -3,6 +3,7 @@
 # in: pardir/'counted_reads/aggregated.tsv'
 # in: pardir/'genome_annotation/head_genes_relations.tsv'
 # in: pardir/'genome_annotation/head_genes_correlations.tsv'
+# in: pardir/f'genome_annotation/head_genes_complements_correlations.tsv'
 # in: pardir/'genome_annotation/head_annotations.gff3'
 # in: pardir/'genome_annotation/gene_annotations.gff3'
 # in: pardir/'genome_annotation/heads_repetitions.tsv'
@@ -22,7 +23,6 @@ def reverse(s):
 # ##### RELATION FLAG WITH NEIGHBOR GENE
 rel_data = pd.read_table(pardir/'genome_annotation' /
                          'head_genes_relations.tsv')
-print(rel_data)
 rel_data.set_index('head_id', inplace=True)
 rel_data.rename(columns={'gene_id': 'neighbor_gene',
                          'flag':'relative_position'}, inplace=True)
@@ -34,10 +34,13 @@ used_genes = rel_data.neighbor_gene.unique()
 # ##### CORRELATION WITH NEIGHBOR GENE
 corr_data = pd.read_table(pardir/'genome_annotation' /
                           'head_genes_correlations.tsv')
-print(corr_data)
+comp_corr_data = pd.read_table(pardir/'genome_annotation' /
+                               'head_genes_complements_correlations.tsv')
+comp_corr_data.rename(columns={'correlation': 'complement_correlation'}, inplace=True)
+corr_data = corr_data.merge(comp_corr_data, how='outer')
 corr_data.set_index('head_id', inplace=True)
 corr_data.rename(columns={'gene_id': 'neighbor_gene'}, inplace=True)
-
+print(corr_data)
 
 # ##### HEAD DATA FROM ANNOTATION FILE
 gff_data = pd.read_table(pardir/'genome_annotation/head_annotations.gff3',
@@ -76,7 +79,6 @@ gene_gff = gene_gff.set_index('Name').loc[used_genes]
 
 # ##### COMPILE GENES DATA
 genes_data = pd.concat([gene_gff, genes_count, complement_genes_count], 1)
-print(genes_data.columns)
 genes_data.columns = ['gene_' + name for name in genes_data.columns]
 
 # ##### ALL TOGETHER NOW!
@@ -85,6 +87,7 @@ data = pd.concat(
         gff_data,
         rel_data,
         corr_data.correlation,
+        corr_data.complement_correlation,
         heads_count,
         complement_heads_count,
         heads_repetitions

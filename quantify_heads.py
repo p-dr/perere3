@@ -28,7 +28,7 @@ if out_file is not None:
     # Remember you are using megablast.
     run(f"blastn -task 'megablast' -query '{heads_path}' -subject '{heads_path}'"
         f" -outfmt '6 {COLUMNS}' -out '{out_path}' -evalue 1e-10"
-        f" -n_threads {n_cpu}", shell=True)
+        f" -num_threads {n_cpu}", shell=True)
     print(f'Alinhamentos salvos em {out_path}.\n')
 
 

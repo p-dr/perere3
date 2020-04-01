@@ -3,7 +3,7 @@
 # in: pardir/'genome_annotation/gene_annotations.gff3'
 # out: pardir/'genome_annotation/head_genes_relations.tsv'
 
-from utils import (pardir, overlaps,
+from utils import (pardir, overlaps, log,
                    redo_flag, parse_gff_attributes,
                    prinf, GFF3_COLUMNS, safe_open)
 import pandas as pd
@@ -21,9 +21,7 @@ GFF_COLS_SUBSET = ['seqid', 'start', 'end', 'strand', 'attributes']
 
 # sequid é o nome do cromossomo (contig)
 COLS_TO_GROUP = 'seqid'
-outpath = pardir/f'genome_annotation/head_genes_relations.tsv'
-outfile = safe_open(outpath, exist_ok='exit')
-use_multiprocessing = '--multiprocess' in argv
+outpath = pardir/f'genome_annotation/head_genes_relations_beta.tsv'
 n_cpu = mp.cpu_count()
 
 heads = pd.read_table(pardir/'genome_annotation/head_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
@@ -32,13 +30,10 @@ heads['id'] = parse_gff_attributes(heads.attributes).index
 genes['id'] = parse_gff_attributes(genes.attributes).index
 head_groups = heads.groupby(COLS_TO_GROUP)
 gene_groups = genes.groupby(COLS_TO_GROUP)
+no_neighbor_count = 0
 
 
 def parse_head_row(head_row, gene_group):
-    global outfile
-
-    parse_head_row.last_args = head_row, gene_group, outfile
-
     for _, gene_row in gene_group.iterrows():
         if overlaps((gene_row.start, gene_row.end),
                     (head_row.start, head_row.end)):
@@ -76,39 +71,56 @@ def parse_head_row(head_row, gene_group):
             except KeyError as e:
                 prinf(f'\nNão há gene {meth.upper()} de {head_row.id}. (B=atrás, F=à frente)\n')
 
-    print('\t'.join([head_row.id, chosen_gene_id, flag, str(distance)])+'\n')
-    outfile.write('\t'.join([head_row.id, chosen_gene_id, flag, str(distance)])+'\n')
+        ret = (head_row.id, chosen_gene_id, flag, distance)
+        return ret
+
+    return [None] * 4
 
 
 def parse_chunk(df, gene_group, n):
-    global n_cpu
-    tqdm.pandas(position=n+2, desc=str(n), leave=False)
-    return df.progress_apply(parse_head_row, axis=1, args=[gene_group])
+    tqdm.pandas(position=n+2, desc=f'{n: >2}', leave=False)
+    ret = df.progress_apply(parse_head_row, axis=1, args=[gene_group], result_type='expand')
+    ret = ret.dropna()
+
+    if not ret.empty:
+        return ret
 
 
 def main():
-    # write header
-    outfile.write('\t'.join(['head_id', 'gene_id', 'flag', 'distance'])+'\n')
-    print('Iterate for each contig and for each head in contig.')
+    global no_neighbor_count
+    with safe_open(outpath, exist_ok='exit') as outfile:
+        # write header
+        #outfile.write('\t'.join(['head_id', 'gene_id', 'flag', 'distance'])+'\n')
 
-    for head_group_name, head_group in tqdm(head_groups, desc='Contigs'):
-        try:
+        relations = pd.DataFrame()
+
+        for head_group_name, head_group in tqdm(head_groups, desc='Contigs'):
+
+            if head_group_name not in gene_groups.groups:
+                prinf('Não há nenhum gene no cromossomo. As heads abaixo não possuem NG.')
+                prinf(head_group)
+                no_neighbor_count += head_group.shape[0]
+                continue
+
+
             gene_group = gene_groups.get_group(head_group_name)
             chunks = np.array_split(head_group, n_cpu)
 
             with mp.Pool() as pool:
-                pool.starmap(parse_chunk, ((c, gene_group, cn) for cn, c in enumerate(chunks)))
+                pool_results = pool.starmap(parse_chunk, ((c, gene_group, cn)
+                                            for cn, c in enumerate(chunks)))
 
-        except KeyError:
-            prinf('Não há nenhum gene no cromossomo. As heads abaixo são "desgenadas".')
-            prinf(head_group)
-            continue
+                for chunk_relations in pool_results:
+                    relations = relations.append(chunk_relations)
+                    # print('\nCHUN', chunk_relations, '\nREL', relations)
 
+        relations.columns = ['head_id', 'gene_id', 'flag', 'distance']
+        relations.to_csv(outfile, sep='\t', index=False)
+        log(f'\nConcluído. Relações salvas em {str(outpath)}.')
 
-    print(f'\nConcluído. Relações salvas em {str(outpath)}.')
+    return relations, no_neighbor_count
+
 
 
 if __name__ == '__main__':
-    main()
-
-outfile.close()
+    relations, no_neighbor_count = main()

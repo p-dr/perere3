@@ -29,7 +29,8 @@ import argparse
 argparser = argparse.ArgumentParser()
 argparser.add_argument('-r', '--redo', action='store_true', help='overwrite existing files')
 argparser.add_argument('-v', '--verbose', action='store_true', help='increase verbosity')
-argparser.add_argument('-s', '--show', action='store_true', help='show created plots')
+argparser.add_argument('-s', '--show', action='store_true', help='show instead of save created plots')
+argparser.add_argument('-ss', '--show_save', action='store_true', help='show and save created plots')
 argparser.add_argument('-p', '--progress', action='store_true', help='show progress information')
 args = argparser.parse_args()
 
@@ -189,6 +190,12 @@ figcount = 0
 
 def save_all_figs():
     global figcount
+
+    if args.show or args.show_save:
+        plt.show()
+        if args.show:
+            return
+        
     timestamp = dt.now().strftime('%Y-%-m-%-d-%Hh%Mm%Ss')
 
     for fignum in tqdm(plt.get_fignums(), desc='Saving figures'):

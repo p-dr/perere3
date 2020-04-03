@@ -16,7 +16,7 @@ import __main__
 try:
     main_name = Path(__main__.__file__).stem
 except AttributeError:
-   main_name = '(shell)' 
+   main_name = '(shell)'
 
 LOG_PATH = (LOG_DIR/main_name).with_suffix('.log')
 

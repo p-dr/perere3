@@ -20,17 +20,20 @@ GFF_COLS_SUBSET = ['seqid', 'start', 'end', 'strand', 'attributes']
 # sequid é o nome do cromossomo (contig)
 COLS_TO_GROUP = 'seqid'
 outpath = pardir/f'genome_annotation/head_genes_relations.tsv'
-outfile = safe_open(outpath, exist_ok='exit')
 
-heads = pd.read_table(pardir/'genome_annotation/head_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
-genes = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3', names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
-heads['id'] = parse_gff_attributes(heads.attributes).index
-genes['id'] = parse_gff_attributes(genes.attributes).index
-head_groups = heads.groupby(COLS_TO_GROUP)
-gene_groups = genes.groupby(COLS_TO_GROUP)
+head_annotations_path = pardir/'genome_annotation/head_annotations.gff3'
+gene_annotations_path = pardir/'genome_annotation/gene_annotations.gff3'
 
 
-if __name__ == '__main__':
+def main():
+    heads = pd.read_table(head_annotations_path, names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
+    genes = pd.read_table(gene_annotations_path, names=GFF3_COLUMNS, usecols=GFF_COLS_SUBSET)
+    heads['id'] = parse_gff_attributes(heads.attributes).index
+    genes['id'] = parse_gff_attributes(genes.attributes).index
+    head_groups = heads.groupby(COLS_TO_GROUP)
+    gene_groups = genes.groupby(COLS_TO_GROUP)
+
+    outfile = safe_open(outpath, exist_ok='exit')
     # write header
     outfile.write('\t'.join(['head_id', 'gene_id', 'flag', 'distance'])+'\n')
     print('Iterate for each contig and for each head in contig.')
@@ -87,4 +90,8 @@ if __name__ == '__main__':
 
     print(f'\nConcluído. Relações salvas em {str(outpath)}.')
 
-outfile.close()
+    outfile.close()
+
+
+if __name__ == '__main__':
+    main()

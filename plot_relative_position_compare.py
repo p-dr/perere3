@@ -11,9 +11,6 @@ import utils as u
 d = pd.read_table(pardir/'genome_annotation/all_together_now.tsv')
 d = d[d.repetitions == 0]
 
-# d = d.sort_values('distance')  # Keep only closest copy to each G
-# d = d.drop_duplicates(subset='neighbor_gene')
-
 
 def main(subsets, corr_transcr):
     plt.figure(figsize=(12, 12))
@@ -24,13 +21,9 @@ def main(subsets, corr_transcr):
 
     n = 0
     for label_i, subset_i in subsets.items():
-        # if corr_transcr.startswith('gene'):
-        #     subset_i = subset_i.drop_duplicates()
         line = []
 
         for label_j, subset_j in subsets.items():
-            # if corr_transcr.startswith('gene'):
-            #     subset_j = subset_j.drop_duplicates()
 
             if n in tri_ind:
                 plt.subplot(4, 4, n+1)
@@ -69,7 +62,7 @@ def main(subsets, corr_transcr):
     ### PLOT MEANS COMPARISON MATRIX
     plt.figure()
     plt.title('log da razão das meanas (positivo => coluna maior)')
-        
+
     means = np.array([subset.mean() for subset in subsets.values()])
     print(means)
     mean_matrix = np.log(means/ means[:, np.newaxis])
@@ -77,7 +70,7 @@ def main(subsets, corr_transcr):
                                  columns=subsets.keys(),
                                  index=subsets.keys())
     sns.heatmap(mean_matrix, cmap='RdYlBu', annot=True)
- 
+
     ### PLOT P-VALUES MATRIX
     plt.figure()
     plt.title('p-valores')
@@ -88,15 +81,19 @@ def main(subsets, corr_transcr):
 
 
 if __name__ == '__main__':
+    print('Quantidades das populações')
+    [print(name, s) for name, s in u.get_subsets(d).items()]
+
     for corr_transcr in ('transcription', 'complement_transcription',
                          'gene_transcription', 'gene_complement_transcription',
                          'correlation', 'complement_correlation'):
-        u.print_header(corr_transcr.upper())
+        u.print_header(corr_transcr)
+        D = d[d[corr_transcr] != 0].dropna(subset=[corr_transcr])
+        print(f'Retirada de zeros\nComprimento antes: {d.shape[0]} | Depois: {D.shape[0]}')
 
         if 'gene' in corr_transcr:
-            D = d.drop_duplicates(subset='neighbor_gene')
-        else:
-            D = d
+            D = D.sort_values('distance')  # Keep only closest copy to each G
+            D = D.drop_duplicates(subset='neighbor_gene')
 
         subsets = get_subsets(D, corr_transcr)
         main(subsets, corr_transcr)

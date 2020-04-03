@@ -16,7 +16,7 @@ import __main__
 try:
     main_name = Path(__main__.__file__).stem
 except AttributeError:
-   main_name = '(shell)' 
+   main_name = '(shell)'
 
 LOG_PATH = (LOG_DIR/main_name).with_suffix('.log')
 
@@ -31,14 +31,14 @@ argparser.add_argument('-r', '--redo', action='store_true', help='overwrite exis
 argparser.add_argument('-v', '--verbose', action='store_true', help='increase verbosity')
 argparser.add_argument('-s', '--show', action='store_true', help='show instead of save created plots')
 argparser.add_argument('-ss', '--show_save', action='store_true', help='show and save created plots')
-argparser.add_argument('-p', '--progress', action='store_true', help='show progress information')
+argparser.add_argument('-p', '--plot', action='store_true', help='show plot information')
 args = argparser.parse_args()
 
 # only for back compatibility
 redo_flag = args.redo
 verbose = args.verbose
 show_flag = args.show
-progress_flag = args.progress
+plot_flag = args.plot
 
 
 def prinf(text, *args, **kwargs):

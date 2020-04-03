@@ -27,7 +27,7 @@ def count_reads(args):
     acc = Path(alignment_file).stem
     annotations_file = str(annotations_dir/(kind+'_annotations.gff3'))
     out_path = out_dir/(acc+'_'+kind+'.csv')
-    
+
     if not out_path.exists() or redo_flag:
         print (f"Contando reads de {acc} em cada anotação de {kind}...")
         t0 = datetime.now()
@@ -58,6 +58,6 @@ def main():
     print(f'Tempo total decorrido: {dt}')
     log(f'Sessão de contagem encerrada com duração {dt}.')
 
- 
+
 if __name__ == '__main__':
     main()

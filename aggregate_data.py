@@ -13,170 +13,188 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from utils import (pardir, save_all_figs, GFF3_COLUMNS,
                    unfold_gff, plot_box, show_flag)
+import utils as u
+from datetime import datetime
 
 outpath = pardir/'genome_annotation/all_together_now.tsv'
-
-def reverse(s):
-    return s[::-1]
-
-
-# ##### RELATION FLAG WITH NEIGHBOR GENE
-rel_data = pd.read_table(pardir/'genome_annotation' /
-                         'head_genes_relations.tsv')
-rel_data.set_index('head_id', inplace=True)
-rel_data.rename(columns={'gene_id': 'neighbor_gene',
-                         'flag':'relative_position'}, inplace=True)
-
-#############
-used_genes = rel_data.neighbor_gene.unique()
-#############
-
-# ##### CORRELATION WITH NEIGHBOR GENE
-corr_data = pd.read_table(pardir/'genome_annotation' /
-                          'head_genes_correlations.tsv')
-comp_corr_data = pd.read_table(pardir/'genome_annotation' /
-                               'head_genes_complements_correlations.tsv')
-comp_corr_data.rename(columns={'correlation': 'complement_correlation'}, inplace=True)
-corr_data = corr_data.merge(comp_corr_data, how='outer')
-corr_data.set_index('head_id', inplace=True)
-corr_data.rename(columns={'gene_id': 'neighbor_gene'}, inplace=True)
-print(corr_data)
-
-# ##### HEAD DATA FROM ANNOTATION FILE
-gff_data = pd.read_table(pardir/'genome_annotation/head_annotations.gff3',
-                         header=None, names=GFF3_COLUMNS)
-gff_data = unfold_gff(gff_data)
-gff_data.set_index('gene_id', inplace=True)
-gff_data.motherlength = gff_data.motherlength.astype(dtype='int')
-gff_data.drop(['source', 'type', 'score', 'phase'], 1, inplace=True)
-
-# ##### HEAD REPETITIONS (# OF INTERHEAD BLAST ALIGNMENTS)
-heads_repetitions = pd.read_table(pardir/'genome_annotation/heads_repetitions.tsv', index_col='head_id')
-
-# ##### READ COUNTS DATA
-count_data = pd.read_table(pardir/'counted_reads' /
-                           'aggregated.tsv')
-count_data = count_data.sum()[1:]
-
-complement_count = count_data.loc[count_data.index.str.endswith('_complement')]
-count_data = count_data.drop(complement_count.index)
-
-complement_count.index = complement_count.index.str.strip('_complement')
-complement_count.rename('complement_transcription', inplace=True)
-complement_heads_count = complement_count.loc[complement_count.index.str.startswith('head')]
-complement_genes_count = complement_count.loc[used_genes]
-
-count_data.rename('transcription', inplace=True)
-heads_count = count_data.loc[count_data.index.str.startswith('head')]
-genes_count = count_data.loc[used_genes]
-
-# ##### GENE ANNOTATIONS DATA
-gene_gff = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3',
-                         header=None, names=GFF3_COLUMNS)
-SELECTED_COLS = ['start', 'end', 'strand', 'length', 'Name']
-gene_gff = unfold_gff(gene_gff)[SELECTED_COLS]
-gene_gff = gene_gff.set_index('Name').loc[used_genes]
-
-# ##### COMPILE GENES DATA
-genes_data = pd.concat([gene_gff, genes_count, complement_genes_count], 1)
-genes_data.columns = ['gene_' + name for name in genes_data.columns]
-
-# ##### ALL TOGETHER NOW!
-data = pd.concat(
-    [
-        gff_data,
-        rel_data,
-        corr_data.correlation,
-        corr_data.complement_correlation,
-        heads_count,
-        complement_heads_count,
-        heads_repetitions
-    ],
-    1, sort=False)
-
-print(data)
-print('='*100)
-print(genes_data)
-print('='*100)
-data = data.merge(genes_data, left_on='neighbor_gene', right_index=True,
-                  how='left')
-
-# ##### FURTHER INFO APPENDS
-
-# If there is no neighbor gene, 'same_strand' = False.
-data['same_strand'] = (data.strand==data.gene_strand) & ~data.gene_strand.isna()
-
-# ## Annotate stream.
-
-# data['gene_stream'] = pd.np.nan
-# data.loc[data.relative_position == 'olap', 'stream'] = 'olap'
-
-# data.loc[((data.strand == '+') & (data.relative_position == 'gh')) | 
-#          ((data.strand == '-') & (data.relative_position == 'hg')), 'gene_stream'] = 'gh'
-# 
-# data.loc[((data.strand == '+') & (data.relative_position == 'hg')) | 
-#          ((data.strand == '-') & (data.relative_position == 'gh')), 'gene_stream'] = 'hg'
-
-data['gene_stream'] = data.relative_position
-mask = (data.gene_strand == '-') & data.relative_position.isin({'hg', 'gh'}) 
-data.loc[mask, 'gene_stream'] = data.loc[mask, 'gene_stream'].apply(reverse)
-
-data['head_stream'] = data.relative_position
-mask = (data.strand == '-') & data.relative_position.isin({'hg', 'gh'}) 
-data.loc[mask, 'head_stream'] = data.loc[mask, 'head_stream'].apply(reverse)
+bkp_dir = u.scripts_dir/'saved_data'
+bkp_outpath = bkp_dir/f'{datetime.now()}.tsv'
 
 
-# ##### FINAL PRINTS
+def plot():
+    print('Plotando...')
 
-print('Quantidade de dados não faltantes:')
-print((~data.isna()).sum())
+    # ###### PLOT ALL NUMERIC!
+    data.dropna(inplace=True)
+    data.drop('same_strand', 1, inplace=True)
+    data = data.infer_objects()
+    data = data.select_dtypes(exclude=['object'])
 
-print('\nDados com sondas relacionadas a genes mas sem correlação')
-print((data.relative_position.isna() ^ data.correlation.isna()).sum())
+    pd.plotting.scatter_matrix(data.drop(['end', 'start'], 1))
+    data.plot.scatter('start', 'transcription', alpha=.2)
+    data.plot.scatter('distance', 'transcription', alpha=.2)
+    plot_box(data[data.distance > 0], 'distance', 'transcription', bins=50)
 
-print('''\nNotas: Só são exibidos os genes que foram relacionados a alguma head/sonda. Tem
-      menos dados de genes porque tem algumas poucas sondas que não tinham
-      nenhum gene no mesmo contig. Há bastante perda de dados quando se quer
-      calcular a correlação, já que muitas sondas tiveram RPKM não-nulo em
-      menos de 4 bibliotecas e foram então descartadas.''')
+    genome_map = data.sort_values('start')[['start', 'transcription']]
+    genome_map['start'] = pd.cut(genome_map.start, int(1e4))
+    genome_map = genome_map.groupby('start').sum()
+    le = len(genome_map.transcription)
+    plt.figure()
+    plt.pcolor(genome_map.transcription.values.reshape(int(le**.5), int(le**.5)))
+    plt.colorbar()
+    plt.figure()
 
+    plt.pcolor(data.corr(method='spearman'))
+    plt.figure()
+    data.transcription.hist()
 
-############ RESET INDEX AND SAVE ##################
-
-data.index.name = 'head_id'
-data = data.reset_index()
-
-data.to_csv(outpath, sep='\t', index=False)
-print('\nDados agregados salvos. Plotando...')
-
-####################################################
-
-
-# ###### PLOT ALL NUMERIC!
-data.dropna(inplace=True)
-data.drop('same_strand', 1, inplace=True)
-data = data.infer_objects()
-data = data.select_dtypes(exclude=['object'])
-
-pd.plotting.scatter_matrix(data.drop(['end', 'start'], 1))
-data.plot.scatter('start', 'transcription', alpha=.2)
-data.plot.scatter('distance', 'transcription', alpha=.2)
-plot_box(data[data.distance > 0], 'distance', 'transcription', bins=50)
-
-genome_map = data.sort_values('start')[['start', 'transcription']]
-genome_map['start'] = pd.cut(genome_map.start, int(1e4))
-genome_map = genome_map.groupby('start').sum()
-le = len(genome_map.transcription)
-plt.figure()
-plt.pcolor(genome_map.transcription.values.reshape(int(le**.5), int(le**.5)))
-plt.colorbar()
-plt.figure()
-
-plt.pcolor(data.corr(method='spearman'))
-plt.figure()
-data.transcription.hist()
-
-if not show_flag:
     save_all_figs()
-else:
-    plt.show()
+
+
+def main():
+    # ##### RELATION FLAG WITH NEIGHBOR GENE
+    rel_data = pd.read_table(pardir/'genome_annotation' /
+                             'head_genes_relations.tsv')
+    rel_data.set_index('head_id', inplace=True)
+    rel_data.rename(columns={'gene_id': 'neighbor_gene',
+                             'flag':'relative_position'}, inplace=True)
+
+    #############
+    used_genes = rel_data.neighbor_gene.unique()
+    #############
+
+    # ##### CORRELATION WITH NEIGHBOR GENE
+    corr_data = pd.read_table(pardir/'genome_annotation' /
+                              'head_genes_correlations.tsv')
+    comp_corr_data = pd.read_table(pardir/'genome_annotation' /
+                                   'head_genes_complements_correlations.tsv')
+    comp_corr_data.rename(columns={'correlation': 'complement_correlation'}, inplace=True)
+    corr_data = corr_data.merge(comp_corr_data, how='outer')
+    corr_data.set_index('head_id', inplace=True)
+    corr_data.rename(columns={'gene_id': 'neighbor_gene'}, inplace=True)
+    print(corr_data)
+
+    # ##### HEAD DATA FROM ANNOTATION FILE
+    gff_data = pd.read_table(pardir/'genome_annotation/head_annotations.gff3',
+                             header=None, names=GFF3_COLUMNS)
+    gff_data = unfold_gff(gff_data)
+    gff_data.set_index('gene_id', inplace=True)
+    gff_data.motherlength = gff_data.motherlength.astype(dtype='int')
+    gff_data.drop(['source', 'type', 'score', 'phase'], 1, inplace=True)
+
+    # ##### HEAD REPETITIONS (# OF INTERHEAD BLAST ALIGNMENTS)
+    heads_repetitions = pd.read_table(pardir/'genome_annotation/heads_repetitions.tsv', index_col='head_id')
+
+    # ##### READ COUNTS DATA
+    count_data = pd.read_table(pardir/'counted_reads' /
+                               'aggregated.tsv')
+    count_data = count_data.sum()[1:]
+
+    complement_count = count_data.loc[count_data.index.str.endswith('_complement')]
+    count_data = count_data.drop(complement_count.index)
+
+    complement_count.index = complement_count.index.str.strip('_complement')
+    complement_count.rename('complement_transcription', inplace=True)
+    complement_heads_count = complement_count.loc[complement_count.index.str.startswith('head')]
+    complement_genes_count = complement_count.loc[used_genes]
+
+    count_data.rename('transcription', inplace=True)
+    heads_count = count_data.loc[count_data.index.str.startswith('head')]
+    genes_count = count_data.loc[used_genes]
+
+    # ##### GENE ANNOTATIONS DATA
+    gene_gff = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3',
+                             header=None, names=GFF3_COLUMNS)
+    SELECTED_COLS = ['start', 'end', 'strand', 'length', 'Name']
+    gene_gff = unfold_gff(gene_gff)[SELECTED_COLS]
+    gene_gff = gene_gff.set_index('Name').loc[used_genes]
+
+    # ##### COMPILE GENES DATA
+    genes_data = pd.concat([gene_gff, genes_count, complement_genes_count], 1)
+    genes_data.columns = ['gene_' + name for name in genes_data.columns]
+
+    # ##### ALL TOGETHER NOW!
+    data = pd.concat(
+        [
+            gff_data,
+            rel_data,
+            corr_data.correlation,
+            corr_data.complement_correlation,
+            heads_count,
+            complement_heads_count,
+            heads_repetitions
+        ],
+        1, sort=False)
+
+    print(data)
+    print('='*100)
+    print(genes_data)
+    print('='*100)
+    data = data.merge(genes_data, left_on='neighbor_gene', right_index=True,
+                      how='left')
+
+    # ##### FURTHER INFO APPENDS
+
+    # If there is no neighbor gene, 'same_strand' = False.
+    data['same_strand'] = (data.strand==data.gene_strand) & ~data.gene_strand.isna()
+
+    # ## Annotate stream.
+
+    # data['gene_stream'] = pd.np.nan
+    # data.loc[data.relative_position == 'olap', 'stream'] = 'olap'
+
+    # data.loc[((data.strand == '+') & (data.relative_position == 'gh')) | 
+    #          ((data.strand == '-') & (data.relative_position == 'hg')), 'gene_stream'] = 'gh'
+    # 
+    # data.loc[((data.strand == '+') & (data.relative_position == 'hg')) | 
+    #          ((data.strand == '-') & (data.relative_position == 'gh')), 'gene_stream'] = 'hg'
+
+    data['gene_stream'] = data.relative_position
+    mask = (data.gene_strand == '-') & data.relative_position.isin({'hg', 'gh'})
+    data.loc[mask, 'gene_stream'] = data.loc[mask, 'gene_stream'].str[::-1]
+
+    data['head_stream'] = data.relative_position
+    mask = (data.strand == '-') & data.relative_position.isin({'hg', 'gh'})
+    data.loc[mask, 'head_stream'] = data.loc[mask, 'head_stream'].str[::-1]
+
+
+    # ##### FINAL PRINTS
+
+    print('Quantidade de dados não faltantes:')
+    print((~data.isna()).sum())
+
+    print('\nDados com sondas relacionadas a genes mas sem correlação')
+    print((data.relative_position.isna() ^ data.correlation.isna()).sum())
+
+    print('''\nNotas: Só são exibidos os genes que foram relacionados a alguma head/sonda. Tem
+           menos dados de genes porque tem algumas poucas sondas que não tinham
+           nenhum gene no mesmo contig. Há bastante perda de dados quando se quer
+           calcular a correlação, já que muitas sondas tiveram RPKM não-nulo em
+           menos de 4 bibliotecas e foram então descartadas.\n''')
+
+
+    ############ RESET INDEX AND SAVE ##################
+
+    data.index.name = 'head_id'
+    data = data.reset_index()
+
+    data.to_csv(outpath, sep='\t', index=False)
+
+    print('Conferindo backup...', end=' ')
+    # if data is different from last backup data, backup it
+    bkps = sorted(bkp_dir.glob('*'))
+
+    if not bkps or not pd.read_table(bkps[-1]).equals(pd.read_table(outpath)):
+        data.to_csv(bkp_outpath, sep='\t', index=False)
+        print('Backup salvo.')
+    else:
+        print('Backup já existe.')
+
+    print('\nDados agregados salvos.')
+
+    if u.plot_flag:
+        plot()
+
+
+if __name__ == '__main__':
+    main()

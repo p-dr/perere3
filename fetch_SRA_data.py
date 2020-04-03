@@ -6,8 +6,9 @@ from subprocess import run
 import multiprocessing as mp
 from sys import argv
 from glob import glob
-from utils import redo_flag as redo, pardir, log
-from trim_SRA_data import trimmed_data_dir 
+from utils import redo_flag, pardir, log
+from trim_SRA_data import trimmed_data_dir
+import count_SRA_reads
 
 n_cpu = mp.cpu_count()
 SRA_data_dir = pardir/'SRA_data'
@@ -22,16 +23,16 @@ accs = (['SRX74506'+str(i) for i in range(72, 79)] +
 #     'SRX7450672',
 # ]
 
-if len(argv) > 2:
-    accs = accs[int(argv[1]):int(argv[2])]
-
 
 def fetch_acc(acc):
-    existing_files = (list(trimmed_data_dir.glob(acc+'*')) +
-                      list(SRA_data_dir.glob(acc+'*')))
-    
+    existing_files = (
+        *count_SRA_reads.out_dir.glob(acc+'*'),
+        *trimmed_data_dir.glob(acc+'*'),
+        *SRA_data_dir.glob(acc+'*'),
+    )
+
     # if no outfile in outdir
-    if not existing_files or redo:
+    if not existing_files or redo_flag:
         log(f"Baixando '{acc}'...")
         exit()
         run(f'fasterq-dump --split-files -O {str(SRA_data_dir)} {acc} -e {n_cpu} -t /dev/shm -p', shell=True)
@@ -39,7 +40,8 @@ def fetch_acc(acc):
         log('Comando de download executado.')
 
     else:
-        log(f"Pulando '{acc}' por existirem os sguintes arquivos:\n{existing_files}")
+        log(f"Pulando '{acc}' por existirem os seguintes arquivos:",
+            *existing_files, sep='\n')
 
 
 def main():

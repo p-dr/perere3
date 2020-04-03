@@ -95,3 +95,6 @@ qui set 26 19:35:29 -03 2019 | A hipótese de que as cópias, tendo promotores i
 
 qui nov 14 08:07:00 -03 2019 | Acho que 'tag sequences' ou 'sequências etiqueta' é uma boa opção de nome.
 qui nov 14 12:11:27 -03 2019 | comincompletas externas não deviam se diferenciar?
+qua abr 1 19:35:48 -03 2020 | Gerei as comparações de posições relativas novamente. A transcrição do complementar dos genes parece maior, indicando que a biblioteca pareia os reads reversos às regiões codificantes, mas para as sondas isso não apresentou diferença. Precisa então verificar isso pra cada uma das bibliotecas. A não diferença em relação às sondas poderia indicar um promotor bidirecional ou que se trata só de ruído, sendo a última mais favorável ao se pensar que a maioria das sondas está inativa.
+qua abr 1 19:38:02 -03 2020 | Uma cópia incompleta pode se replicar com a proteína de outra cópia.
+qua abr 1 19:39:12 -03 2020 | Isso não pode gerar cópias com sondas coincidentes que descartaríamos na etapa do blast?

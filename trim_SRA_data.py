@@ -8,6 +8,7 @@ from utils import pardir, log, redo_flag
 from wget import download
 import multiprocessing as mp
 from datetime import datetime
+import count_SRA_reads
 
 
 SRA_data_dir = pardir/'SRA_data'
@@ -20,14 +21,20 @@ trimmomatic_path = trimmomatic_dir/'trimmomatic-0.39.jar'
 adapters_dir = trimmomatic_dir/'adapters'
 adapter_path = str(adapters_dir/'TruSeq3-PE.fa')
 
+
 # Remember you chose _1 suffix for forward and _2 for reverse.
 def trim_acc(acc):
     inp1, inp2 = sorted(list(SRA_data_dir.glob(acc + '*')))
     ext = inp2.suffix
     output_prefix = str(trimmed_data_dir/acc)
 
+    existing_files = (
+        *count_SRA_reads.out_dir.glob(acc+'*'),
+        *trimmed_data_dir.glob(acc+'*'),
+    )
+
     # if outfiles are not in outdir
-    if not list(trimmed_data_dir.glob(acc + '*')) or redo_flag:
+    if not existing_files or redo_flag:
         t = datetime.now()
         try:
             command = (
@@ -45,7 +52,8 @@ def trim_acc(acc):
 
 
     else:
-        print (f"'{output_prefix}' já existe. Pulando '{acc}'.")
+        log(f"Pulando '{acc}' por existirem os seguintes arquivos:",
+            *existing_files, sep='\n')
 
 
 def main():

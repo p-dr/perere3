@@ -13,8 +13,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from utils import (pardir, save_all_figs, GFF3_COLUMNS,
                    unfold_gff, plot_box, show_flag)
+import utils as u
+from datetime import datetime
 
 outpath = pardir/'genome_annotation/all_together_now.tsv'
+bkp_dir = u.scripts_dir/'saved_data'
+bkp_outpath = bkp_dir/f'{datetime.now()}.tsv'
 
 def reverse(s):
     return s[::-1]
@@ -118,11 +122,11 @@ data['same_strand'] = (data.strand==data.gene_strand) & ~data.gene_strand.isna()
 #          ((data.strand == '-') & (data.relative_position == 'gh')), 'gene_stream'] = 'hg'
 
 data['gene_stream'] = data.relative_position
-mask = (data.gene_strand == '-') & data.relative_position.isin({'hg', 'gh'}) 
+mask = (data.gene_strand == '-') & data.relative_position.isin({'hg', 'gh'})
 data.loc[mask, 'gene_stream'] = data.loc[mask, 'gene_stream'].apply(reverse)
 
 data['head_stream'] = data.relative_position
-mask = (data.strand == '-') & data.relative_position.isin({'hg', 'gh'}) 
+mask = (data.strand == '-') & data.relative_position.isin({'hg', 'gh'})
 data.loc[mask, 'head_stream'] = data.loc[mask, 'head_stream'].apply(reverse)
 
 
@@ -135,10 +139,10 @@ print('\nDados com sondas relacionadas a genes mas sem correlação')
 print((data.relative_position.isna() ^ data.correlation.isna()).sum())
 
 print('''\nNotas: Só são exibidos os genes que foram relacionados a alguma head/sonda. Tem
-      menos dados de genes porque tem algumas poucas sondas que não tinham
-      nenhum gene no mesmo contig. Há bastante perda de dados quando se quer
-      calcular a correlação, já que muitas sondas tiveram RPKM não-nulo em
-      menos de 4 bibliotecas e foram então descartadas.''')
+       menos dados de genes porque tem algumas poucas sondas que não tinham
+       nenhum gene no mesmo contig. Há bastante perda de dados quando se quer
+       calcular a correlação, já que muitas sondas tiveram RPKM não-nulo em
+       menos de 4 bibliotecas e foram então descartadas.\n''')
 
 
 ############ RESET INDEX AND SAVE ##################
@@ -147,36 +151,47 @@ data.index.name = 'head_id'
 data = data.reset_index()
 
 data.to_csv(outpath, sep='\t', index=False)
-print('\nDados agregados salvos. Plotando...')
+
+print('Conferindo backup...', end=' ')
+# if data is different from last backup data, backup it
+bkps = sorted(bkp_dir.glob('*'))
+
+if not bkps or not pd.read_table(bkps[-1]).equals(pd.read_table(outpath)):
+    data.to_csv(bkp_outpath, sep='\t', index=False)
+    print('Backup salvo.')
+else:
+    print('Backup já existe.')
+
+print('\nDados agregados salvos.')
 
 ####################################################
 
 
-# ###### PLOT ALL NUMERIC!
-data.dropna(inplace=True)
-data.drop('same_strand', 1, inplace=True)
-data = data.infer_objects()
-data = data.select_dtypes(exclude=['object'])
+if u.plot_flag:
+    print('Plotando...')
 
-pd.plotting.scatter_matrix(data.drop(['end', 'start'], 1))
-data.plot.scatter('start', 'transcription', alpha=.2)
-data.plot.scatter('distance', 'transcription', alpha=.2)
-plot_box(data[data.distance > 0], 'distance', 'transcription', bins=50)
+    # ###### PLOT ALL NUMERIC!
+    data.dropna(inplace=True)
+    data.drop('same_strand', 1, inplace=True)
+    data = data.infer_objects()
+    data = data.select_dtypes(exclude=['object'])
 
-genome_map = data.sort_values('start')[['start', 'transcription']]
-genome_map['start'] = pd.cut(genome_map.start, int(1e4))
-genome_map = genome_map.groupby('start').sum()
-le = len(genome_map.transcription)
-plt.figure()
-plt.pcolor(genome_map.transcription.values.reshape(int(le**.5), int(le**.5)))
-plt.colorbar()
-plt.figure()
+    pd.plotting.scatter_matrix(data.drop(['end', 'start'], 1))
+    data.plot.scatter('start', 'transcription', alpha=.2)
+    data.plot.scatter('distance', 'transcription', alpha=.2)
+    plot_box(data[data.distance > 0], 'distance', 'transcription', bins=50)
 
-plt.pcolor(data.corr(method='spearman'))
-plt.figure()
-data.transcription.hist()
+    genome_map = data.sort_values('start')[['start', 'transcription']]
+    genome_map['start'] = pd.cut(genome_map.start, int(1e4))
+    genome_map = genome_map.groupby('start').sum()
+    le = len(genome_map.transcription)
+    plt.figure()
+    plt.pcolor(genome_map.transcription.values.reshape(int(le**.5), int(le**.5)))
+    plt.colorbar()
+    plt.figure()
 
-if not show_flag:
+    plt.pcolor(data.corr(method='spearman'))
+    plt.figure()
+    data.transcription.hist()
+
     save_all_figs()
-else:
-    plt.show()

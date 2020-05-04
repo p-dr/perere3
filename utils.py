@@ -1,6 +1,7 @@
 from pathlib import Path
 
 scripts_dir = Path(__file__).resolve().parent
+plot_scripts_dir = scripts_dir/'plot_scripts'
 pardir = scripts_dir.parent
 genome_path = pardir/'seqs/sm_genome.fa'
 
@@ -32,6 +33,7 @@ argparser.add_argument('-v', '--verbose', action='store_true', help='increase ve
 argparser.add_argument('-s', '--show', action='store_true', help='show instead of save created plots')
 argparser.add_argument('-ss', '--show_save', action='store_true', help='show and save created plots')
 argparser.add_argument('-p', '--plot', action='store_true', help='show plot information')
+argparser.add_argument('-c', '--clean', action='store_true', help='delete large files after processing them')
 args = argparser.parse_args()
 
 # only for back compatibility
@@ -94,44 +96,6 @@ def overlaps(*args):
         return False
 
 
-def find_gtaa_break(seq, max_dirty_blocks=2, max_errors=2, verbose=False):
-    """
-    Returns position of seq string where 'GTAA' repetitiveness is broken.
-    Tolerates at most max_errors in max_dirty_blocks blocks of four characters.
-    """
-    seq = seq.upper()
-    errors = 0
-    count_dirty_blocks = 0
-
-    for i in range(0, len(seq), 4):
-
-        for bp1, bp2 in zip(seq[i:i+4], 'GTAA'):
-            if bp1 != bp2:
-                errors += 1
-                if verbose:
-                    print (bp1.lower(), end='')
-
-            elif verbose:
-                print(bp1, end='')
-
-            if errors > max_errors:
-                ret = i-count_dirty_blocks*4
-                if verbose:
-                    print ('\n'+seq[:ret]+'|'+seq[ret:])
-                return ret
-
-        if errors:
-            count_dirty_blocks += 1
-
-            if count_dirty_blocks == max_dirty_blocks:
-                count_dirty_blocks = 0
-                errors = 0
-
-    if verbose:
-        print('\nNo break position found. Returning len(seq).')
-    return len(seq)
-
-
 from time import time
 
 # timeit does exactly the same, but better.
@@ -172,7 +136,6 @@ def safe_open(path, mode='w', exist_ok=True):
             print(message)
             if exist_ok == 'exit':
                 exit()
-
         else:
             raise FileExistsError(message)
 
@@ -303,8 +266,8 @@ def multibox_compare(ds, labels=None, arch_height=None, margin=None):
 
 import os
 
-def print_header(*args, sep=' ', write_log=False, **kwargs):
-    outs = [LOG_PATH.open('a'), None][not write_log:]  # You let an open file.
+def print_header(*args, sep=' ', log=False, **kwargs):
+    outs = [LOG_PATH.open('a'), None][not log:]  # You let an open file.
     cols, _ = os.get_terminal_size()
     args = [a.upper() if type(a) == str else str(a) for a in args]
     argstr = f'{sep.join(args):^{cols}}'
@@ -314,3 +277,29 @@ def print_header(*args, sep=' ', write_log=False, **kwargs):
         print(argstr, file=outfile, **kwargs)
         print('=' * cols, file=outfile)
         print(file=outfile)
+
+
+def clean(*paths):
+    if args.clean:
+       [path.unlink() for path in paths] 
+       log('Deleted following files:', *paths, sep='\n\t')
+
+
+def ask_to_call(func, desc, *args, **kwargs):
+    # implement not_func to call if inp in 'nN'
+    while True:
+        inp = input('Delete leftover files? [y/n]:')
+        if inp in 'yY':
+            func(*args, **kwargs)
+            return True
+        elif inp in 'nN':
+            return False
+
+
+def user_confirms(desc='Confirm action?', yes_options='yY', no_options='nN'):
+    while True:
+        inp = input(f'{desc} [{yes_options}/no_options]:')
+        if inp in yes_options:
+            return True
+        elif inp in no_options:
+            return False

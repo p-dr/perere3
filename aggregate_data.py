@@ -1,6 +1,7 @@
 # description: Plots scatter matrix comparing all new parameters and generate
 # all_together_now.tsv compilation.
-# in: pardir/'counted_reads/aggregated.tsv'
+# in: pardir/'counted_reads/parsed_data/heads_rpkm.tsv'
+# in: pardir/'counted_reads/parsed_data/genes_rpkm.tsv'
 # in: pardir/'genome_annotation/head_genes_relations.tsv'
 # in: pardir/'genome_annotation/head_genes_correlations.tsv'
 # in: pardir/f'genome_annotation/head_genes_complements_correlations.tsv'
@@ -15,6 +16,10 @@ from utils import (pardir, save_all_figs, GFF3_COLUMNS,
                    unfold_gff, plot_box, show_flag)
 import utils as u
 from datetime import datetime
+from correlate_heads_to_near_genes import (
+    out_heads_rpkm as heads_rpkm_path,
+    out_genes_rpkm as genes_rpkm_path,
+)
 
 outpath = pardir/'genome_annotation/all_together_now.tsv'
 bkp_dir = u.scripts_dir/'saved_data'
@@ -85,21 +90,8 @@ def main():
     heads_repetitions = pd.read_table(pardir/'genome_annotation/heads_repetitions.tsv', index_col='head_id')
 
     # ##### READ COUNTS DATA
-    count_data = pd.read_table(pardir/'counted_reads' /
-                               'aggregated.tsv')
-    count_data = count_data.sum()[1:]
-
-    complement_count = count_data.loc[count_data.index.str.endswith('_complement')]
-    count_data = count_data.drop(complement_count.index)
-
-    complement_count.index = complement_count.index.str.strip('_complement')
-    complement_count.rename('complement_transcription', inplace=True)
-    complement_heads_count = complement_count.loc[complement_count.index.str.startswith('head')]
-    complement_genes_count = complement_count.loc[used_genes]
-
-    count_data.rename('transcription', inplace=True)
-    heads_count = count_data.loc[count_data.index.str.startswith('head')]
-    genes_count = count_data.loc[used_genes]
+    heads_rpkm = pd.read_table(heads_rpkm_path, index_col='head_id')
+    genes_rpkm = pd.read_table(genes_rpkm_path, index_col='gene_id').loc[used_genes]
 
     # ##### GENE ANNOTATIONS DATA
     gene_gff = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3',
@@ -109,7 +101,7 @@ def main():
     gene_gff = gene_gff.set_index('Name').loc[used_genes]
 
     # ##### COMPILE GENES DATA
-    genes_data = pd.concat([gene_gff, genes_count, complement_genes_count], 1)
+    genes_data = pd.concat([gene_gff, genes_rpkm], 1)
     genes_data.columns = ['gene_' + name for name in genes_data.columns]
 
     # ##### ALL TOGETHER NOW!
@@ -119,9 +111,8 @@ def main():
             rel_data,
             corr_data.correlation,
             corr_data.complement_correlation,
-            heads_count,
-            complement_heads_count,
-            heads_repetitions
+            heads_rpkm,
+            heads_repetitions,
         ],
         1, sort=False)
 
@@ -182,7 +173,7 @@ def main():
 
     if not bkps or not pd.read_table(bkps[-1]).equals(pd.read_table(outpath)):
         data.to_csv(bkp_outpath, sep='\t', index=False)
-        print('Backup salvo.')
+        print('Novo backup salvo.')
     else:
         print('Backup já existe.')
 

@@ -32,7 +32,7 @@ for acc in accs:
         print (f"Alinhando {acc} com heads...")
         run((f'hisat2 -q -x {heads_prefix} -1 {input_prefix}_1_paired* '
              f'-2 {input_prefix}_2_paired* -S {str(out_path)} --no-unal --rna-strandness FR --threads {ncpu}'),
-             shell=True, stout=log_file, stderr=log_file)
+             shell=True, stdout=log_file, stderr=log_file)
         print ('Hisat2 terminou de rodar.')
         log(f"Alinhamentos de {acc} com heads concluídos e salvos em '{str(out_path)}'.")
         

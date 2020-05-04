@@ -6,7 +6,6 @@
 from pandas import read_csv, DataFrame, cut, pivot_table
 from matplotlib import pyplot as plt
 from utils import pardir
-from labutils import rgb_to_hex
 from pathlib import Path
 from random import random as rd, seed
 from numpy import log2
@@ -31,7 +30,8 @@ def color_from_id(name):
         num = int(name.split('_')[1])
 
     seed(num)
-    return rgb_to_hex(int(rd()*255) for i in range(3))
+    rgb = (int(rd()*255) for i in range(3))
+    return '#' + ''.join(f'{n:x}' for n in rgb)
 
 
 def get_sum(df):

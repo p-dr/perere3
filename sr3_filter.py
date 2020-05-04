@@ -14,27 +14,9 @@ from datetime import datetime
 # Usar biopython para blastear?
 filtered_outpath = pardir/'alinhamentos/perere3_vs_genome_sr3_filtered.bl'
 discarded_outpath = pardir/'alinhamentos/perere3_vs_genome_discarded.tsv'
-filtered_outfile = safe_open(filtered_outpath, exist_ok=False)
-discarded_outfile = safe_open(discarded_outpath, exist_ok=False)
 
 perere3_inpath = pardir/'alinhamentos/perere3_vs_genome.bl'
 sr3_inpath = pardir/'alinhamentos/sr3_vs_genome.bl'
-
-n_cpu = mp.cpu_count()
-
-#================== LER E FILTRAR ALINHAMENTOS ==================#
-
-print('Lendo resultados do Blast...', end=' ')
-perere3_vs_genoma = pd.read_table(perere3_inpath,
-                             header=None, names=BL_COLUMNS)
-sr3_vs_genoma = pd.read_table(sr3_inpath,
-                         header=None, names=BL_COLUMNS)
-print('Resultados lidos.')
-
-# Sort positions
-# for data in (perere3_vs_genoma, sr3_vs_genoma):
-#     data.sort_values('sstart', inplace=True)
-#     data.reset_index(drop=True, inplace=True)
 
 
 def cartesian_product(left, right):
@@ -53,8 +35,25 @@ def parse_product(progress_pos, product):
 
 
 def main():
+    filtered_outfile = safe_open(filtered_outpath, exist_ok=False)
+    discarded_outfile = safe_open(discarded_outpath, exist_ok=False)
+    n_cpu = mp.cpu_count()
+
+    #================== LER E FILTRAR ALINHAMENTOS ==================#
+
+    print('Lendo resultados do Blast...', end=' ')
+    perere3_vs_genoma = pd.read_table(perere3_inpath,
+                                 header=None, names=BL_COLUMNS)
+    sr3_vs_genoma = pd.read_table(sr3_inpath,
+                             header=None, names=BL_COLUMNS)
+    print('Resultados lidos.')
+
+    # Sort positions
+    # for data in (perere3_vs_genoma, sr3_vs_genoma):
+    #     data.sort_values('sstart', inplace=True)
+    #     data.reset_index(drop=True, inplace=True)
  
-    print('Filtrando alinhamentos em que o SR3 é melhor...')
+    print('Buscando alinhamentos em que o SR3 é melhor...')
     discarded = pd.DataFrame()
     filtered_perere3_vs_genoma = perere3_vs_genoma.copy()
 
@@ -72,8 +71,7 @@ def main():
 
         # discard when perere3 aligns better
         prinf('Filtrando por bitscore do SR3...', end='\r')
-        product = product.loc[product.bitscore_x < product.bitscore_y,
-                              ]
+        product = product.loc[product.bitscore_x < product.bitscore_y]
 
         if product.empty:
             continue
@@ -91,18 +89,17 @@ def main():
         # print(filtered_perere3_vs_genoma.loc[discarded['index'].unique()])
 
 
-    filtered_perere3_vs_genoma.drop(discarded['index'].values, inplace=True)
+    print(f"Escrevendo posições das linhas removidas de '{str(perere3_inpath)}' em '{str(discarded_outpath)}'...", end=' ')
+    discarded.columns = pd.MultiIndex.from_product([('perere3', 'sr3'), ('index', 'sstart', 'ssend', 'bitscore')])
+    discarded.to_csv(discarded_outfile, sep='\t', index=False)
+    print('Arquivo escrito.')
 
+    print('Filtrando...', end=' ')
+    filtered_perere3_vs_genoma.drop(discarded[('perere3', 'index')], inplace=True)
     print(f'\nFiltragem concluída. {len(discarded)} alinhamentos removidos.')
 
     print(f"Escrevendo alinhamentos filtrados do perere3 em '{str(filtered_outpath)}'...", end=' ')
     filtered_perere3_vs_genoma.to_csv(filtered_outfile, sep='\t', index=False)
-    print('Arquivo escrito.')
-
-    print(f"Escrevendo posições das linhas removidas de '{str(perere3_inpath)}' em '{str(discarded_outpath)}'...", end=' ')
-
-    discarded.columns = pd.MultiIndex.from_product([('perere3', 'sr3'), ('index', 'sstart', 'ssend', 'bitscore')])
-    discarded.to_csv(discarded_outfile, sep='\t', index=False)
     print('Arquivo escrito.')
 
     return filtered_perere3_vs_genoma, discarded

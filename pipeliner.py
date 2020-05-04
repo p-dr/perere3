@@ -8,12 +8,27 @@ from pprint import pprint
 CMAP = get_cmap('cool').reversed()
 pipeline = Digraph()
 scripts_dir = pardir/'scripts'
-ignore_list = ['*.swp']
+ignore_list = ['*.sw*']
 ext = ['.py', '.sh']
 
 
-def parse_script(script_path):
+def path2str(p):
+    if isinstance(p, str):
+        return p
+    # WRN: .replace of pathlib moves the file!
+    return str(p.resolve()).replace(str(pardir), '..').replace('/','/\n/').replace('../\n', '..')
 
+
+def eval_path(path_var, script_path):
+    if path_var.startswith('('):
+        return path_var
+    elif script_path.suffix != '.py':
+        return eval(path_var)
+    exec(f'import {script_path.stem} as s; eval_path.ret = s.{path_var}')
+    return eval_path.ret
+
+
+def parse_script(script_path):
     script_tags = {}
 
     with script_path.open('r') as script_file:
@@ -28,12 +43,14 @@ def parse_script(script_path):
                     continue
                 else:
                     tag, value = tag
+                    tag = tag.strip()
 
                 if tag == 'description':
-                    script_tags[tag] = value
+                    script_tags[tag] = value.strip()
 
-                else:
-                    value = value.split(' ')
+                elif tag in ('in', 'out'):
+                    value = value.split()
+                    value = [eval_path(path, script_path) for path in value]
                     script_tags[tag] = script_tags.get(tag, []) + value
 
             elif line != '\n':
@@ -50,11 +67,11 @@ def build_edges(script_tags, script_name, file2color_map):
 
     for inpath in script_tags.get('in', ()):
         pipeline.attr('node', color=file2color_map[inpath])
-        pipeline.edge(inpath.replace('/','/\n/'), script_name)
+        pipeline.edge(path2str(inpath), script_name)
 
     for outpath in script_tags.get('out', ()):
         pipeline.attr('node', color=file2color_map[outpath])
-        pipeline.edge(script_name, outpath.replace('/','/\n/'))
+        pipeline.edge(script_name, path2str(outpath))
 
 
 def ctimes2color(all_iofiles_ctime):
@@ -63,9 +80,8 @@ def ctimes2color(all_iofiles_ctime):
     ret = {'(cloud)': 'white'}
     ctimes = sorted(all_iofiles_ctime.values())
     color_step = CMAP.N // (len(ctimes)-1)  # why must it be integer?
+
     for io_str_path, ctime in all_iofiles_ctime.items():
-        # trim out 'pardir/"' and '"'
-        io_path = eval(io_str_path)
         color = to_hex(CMAP(ctimes.index(ctime) * color_step)) + ALPHA
         ret.update({io_str_path: color})
 
@@ -86,13 +102,9 @@ def main():
         if script_tags:
             all_scripts_tags.update({script_name: script_tags})
 
-            for io_str_path in script_tags.get('in', []) + script_tags.get('out', []):
+            for io_path in script_tags.get('in', []) + script_tags.get('out', []):
 
-                # trim out 'pardir/"' and '"'
-                io_path = pardir/io_str_path[8:-1]
-                ignored = any(io_path.match(patt) for patt in ignore_list)
-
-                if io_str_path == '(cloud)' or ignored:
+                if isinstance(io_path, str) or any(io_path.match(patt) for patt in ignore_list):
                     continue
 
                 elif not io_path.exists():
@@ -111,7 +123,7 @@ def main():
                 else:
                     creation_time = io_path.stat().st_mtime
 
-                all_iofiles_ctime[io_str_path] = all_iofiles_ctime.get(io_str_path, creation_time)
+                all_iofiles_ctime[io_path] = all_iofiles_ctime.get(io_path, creation_time)
 
         else:
             untagged_scripts.append(script_name)

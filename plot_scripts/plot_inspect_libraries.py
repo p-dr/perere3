@@ -1,12 +1,15 @@
+# description: Compares genes' to gene complements' transcription in each reads library.
 # in: pardir/'counted_reads/aggregated.tsv'
 # plot: 
-
+import sys
 import utils as u
+sys.path.append(str(u.scripts_dir))
+from correlate_heads_to_near_genes import out_rpkm_by_lib as rpkm_by_lib
+
 import pandas as pd
 import matplotlib.pyplot as plt
-from  correlate_heads_to_near_genes import out_aggregated_counts
 
-d = pd.read_table(out_aggregated_counts, index_col='biblioteca')
+d = pd.read_table(rpkm_by_lib, index_col='library')
 d = d.loc[:, d.columns.str.contains('Smp')]  # Restrict to genes.
 
 comp = d.loc[:, d.columns.str.endswith('_complement')]

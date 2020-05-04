@@ -70,6 +70,7 @@ def main():
     counts_df = counts.to_frame().reset_index()
     counts_df.columns = ['head_id', 'repetitions']
     counts_df.to_csv(repetitions_outpath, sep='\t', index=False)
+    u.log(f'Repetitions table saved at {str(repetitions_outpath)}')
 
     if u.plot_flag:
         plot(counts)

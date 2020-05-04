@@ -10,25 +10,25 @@
 
 import networkx as nx
 import subprocess as sp
-import argparse
-from utils import pardir, scripts_dir, LOG_PATH, print_header, log
+import utils as u
+from fetch_SRA_data import FINISHED_FLAG
 
-logfile = LOG_PATH.open('a')
-graph = nx.drawing.nx_pydot.read_dot(pardir/'pipeline')
-start = "pardir/\n/'genome_annotation/\n/all_together_now.tsv'"
+u.logfile = u.LOG_PATH.open('a')
+graph = nx.drawing.nx_pydot.read_dot(u.pardir/'pipeline')
+start = "../genome_annotation/\n/all_together_now.tsv"
 
-argparser = argparse.ArgumentParser(
-    description='Run necessary scripts for creating ' + start.replace('/\n', ''))
-
-argparser.add_argument('-f', '--startfrom',
-    default=None,
-    help='Start running pipeline from <script>')
-argparser.add_argument('-l', '--list', '--print',
-    action='store_true',
-    help='Only prints the pipeline to be run')
-argparser.add_argument('-e', '--exclude',
-    nargs='*',
-    help='Do not run selected scripts')
+# argparser = argparse.ArgumentParser(
+#     description='Run necessary scripts for creating ' + start.replace('/\n', ''))
+# 
+# argparser.add_argument('-f', '--startfrom',
+#     default=None,
+#     help='Start running pipeline from <script>')
+# argparser.add_argument('-l', '--list', '--print',
+#     action='store_true',
+#     help='Only prints the pipeline to be run')
+# argparser.add_argument('-e', '--exclude',
+#     nargs='*',
+#     help='Do not run selected scripts')
 
 
 def above_tree(graph, start):
@@ -97,16 +97,19 @@ def parent_scripts(graph, start, flag=True):
 
 
 def run_script(name):
-    print_header(f'Running {name}...', write_log=True)
-    script_path = scripts_dir/name
+    if name == 'aggregate_data.py':  # find better way
+        return
+    u.print_header(f'Running {name}...', log=True)
+    script_path = u.scripts_dir/name
     suffix = script_path.suffix
 
     if suffix == '.py':
         sname = name.strip('.py')
         try:
-            exec(f'import {sname}; {sname}.main()')  # del after?
+            exec(f'import {sname}; main_ret = {sname}.main()', globals())  # del after?
+
         except FileExistsError:
-            log('FILEEXISTS')
+            u.log('FILEEXISTS')
             
 
     elif suffix == '.sh':
@@ -119,7 +122,7 @@ def run_script(name):
 
         while process.poll() is None:
             line = process.stdout.readline()
-            logfile.write(line)
+            u.logfile.write(line)
             print(line, end='')
 
         print('Child process returned', process.returncode)
@@ -127,23 +130,41 @@ def run_script(name):
             exit()
 
 
+def plot_all(confirm=False):
+    if not confirm or u.user_confirms():
+        for script in u.plot_scripts_dir.glob('*.py'):
+            u.print_header(script.stem)
+            sp.run(('python', str(script)))
+
+
 def main(start=start):
     ps = parent_scripts(graph, start)
-    args = argparser.parse_args()
+    # args = argparser.parse_args()
 
-    if args.startfrom is not None:
-        ps = ps[ps.index(args.startfrom):]
+    # if args.startfrom is not None:
+    #     ps = ps[ps.index(args.startfrom):]
 
-    log('Iniciando sessão com os seguintes scripts:\n', *ps)
+    u.log('Iniciando sessão com os seguintes scripts:\n', *ps)
+    finished = False  # finished downloading all accs.
 
-    for script in ps:
-        if args.list:
-            print(script)
-        else:
+    while not finished:
+        for script in ps:
+            # if args.list:
+            #     print(script)
+            # else:
             run_script(script)
+
+            if main_ret == FINISHED_FLAG:
+                finished = True
+
+    u.print_header('agregando resultados', log=True)
+    run_script('aggregate_data.py')
+
+    if u.args.plot:
+        plot_all()
 
 
 if __name__ == '__main__':
     main()
 
-logfile.close()
+u.logfile.close()

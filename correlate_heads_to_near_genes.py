@@ -1,35 +1,53 @@
 # description: Calculates expression (read count) correlation between heads and its nearest gene(s). When only "relation" is said, I mean head -> nearest gene(s) mapping.
-# in: pardir/'genome_annotation/head_genes_relations.tsv'
-# in: pardir/'counted_reads'
-# in: pardir/'genome_annotation/gene_annotations.gff3'
-# in: pardir/'genome_annotation/head_annotations.gff3'
-# out: pardir/'genome_annotation/head_genes_correlations.tsv'
-# out: pardir/f'genome_annotation/head_genes_complements_correlations.tsv'
-# out: pardir/'counted_reads/aggregated.tsv'
+# in: u.pardir/'genome_annotation/head_genes_relations.tsv'
+# in: u.pardir/'counted_reads'
+# in: u.pardir/'genome_annotation/gene_annotations.gff3'
+# in: u.pardir/'genome_annotation/head_annotations.gff3'
+# out: u.pardir/'genome_annotation/head_genes_correlations.tsv'
+# out: u.pardir/f'genome_annotation/head_genes_complements_correlations.tsv'
+# out: out_rpkm_by_lib
+# out: out_heads_rpkm
+# out: out_genes_rpkm
 
-from utils import (pardir, show_flag, safe_open, parse_gff_attributes,
-                   prinf, GFF3_COLUMNS, save_all_figs)
+import utils as u
 import pandas as pd
 from matplotlib import pyplot as plt
 from sys import argv
+from count_SRA_reads import out_dir as counts_dir
 
-out_aggregated_counts = pardir/f'counted_reads/aggregated.tsv'
+u.redo_flag = True  # Gabiarration.
 
-outpath = pardir/f'genome_annotation/head_genes_correlations.tsv'
-complements_outpath = pardir/f'genome_annotation/head_genes_complements_correlations.tsv'
+count_flags = [
+    "__no_feature",
+    "__ambiguous",
+    "__too_low_aQual",
+    "__not_aligned",
+    "__alignment_not_unique",
+]
+
+parsed_data_dir = counts_dir/'parsed_data'
+parsed_data_dir.mkdir(exist_ok=True)
+
+out_rpkm_by_lib = parsed_data_dir/'rpkm_by_lib.tsv'
+out_heads_rpkm = parsed_data_dir/'heads_rpkm.tsv'
+out_genes_rpkm = parsed_data_dir/'genes_rpkm.tsv'
+
+corr_outpath = u.pardir/f'genome_annotation/head_genes_correlations.tsv'
+complements_outpath = u.pardir/f'genome_annotation/head_genes_complements_correlations.tsv'
+
 
 def main():
-    outfile = safe_open(outpath, exist_ok='exit')
-    complements_outfile = safe_open(complements_outpath, exist_ok='exit')
+    outfile = u.safe_open(corr_outpath, exist_ok='exit')
+    complements_outfile = u.safe_open(complements_outpath, exist_ok='exit')
 
     print('Buscando comprimentos de genes e heads...')
-    gene_attibutes = pd.read_table(pardir/'genome_annotation/gene_annotations.gff3',
-                                   names=GFF3_COLUMNS, usecols=['attributes'])['attributes']
-    head_attibutes = pd.read_table(pardir/'genome_annotation/head_annotations.gff3',
-                                   names=GFF3_COLUMNS, usecols=['attributes'])['attributes']
+    gene_attibutes = pd.read_table(u.pardir/'genome_annotation/gene_annotations.gff3',
+                                   names=u.GFF3_COLUMNS, usecols=['attributes'])['attributes']
+    head_attibutes = pd.read_table(u.pardir/'genome_annotation/head_annotations.gff3',
+                                   names=u.GFF3_COLUMNS, usecols=['attributes'])['attributes']
 
-    gene_lengths = parse_gff_attributes(gene_attibutes, gene_id='Name')['length']
-    head_lengths = parse_gff_attributes(head_attibutes)['length']
+    gene_lengths = u.parse_gff_attributes(gene_attibutes, gene_id='Name')['length']
+    head_lengths = u.parse_gff_attributes(head_attibutes)['length']
     lengths = pd.concat([head_lengths, gene_lengths]).astype(int)
 
     # Consider same lengths for complements
@@ -38,7 +56,7 @@ def main():
     lengths = lengths.append(new_lengths)
 
     print('Concluído. Lendo arquivo de relações...')
-    relations = pd.read_table(pardir/f'genome_annotation/head_genes_relations.tsv')
+    relations = pd.read_table(u.pardir/f'genome_annotation/head_genes_relations.tsv')
 
     # Escrever cabeçalho
     outfile.write('\t'.join(relations.columns) + '\tcorrelation\n')
@@ -48,14 +66,18 @@ def main():
     # ###################### AGREGATE COUNTS ###############################
     print('Conclúido. Agregando contagens em um DataFrame...')
 
-    # Read counts for each feature
+    # Read counts for each feature and library
     counts = pd.DataFrame()
+    # All libraries merged, data by feature (head/gene)
+    # total_count = pd.Series()
+    lib_sizes = pd.DataFrame()
 
     # for each SRA library
-    for count_path in (pardir/'counted_reads').glob('*.csv'):  # WARNING: A extensão será mudada para tsv no futuro.
+    for count_path in (u.pardir/'counted_reads').glob('*.tsv'):
         print(f'Processing {str(count_path)}')
 
         lib_name = count_path.stem.split('_')[0]
+        count_type = count_path.stem.strip(lib_name + '_')  # gene, head, head_complement or gene_complement
 
         count = pd.read_table(count_path, header=None,
                               names=['feature', lib_name],
@@ -72,26 +94,112 @@ def main():
             # + __too_low_aQual
             # (without) __not_aligned
             # + __alignment_not_unique
-            total_count = count.iloc[:-2].sum() + count.iloc[-1]
-            count /= total_count/1e6
+            total_lib_count = count.iloc[:-2, 0].sum() + count.iloc[-1, 0]
+            lib_sizes.loc[count_type, lib_name] = total_lib_count
+            counts = counts.combine_first(count)  # this func sounds weird.
 
-            ### NORMALIZE FOR FEATURE LENGTH (IN KBP):
-            count[lib_name] /= lengths/1000  # This makes final flag rows (__no_feature etc.) become NaN.
-            count.dropna(inplace=True)  # This eliminates final flags.
 
-            # count final meaning (RPKM):
-            # read count by library size (in million reads) by feature length (in bp)
-            counts = counts.combine_first(count)
+    counts = counts.drop(count_flags)
 
+    ################# SEE WHICH LIBRARIES USE REVERSED READS
+
+    gene_counts = counts[counts.index.str.startswith('Smp')]
+    counts_comp = gene_counts.loc[gene_counts.index.str.endswith('_complement')]
+    gene_counts = gene_counts.drop(counts_comp.index)
+
+    if counts_comp.shape != gene_counts.shape:
+        print(counts_comp, gene_counts)
+        raise RuntimeError
+
+    rev = counts_comp.mean() > gene_counts.mean()
+    reversed_libs = rev[rev].index
+    print('RF libraries found:', *reversed_libs)
+
+    is_complement = counts.index.str.endswith('_complement')
+
+    rl = reversed_libs
+    c = is_complement
+
+    # complement become non_complement for RF libraries
+    comp_ind = counts.index[c]
+    not_comp = comp_ind.str.strip('_complement')  # IMPORTANT: done this way to keep same order as c.
+    # print(counts.loc[comp_ind, rl])
+    # print(counts.loc[not_comp, rl])
+    # print(counts.head(20))
+
+    # the following was a difficult line. Very important one.
+    counts.loc[not_comp, rl], counts.loc[comp_ind, rl] = counts.loc[comp_ind, rl].values, counts.loc[not_comp, rl].values
+    # print(counts.head(20))
+
+    # # CHECKING RF AGAIN
+    # gene_counts = counts[counts.index.str.startswith('Smp')]
+    # counts_comp = gene_counts.loc[gene_counts.index.str.endswith('_complement')]
+    # gene_counts = gene_counts.drop(counts_comp.index)
+    # rev = counts_comp.mean() > gene_counts.mean()
+    # rl = rev[rev].index
+    # if rl.empty:
+    #     raise RuntimeError('Not all RF libs were correctly treated.')
+    ################## 
 
     counts = counts.T
-    counts.index.name = 'biblioteca'
-    print(counts)
 
-    out_aggregated_file = safe_open(out_aggregated_counts)
-    if out_aggregated_file is not None:
-        counts.to_csv(out_aggregated_file, sep='\t')
-        out_aggregated_file.close()
+    ################# SAVE TRANSCRIPTION DATA (RPKM)
+
+    if not (lib_sizes.max() == lib_sizes.min()).all():
+        print(lib_sizes)
+        print('lib_sizes.max() == lib_sizes.min()')
+        print(lib_sizes.max() == lib_sizes.min())
+        raise RuntimeError("Library size differs across count files.")
+
+    lib_sizes = lib_sizes.max()
+
+    total_read_sum = lib_sizes.sum()
+    rpkm = counts.sum()
+    rpkm /= lengths/1000  # by lenght kbp; count flags are NaNed here
+    rpkm /= total_read_sum/1e6  # by million reads in libs
+    sh0 = rpkm.shape[0]  # for posterior shape verification
+
+    complement_rpkm = rpkm[rpkm.index.str.endswith('_complement')]
+    rpkm = rpkm.drop(complement_rpkm.index)
+    complement_rpkm.index = complement_rpkm.index.str.replace('_complement', '')
+    rpkm = pd.concat([rpkm, complement_rpkm], axis=1)
+
+    heads_rpkm = rpkm[rpkm.index.str.startswith('head')].reset_index()
+    genes_rpkm = rpkm[rpkm.index.str.startswith('Smp')].reset_index()
+
+    heads_rpkm.columns = ['head_id', 'transcription', 'complement_transcription']
+    genes_rpkm.columns = ['gene_id', 'transcription', 'complement_transcription']
+    len_check = heads_rpkm.shape[0] + genes_rpkm.shape[0] == rpkm.shape[0]
+
+    if not len_check:
+        print("heads_rpkm.shape[0], '+', genes_rpkm.shape[0], '=', rpkm.shape[0]")
+        print(heads_rpkm.shape[0], '+', genes_rpkm.shape[0], '=', rpkm.shape[0])
+        print(len_check)
+        print('NaNs:\n', heads_rpkm.isna().sum(), genes_rpkm.isna().sum()) 
+        raise RuntimeError('rpkm dataframe seems to be wrongly splitted.')
+
+    with u.safe_open(out_heads_rpkm, exist_ok=False) as hr:
+        heads_rpkm.to_csv(hr, index=False, sep='\t')
+    with u.safe_open(out_genes_rpkm, exist_ok=False) as gr:
+        genes_rpkm.to_csv(gr, index=False, sep='\t')
+
+    u.log(f'RPKM data was sucessfully saved to disk:\n\t{out_genes_rpkm}\n\t{out_heads_rpkm}')
+    print()
+    
+    #################### ORGANIZE BY LIB. AND GEN CORRELATION
+    # REMEMBER: Complement correlation is correlation between copy complement
+    # and neighbor gene (not the complement of the latter).
+
+    print('Normalizing counts...')
+    rpkm_by_lib = counts#.copy()
+    print('shape before:', rpkm_by_lib.shape)
+    rpkm_by_lib = rpkm_by_lib.div(lib_sizes/1e6, axis=0)  # per million reads in library
+    rpkm_by_lib = rpkm_by_lib.div(lengths/1000, axis=1)  # per feature kilobase of length
+    print('shape after:', rpkm_by_lib.shape)
+    rpkm_by_lib.index.name = 'library'
+
+    with u.safe_open(out_rpkm_by_lib, exist_ok=False) as of:
+        rpkm_by_lib.to_csv(of, sep='\t')
 
     print('Concluído. Calculando correlações...')
 
@@ -109,26 +217,26 @@ def main():
 
             if complement_flag:
                 hid += '_complement'
-                gid += '_complement'
+                # gid += '_complement'
 
-            if hid not in counts:
+            if hid not in rpkm_by_lib:
                 print(f'WARNING: {hid} não presente nas contagens, só nas relações head-gene. Talvez a contagem deva ser refeita.')
                 continue
 
-            head_col = counts[hid]
-            gene_col = counts[gid]
+            head_col = rpkm_by_lib[hid]
+            gene_col = rpkm_by_lib[gid]
 
             n_non_zero = (head_col.astype(bool) & gene_col.astype(bool)).sum()
-            # if number of significative points (head and gene counts != 0) is less than 4
+            # if number of significative points (head and gene rpkm_by_lib != 0) is less than 4
             if n_non_zero < 4:
-                prinf('\nCorrelação descartada:\n', counts[[gid, hid]])
+                u.prinf('\nCorrelação descartada:\n', rpkm_by_lib[[gid, hid]])
                 continue
 
-            prinf('\nCorrelação plotada:\n', pd.concat([counts[[gid, hid]], head_col.astype(bool) & gene_col.astype(bool)], 1))
+            u.prinf('\nCorrelação plotada:\n', pd.concat([rpkm_by_lib[[gid, hid]], head_col.astype(bool) & gene_col.astype(bool)], 1))
 
             corr = head_col.corr(gene_col)
 
-            if show_flag:
+            if u.show_flag:
                 gridi = i % (gridx*gridy) + 1
                 plt.subplot(gridx, gridy, gridi)
                 plt.plot(head_col, gene_col, 'o', label=corr)
@@ -137,7 +245,7 @@ def main():
 
                 if gridi == gridx*gridy:
                     plt.tight_layout()
-                    save_all_figs()
+                    u.save_all_figs()
                     plt.show()
 
                 i += 1
@@ -148,8 +256,8 @@ def main():
     outfile.close()
     complements_outfile.close()
 
-    print(f'Arquivos de correlações salvos:\n{str(outpath)}\n{str(complements_outpath)}')
+    print(f'Arquivos de correlações salvos:\n{str(corr_outpath)}\n{str(complements_outpath)}')
 
 
 if __name__ == '__main__':
-    main()
+    main_return = main()

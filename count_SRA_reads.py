@@ -1,45 +1,60 @@
 # description: Counts how many reads were aligned to each gene and head, using HTSeq. Saves it as an attribute on GFF file.
-# in: pardir/'alinhamentos/SRA_vs_genoma'
-# in: pardir/'genome_annotation/head_annotations.gff3'
-# in: pardir/'genome_annotation/gene_annotations.gff3'
-# in: pardir/'genome_annotation/head_complement_annotations.gff3'
-# in: pardir/'genome_annotation/gene_complement_annotations.gff3'
-# out: pardir/'counted_reads'
+# in: alignment_dir
+# in: u.pardir/'genome_annotation/head_annotations.gff3'
+# in: u.pardir/'genome_annotation/gene_annotations.gff3'
+# in: u.pardir/'genome_annotation/head_complement_annotations.gff3'
+# in: u.pardir/'genome_annotation/gene_complement_annotations.gff3'
+# out: out_dir
 
 from glob import glob
 from pathlib import Path
 import subprocess as sp
-from utils import pardir, redo_flag, log, LOG_PATH
+import utils as u
 import multiprocessing as mp
 from datetime import datetime
 
-logfile = LOG_PATH.open('a')
-alignment_dir = pardir/'alinhamentos/SRA_vs_genoma'
-annotations_dir = pardir/'genome_annotation'
-out_dir = pardir/'counted_reads'
+alignment_dir = u.pardir/'alinhamentos/SRA_vs_genoma'
+annotations_dir = u.pardir/'genome_annotation'
+out_dir = u.pardir/'counted_reads'
 out_dir.mkdir(exist_ok=True)
 
 in_format = 'sam'
+# u.args.clean = False
+
+
+def counted(acc):
+    pathlist = [path for path in out_dir.glob(acc+'*')
+                if path.stat().st_size > 1e4]
+    return len(pathlist) == 4
+
 
 def count_reads(args):
     alignment_file, kind = args
 
     acc = Path(alignment_file).stem
     annotations_file = str(annotations_dir/(kind+'_annotations.gff3'))
-    out_path = out_dir/(acc+'_'+kind+'.csv')
+    out_path = out_dir/(acc+'_'+kind+'.tsv')
 
-    if not out_path.exists() or redo_flag:
+    if not out_path.exists() or u.redo_flag:
         print (f"Contando reads de {acc} em cada anotação de {kind}...")
         t0 = datetime.now()
         htseq = sp.Popen((f'python -m HTSeq.scripts.count {alignment_file} --format {in_format} '
                           f'{annotations_file} --type=gene --stranded=yes --order=pos > {str(out_path)}'),
                           stdout=sp.PIPE, stderr=sp.STDOUT, universal_newlines=True, shell=True)
         while htseq.poll() is None:
-            log(out_path.stem + ':', htseq.stdout.readline().strip())  # won't it print stem endlessly?
+            u.log(out_path.stem + ':', htseq.stdout.readline().strip())  # won't it print stem endlessly?
 
         dt = datetime.now() - t0
-        print (f'\n{out_path.name}: htseq-count terminou de rodar. Tempo decorrido: {dt}')
-        log(f"'{str(out_path)}' finalizado em {dt}.")
+
+        if htseq.returncode:
+            u.log(acc, 'ERROR: program returned code', htseq.returncode)
+            out_path.unlink()
+            raise RuntimeError(f'HTSeq returned {htseq.returncode} exit code')
+        else:
+            u.log(f"'{str(out_path)}' finalizado em {dt}.")
+            if counted(acc):
+                u.clean(alignment_file)
+
     else:
         print (f"'{str(out_path)}' já existe. Pulando '{acc}_{kind}'.")
 
@@ -56,7 +71,7 @@ def main():
 
     print('\nTodos os arquivos foram processados.')
     print(f'Tempo total decorrido: {dt}')
-    log(f'Sessão de contagem encerrada com duração {dt}.')
+    u.log(f'Sessão de contagem encerrada com duração {dt}.')
 
 
 if __name__ == '__main__':

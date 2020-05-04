@@ -98,3 +98,5 @@ qui nov 14 12:11:27 -03 2019 | comincompletas externas não deviam se diferencia
 qua abr 1 19:35:48 -03 2020 | Gerei as comparações de posições relativas novamente. A transcrição do complementar dos genes parece maior, indicando que a biblioteca pareia os reads reversos às regiões codificantes, mas para as sondas isso não apresentou diferença. Precisa então verificar isso pra cada uma das bibliotecas. A não diferença em relação às sondas poderia indicar um promotor bidirecional ou que se trata só de ruído, sendo a última mais favorável ao se pensar que a maioria das sondas está inativa.
 qua abr 1 19:38:02 -03 2020 | Uma cópia incompleta pode se replicar com a proteína de outra cópia.
 qua abr 1 19:39:12 -03 2020 | Isso não pode gerar cópias com sondas coincidentes que descartaríamos na etapa do blast?
+ter abr 28 15:20:15 -03 2020 | Mudarei agora o comprimento das sondas (heads) para 500 pb
+seg mai 4 17:59:31 -03 2020 | heads agora com 200bp

@@ -1,0 +1,40 @@
+# RNA-Seq of control immature S. mansoni
+SRX7450672
+SRX7450673
+
+# RNA-Seq of control mature S. mansoni
+SRX7450674
+SRX7450675
+SRX7450676
+SRX7450677
+SRX7450678
+
+# RNA-Seq of control immature S. mansoni
+SRX7450684
+SRX7450685
+SRX7450686
+
+# # [SINGLE] GSM4405000: control RNAi replicate n; Schistosoma mansoni; RNA-Seq
+# SRX7888074
+# SRX7888075
+# SRX7888076
+
+# RNA-Seq of control adult S. mansoni
+SRX6368360
+SRX6368363
+SRX6368364
+SRX6368365
+SRX6368366
+
+# # RNA-seq of Schistosoma mansoni (somula) control
+SRX5554083
+SRX5554084
+SRX5554085
+SRX5554086
+SRX5554087
+SRX5554088
+# SRX5554089  # Gene complements appear to be expressed
+# SRX5554090  # Gene complements appear to be expressed
+# SRX5554091  # Gene complements appear to be expressed
+SRX5554092
+SRX5554093

@@ -1,7 +1,7 @@
 # description: Maps each head to its nearest (or overlapped) gene.
 # in: pardir/'genome_annotation/head_annotations.gff3'
 # in: pardir/'genome_annotation/gene_annotations.gff3'
-# out: pardir/'genome_annotation/head_genes_relations.tsv'
+# out: outpath
 
 from utils import (pardir, overlaps,
                    redo_flag, parse_gff_attributes,
@@ -33,7 +33,7 @@ def main():
     head_groups = heads.groupby(COLS_TO_GROUP)
     gene_groups = genes.groupby(COLS_TO_GROUP)
 
-    outfile = safe_open(outpath, exist_ok='exit')
+    outfile = safe_open(outpath, exist_ok=False)
     # write header
     outfile.write('\t'.join(['head_id', 'gene_id', 'flag', 'distance'])+'\n')
     print('Iterate for each contig and for each head in contig.')

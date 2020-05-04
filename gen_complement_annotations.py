@@ -9,7 +9,8 @@ from utils import redo_flag, pardir, GFF3_COLUMNS, safe_open
 
 def main():
     for kind, pattern in (('head', r'head\d+'), ('gene', r'Smp_\d+')):
-        outfile = safe_open(pardir/f'genome_annotation/{kind}_complement_annotations.gff3', exist_ok=False)
+        out_path = pardir/f'genome_annotation/{kind}_complement_annotations.gff3'
+        outfile = safe_open(out_path, exist_ok=False)
         gff = pd.read_table(pardir/f'genome_annotation/{kind}_annotations.gff3', names=GFF3_COLUMNS)
 
         print(gff.strand.head())

@@ -2,10 +2,11 @@
 # in: (cloud)
 # out: pardir/'seqs/sm_genome.fa'
 # out: pardir/'genome_annotation/sm_annotations.gff3'
+
 from wget import download
 from pathlib import Path
 from subprocess import call
-from utils import redo_flag
+from utils import redo_flag, pardir
 
 genome_out_dir = Path('../seqs')
 genome_out_dir.mkdir(exist_ok=True)

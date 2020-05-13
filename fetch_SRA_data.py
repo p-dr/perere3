@@ -2,7 +2,7 @@
 # in: (cloud)
 # out: SRA_data_dir
 
-from subprocess import run
+import subprocess as sp
 import multiprocessing as mp
 from sys import argv
 from glob import glob
@@ -35,11 +35,12 @@ def fetch_acc(acc):
         *SRA_data_dir.glob(acc+'*'),
     )
 
+    u.log(existing_files,'not existing', not bool(existing_files), 'redo', u.redo_flag)
     # if no outfile in outdir
     if not existing_files or u.redo_flag:
         u.log(f"Baixando '{acc}'...")
         try:
-            run(f'fasterq-dump --split-files -O {str(SRA_data_dir)} {acc} -e {n_cpu} -t /dev/shm -p', shell=True, check=True)
+            sp.run(f'fasterq-dump --split-files -O {str(SRA_data_dir)} {acc} -e {n_cpu} -t /dev/shm -p', shell=True, check=True)
             # run(f'fastq-dump --gzip --split-files -I -O {str(SRA_data_dir)} {acc}', shell=True)
 
         except sp.CalledProcessError as err:

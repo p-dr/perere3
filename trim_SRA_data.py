@@ -52,7 +52,7 @@ def trim_acc(acc):
 
         except sp.CalledProcessError as err:
             u.log(f'ERROR: {err.returncode}\n OUT: {err.output}')
-            u.clean(*trimmed_data_dir.glob(acc+'*'))
+            #u.clean(*trimmed_data_dir.glob(acc+'*'))
             raise err
 
 

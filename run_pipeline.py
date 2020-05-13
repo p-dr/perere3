@@ -12,23 +12,10 @@ import networkx as nx
 import subprocess as sp
 import utils as u
 from fetch_SRA_data import FINISHED_FLAG
+from sys import argv
 
-u.logfile = u.LOG_PATH.open('a')
 graph = nx.drawing.nx_pydot.read_dot(u.pardir/'pipeline')
 start = "../genome_annotation/\n/all_together_now.tsv"
-
-# argparser = argparse.ArgumentParser(
-#     description='Run necessary scripts for creating ' + start.replace('/\n', ''))
-# 
-# argparser.add_argument('-f', '--startfrom',
-#     default=None,
-#     help='Start running pipeline from <script>')
-# argparser.add_argument('-l', '--list', '--print',
-#     action='store_true',
-#     help='Only prints the pipeline to be run')
-# argparser.add_argument('-e', '--exclude',
-#     nargs='*',
-#     help='Do not run selected scripts')
 
 
 def above_tree(graph, start):
@@ -96,8 +83,8 @@ def parent_scripts(graph, start, flag=True):
     return ret
 
 
-def run_script(name):
-    if name == 'aggregate_data.py':  # find better way
+def run_script(name, ignore_blacklist=False):
+    if (not ignore_blacklist) and (name in run_script.blacklist):
         return
     u.print_header(f'Running {name}...', log=True)
     script_path = u.scripts_dir/name
@@ -106,7 +93,7 @@ def run_script(name):
     if suffix == '.py':
         sname = name.strip('.py')
         try:
-            exec(f'import {sname}; main_ret = {sname}.main()', globals())  # del after?
+            exec(f'import {sname}; main_ret = {sname}.main(); del {sname}', globals())  # del after?
 
         except FileExistsError:
             u.log('FILEEXISTS')
@@ -122,12 +109,10 @@ def run_script(name):
 
         while process.poll() is None:
             line = process.stdout.readline()
-            u.logfile.write(line)
-            print(line, end='')
+            u.log(line.strip())
 
-        print('Child process returned', process.returncode)
         if process.returncode:
-            exit()
+            raise sp.CalledProcessError(f'Child process returned {process.returncode}.')
 
 
 def plot_all(confirm=False):
@@ -138,33 +123,31 @@ def plot_all(confirm=False):
 
 
 def main(start=start):
+    # Currently using for dictating which scripts must only be run after all pipeline loops.
+    run_script.blacklist = {'aggregate_data.py', 'correlate_heads_to_near_genes.py'}
+
+    local_plot_flag = u.args.plot
+    u.args.plot = False
     ps = parent_scripts(graph, start)
-    # args = argparser.parse_args()
 
-    # if args.startfrom is not None:
-    #     ps = ps[ps.index(args.startfrom):]
-
-    u.log('Iniciando sessão com os seguintes scripts:\n', *ps)
-    finished = False  # finished downloading all accs.
+    u.log('Iniciando sessão com os seguintes script:\n', *ps)
+    # Finished downloading all accs?
+    finished = False
 
     while not finished:
         for script in ps:
-            # if args.list:
-            #     print(script)
-            # else:
             run_script(script)
 
             if main_ret == FINISHED_FLAG:
                 finished = True
 
-    u.print_header('agregando resultados', log=True)
-    run_script('aggregate_data.py')
+    for script in run_script.blacklist:
+        run_script(script, ignore_blacklist=True)
 
-    if u.args.plot:
+    if local_plot_flag:
+        print_header('plotting...', log=True)
         plot_all()
 
 
 if __name__ == '__main__':
     main()
-
-u.logfile.close()

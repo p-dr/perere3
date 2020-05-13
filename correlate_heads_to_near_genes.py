@@ -15,8 +15,6 @@ from matplotlib import pyplot as plt
 from sys import argv
 from count_SRA_reads import out_dir as counts_dir
 
-u.redo_flag = True  # Gabiarration.
-
 count_flags = [
     "__no_feature",
     "__ambiguous",
@@ -37,8 +35,8 @@ complements_outpath = u.pardir/f'genome_annotation/head_genes_complements_correl
 
 
 def main():
-    outfile = u.safe_open(corr_outpath, exist_ok='exit')
-    complements_outfile = u.safe_open(complements_outpath, exist_ok='exit')
+    outfile = corr_outpath.open('w')
+    complements_outfile = complements_outpath.open('w')
 
     print('Buscando comprimentos de genes e heads...')
     gene_attibutes = pd.read_table(u.pardir/'genome_annotation/gene_annotations.gff3',
@@ -178,10 +176,8 @@ def main():
         print('NaNs:\n', heads_rpkm.isna().sum(), genes_rpkm.isna().sum()) 
         raise RuntimeError('rpkm dataframe seems to be wrongly splitted.')
 
-    with u.safe_open(out_heads_rpkm, exist_ok=False) as hr:
-        heads_rpkm.to_csv(hr, index=False, sep='\t')
-    with u.safe_open(out_genes_rpkm, exist_ok=False) as gr:
-        genes_rpkm.to_csv(gr, index=False, sep='\t')
+    heads_rpkm.to_csv(out_heads_rpkm, index=False, sep='\t')
+    genes_rpkm.to_csv(out_genes_rpkm, index=False, sep='\t')
 
     u.log(f'RPKM data was sucessfully saved to disk:\n\t{out_genes_rpkm}\n\t{out_heads_rpkm}')
     print()
@@ -198,8 +194,7 @@ def main():
     print('shape after:', rpkm_by_lib.shape)
     rpkm_by_lib.index.name = 'library'
 
-    with u.safe_open(out_rpkm_by_lib, exist_ok=False) as of:
-        rpkm_by_lib.to_csv(of, sep='\t')
+    rpkm_by_lib.to_csv(out_rpkm_by_lib, sep='\t')
 
     print('Concluído. Calculando correlações...')
 
@@ -257,6 +252,9 @@ def main():
     complements_outfile.close()
 
     print(f'Arquivos de correlações salvos:\n{str(corr_outpath)}\n{str(complements_outpath)}')
+
+    outfile.close()
+    complements_outfile.close()
 
 
 if __name__ == '__main__':

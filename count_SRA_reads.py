@@ -48,7 +48,7 @@ def count_reads(args):
 
         if htseq.returncode:
             u.log(acc, 'ERROR: program returned code', htseq.returncode)
-            out_path.unlink()
+            #out_path.unlink()
             raise RuntimeError(f'HTSeq returned {htseq.returncode} exit code')
         else:
             u.log(f"'{str(out_path)}' finalizado em {dt}.")

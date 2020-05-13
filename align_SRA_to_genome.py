@@ -17,7 +17,7 @@ genome_prefix = str(u.pardir/'genome_ht2/sm_genome')
 out_dir = u.pardir/'alinhamentos/SRA_vs_genoma'
 out_dir.mkdir(parents=True, exist_ok=True)
 
-accs = set(Path(filepath).stem.split('_')[0] for filepath in iglob(str(trimmed_data_dir/'*')))
+accs = {Path(filepath).stem.split('_')[0] for filepath in iglob(str(trimmed_data_dir/'*'))}
 
 
 def align_acc(acc):
@@ -41,7 +41,7 @@ def align_acc(acc):
 
         except sp.CalledProcessError as err:
             u.log(f'{acc} returned ERROR: {err.returncode} | OUT: {err.output}')
-            u.clean(out_path)
+            #u.clean(out_path)
             raise err
             
     else:

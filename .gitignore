@@ -151,5 +151,7 @@ tags
 [._]*.un~
 
 ################### MANUALLY ADDED
+# temporary files (mainly faster-qdump)
+*.tmp
 # Big folders
 test/alignments

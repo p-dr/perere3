@@ -25,7 +25,15 @@ in_format = 'sam'
 def counted(acc):
     pathlist = [path for path in out_dir.glob(acc+'*')
                 if path.stat().st_size > 1e4]
-    return len(pathlist) == 4
+    ret = len(pathlist) == 4
+
+    if ret:
+        u.log(acc, 'was already counted.')
+    else:
+        u.log(acc, 'was NOT counted yet.')
+
+    u.log('Existing count files:', *out_dir.glob(acc+'*'), sep='\n\t')
+    return ret
 
 
 def count_reads(args):

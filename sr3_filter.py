@@ -3,7 +3,7 @@
 # in: pardir/'alinhamentos/sr3_vs_genome.bl'
 # out: pardir/'alinhamentos/perere3_vs_genome_sr3_filtered.bl'
 # out: pardir/'alinhamentos/perere3_vs_genome_discarded.tsv'
-raise FileExistsError
+
 import pandas as pd
 import numpy as np
 from utils import overlaps, pardir, verbose, BL_COLUMNS, prinf, safe_open

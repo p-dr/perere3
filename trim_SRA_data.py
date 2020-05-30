@@ -8,11 +8,11 @@ import utils as u
 from wget import download
 import multiprocessing as mp
 from datetime import datetime
-import count_SRA_reads
-from align_SRA_to_genome import out_dir as SRA_to_genome_alignments
+## Imported in fetch_existing_files() to avoid circular dependency:
+    # from align_SRA_to_genome import out_dir as SRA_to_genome_alignments
+    # import count_SRA_reads
 
-
-SRA_data_dir = u.pardir/'SRA_data'
+SRA_data_dir = u.pardir/'SRA_data'  # TODO: import from fetch_SRA_data (needs to solve circular import)
 trimmed_data_dir = u.pardir/'trimmed_SRA_data'
 
 trimmomatic_source = 'http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip'
@@ -22,21 +22,29 @@ trimmomatic_path = trimmomatic_dir/'trimmomatic-0.39.jar'
 adapters_dir = trimmomatic_dir/'adapters'
 adapter_path = str(adapters_dir/'TruSeq3-PE.fa')
 
+# TODO: existing files in count out_dir may not mean we finished counting. Import counted function from count_SRA_reads.
+def fetch_existing_files(acc):
+    from align_SRA_to_genome import out_dir as SRA_to_genome_alignments
+    import count_SRA_reads
 
-# Remember you chose _1 suffix for forward and _2 for reverse.
-def trim_acc(acc):
-    inp1, inp2 = sorted(list(SRA_data_dir.glob(acc + '*')))
-    ext = inp2.suffix
-    output_prefix = str(trimmed_data_dir/acc)
-
-    existing_files = (
-        *count_SRA_reads.out_dir.glob(acc+'*'),
+    return (
+        # *count_SRA_reads.out_dir.glob(acc+'*'),  # tested by counted func
         *SRA_to_genome_alignments.glob(acc+'*'),
         *trimmed_data_dir.glob(acc+'*'),
     )
 
+
+# Remember you chose _1 suffix for forward and _2 for reverse.
+def trim_acc(acc):
+    import count_SRA_reads as counter
+
+    inp1, inp2 = sorted(list(SRA_data_dir.glob(acc + '*')))
+    ext = inp2.suffix
+    output_prefix = str(trimmed_data_dir/acc)
+    existing_files = fetch_existing_files(acc)
+
     # if outfiles are not in outdir
-    if not existing_files or u.redo_flag:
+    if (not existing_files and not counter.counted(acc)) or u.redo_flag:
         t = datetime.now()
         try:
             command = (

@@ -2,22 +2,19 @@
 # in: trimmed_data_dir u.pardir/'genome_ht2'
 # out: out_dir
 
-from glob import iglob
 from pathlib import Path
 from sys import argv
 from datetime import datetime
-from count_SRA_reads import counted
+from count_SRA_reads import counted  # should not be here (will cause circular import after fixing import in count_SRA_reads)
 import utils as u
 import subprocess as sp
 import multiprocessing as mp
+from trim_SRA_data import trimmed_data_dir
 
-trimmed_data_dir = u.pardir/'trimmed_SRA_data'
 genome_prefix = str(u.pardir/'genome_ht2/sm_genome')
 
 out_dir = u.pardir/'alinhamentos/SRA_vs_genoma'
 out_dir.mkdir(parents=True, exist_ok=True)
-
-accs = {Path(filepath).stem.split('_')[0] for filepath in iglob(str(trimmed_data_dir/'*'))}
 
 
 def align_acc(acc):
@@ -49,7 +46,11 @@ def align_acc(acc):
 
 
 def main():
+    from trim_SRA_data import trimmed_data_dir
+    accs = {p.stem.split('_')[0] for p in trimmed_data_dir.glob('*')}
+
     u.log(f'Nova sessão de alinhamentos iniciada.')
+    u.log('Accession codes:', *accs, sep='\n\t')
 
     t = datetime.now()
     for acc in accs:

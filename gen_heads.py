@@ -13,9 +13,10 @@ from sr3_filter import filtered_outpath as inpath
 # A filtragem por evalue é feita no próprio BLAST.
 # How much does the GTAA repeats influnces the final result?
 
-HEAD_LEN = 200  # final head length
-GTAA_WINDOW_LEN = 2000  # search window length for GTAA repetitions
+HEAD_LEN = 100  # final head length
+GTAA_WINDOW_LEN = 4000  # search window length for GTAA repetitions
 PREFIX_LEN = 12  # Length of printed transposon tail in verbose mode
+PHASE_TOL = 3  # phase difference tollerance in gtaa region (only to the 3'?)
 # Maximum allowed difference between total known length of Perere-3 and the length of the alignment being considered. Intends to discard heads of truncated copies, as truncation tends to occur at 5' end, removing the copy promoter.
 MAX_DISTANCE_FROM_END = 5
 
@@ -24,7 +25,7 @@ heads_outpath = u.pardir/'seqs/heads.fa'
 motherlength_path = u.pardir/'genome_annotation/heads_motherlength.tsv'
 
 
-def find_gtaa_break(seq, phase_tol=3, *args, **kwargs):
+def find_gtaa_break(seq, phase_tol=PHASE_TOL, *args, **kwargs):
     """phase_tol is the phase tolerance of analysis. Warning: it multiplies processing time."""
     return max(phase + gtaa_break_pos(seq[phase:],*args, **kwargs)
                for phase in range(phase_tol + 1))
@@ -70,6 +71,7 @@ def gtaa_break_pos(seq, max_dirty_blocks=2, max_errors=2, verbose=False):
 
 
 def main():
+    u.log(f'{__file__}: Generating heads of {HEAD_LEN} bp.')
     truncated_count = 0
     #======================== LEITURA ========================#
     heads_annotations_file = u.safe_open(heads_annotations_path, exist_ok=False)
@@ -87,7 +89,7 @@ def main():
 
 
     #======================== GET HEADS ========================#
-    print('Buscando as sequências head no genoma...', end=' ')
+    print('Searching for Perere-3 copies in S. mansoni\'s genome...')
 
     with (u.pardir/'seqs/perere3.fa').open() as per_file:
         perere_len = len(''.join([l.strip() for l in per_file.readlines()][1:]))
@@ -152,7 +154,7 @@ def main():
             truncated_count += 1
 
 
-    u.log('Written:', heads_outpath, heads_annotations_path, sep='\n\t')
+    u.log(f'\n{filtered_perere3_vs_genoma.shape[0] - truncated_count} heads written:', heads_outpath, heads_annotations_path, sep='\n\t')
     u.log(f'{filtered_perere3_vs_genoma.shape[0]} alignments considered.')
     u.log(truncated_count, 'heads discarded as truncated.')
 

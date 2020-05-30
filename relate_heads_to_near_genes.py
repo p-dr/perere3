@@ -3,7 +3,6 @@
 # in: pardir/'genome_annotation/gene_annotations.gff3'
 # out: outpath
 
-raise FileExistsError
 from utils import (pardir, overlaps,
                    redo_flag, parse_gff_attributes,
                    prinf, GFF3_COLUMNS, safe_open)

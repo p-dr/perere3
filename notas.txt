@@ -100,3 +100,7 @@ qua abr 1 19:38:02 -03 2020 | Uma cópia incompleta pode se replicar com a prote
 qua abr 1 19:39:12 -03 2020 | Isso não pode gerar cópias com sondas coincidentes que descartaríamos na etapa do blast?
 ter abr 28 15:20:15 -03 2020 | Mudarei agora o comprimento das sondas (heads) para 500 pb
 seg mai 4 17:59:31 -03 2020 | heads agora com 200bp
+sex mai 15 22:24:15 -03 2020 | mudarei pra 500 de novo
+dom mai 17 18:33:54 -03 2020 | mudei para 200 de novo
+sex mai 29 16:54:06 -03 2020 | corrigir 300 400 e 700 no multilen compare
+sex mai 29 16:57:26 -03 2020 | se der certo, investigar porque complementos transcrevem mais: 1. ver se isso permanece mesmo só com sondas externas a genes; 2. ver a proporção de sondas que se inserem na mesma fita/na fita menos do gene

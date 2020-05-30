@@ -16,6 +16,8 @@ from sys import argv
 
 graph = nx.drawing.nx_pydot.read_dot(u.pardir/'pipeline')
 start = "../genome_annotation/\n/all_together_now.tsv"
+# Which scripts must only be run after all pipeline loops.
+run_after = ['correlate_heads_to_near_genes.py', 'aggregate_data.py']
 
 
 def above_tree(graph, start):
@@ -83,8 +85,8 @@ def parent_scripts(graph, start, flag=True):
     return ret
 
 
-def run_script(name, ignore_blacklist=False):
-    if (not ignore_blacklist) and (name in run_script.blacklist):
+def run_script(name, finished=False):
+    if (name in run_after) and (not finished):
         return
     u.print_header(f'Running {name}...', log=True)
     script_path = u.scripts_dir/name
@@ -122,12 +124,23 @@ def plot_all(confirm=False):
             sp.run(('python', str(script)))
 
 
+def run_end_scripts(scripts, plot=False):
+    u.print_header('running end scripts...', log=True)
+    u.log('End scripts:', *scripts, end='\t\n')
+
+    for script in scripts:
+        run_script(script, finished)
+
+    if plot:
+        u.print_header('plotting...', log=True)
+        plot_all()
+
+
 def main(start=start):
-    # Currently using for dictating which scripts must only be run after all pipeline loops.
-    run_script.blacklist = {'aggregate_data.py', 'correlate_heads_to_near_genes.py'}
 
     local_plot_flag = u.args.plot
     u.args.plot = False
+    u.plot_flag = False
     ps = parent_scripts(graph, start)
 
     u.log('Iniciando sessão com os seguintes script:\n', *ps)
@@ -139,14 +152,11 @@ def main(start=start):
             run_script(script)
 
             if main_ret == FINISHED_FLAG:
-                finished = True
+                finished = True  # save in this flag because main_ret will keep changing after.
+    run_end_scripts(run_after, plot=local_plot_flag)
 
-    for script in run_script.blacklist:
-        run_script(script, ignore_blacklist=True)
-
-    if local_plot_flag:
-        print_header('plotting...', log=True)
-        plot_all()
+    # reset utils flags
+    u.args.plot, u.plot_flag = 2 * [local_plot_flag]
 
 
 if __name__ == '__main__':

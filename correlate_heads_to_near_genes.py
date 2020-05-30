@@ -14,6 +14,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from sys import argv
 from count_SRA_reads import out_dir as counts_dir
+from tqdm import tqdm
 
 count_flags = [
     "__no_feature",
@@ -23,6 +24,7 @@ count_flags = [
     "__alignment_not_unique",
 ]
 
+counts_dir = u.pardir/'counted_reads'
 parsed_data_dir = counts_dir/'parsed_data'
 parsed_data_dir.mkdir(exist_ok=True)
 
@@ -62,7 +64,7 @@ def main():
 
 
     # ###################### AGREGATE COUNTS ###############################
-    print('Conclúido. Agregando contagens em um DataFrame...')
+    print(f"Aggregating count files from '{counts_dir}'...")
 
     # Read counts for each feature and library
     counts = pd.DataFrame()
@@ -71,9 +73,7 @@ def main():
     lib_sizes = pd.DataFrame()
 
     # for each SRA library
-    for count_path in (u.pardir/'counted_reads').glob('*.tsv'):
-        print(f'Processing {str(count_path)}')
-
+    for count_path in tqdm([*counts_dir.glob('*.tsv')]):
         lib_name = count_path.stem.split('_')[0]
         count_type = count_path.stem.strip(lib_name + '_')  # gene, head, head_complement or gene_complement
 
@@ -94,8 +94,8 @@ def main():
             # + __alignment_not_unique
             total_lib_count = count.iloc[:-2, 0].sum() + count.iloc[-1, 0]
             lib_sizes.loc[count_type, lib_name] = total_lib_count
-            counts = counts.combine_first(count)  # this func sounds weird.
-
+            #counts = pd.concat([counts, count], axis=1)
+            counts = counts.combine_first(count)
 
     counts = counts.drop(count_flags)
 
@@ -125,7 +125,7 @@ def main():
     # print(counts.loc[not_comp, rl])
     # print(counts.head(20))
 
-    # the following was a difficult line. Very important one.
+    # the following was a difficult line. Important one, though.
     counts.loc[not_comp, rl], counts.loc[comp_ind, rl] = counts.loc[comp_ind, rl].values, counts.loc[not_comp, rl].values
     # print(counts.head(20))
 
@@ -152,9 +152,11 @@ def main():
     lib_sizes = lib_sizes.max()
 
     total_read_sum = lib_sizes.sum()
+    #print(counts.loc[:, counts.columns.str.startswith('head')])
     rpkm = counts.sum()
-    rpkm /= lengths/1000  # by lenght kbp; count flags are NaNed here
     rpkm /= total_read_sum/1e6  # by million reads in libs
+    print(lengths)
+    rpkm /= lengths/1000  # by lenght kbp
     sh0 = rpkm.shape[0]  # for posterior shape verification
 
     complement_rpkm = rpkm[rpkm.index.str.endswith('_complement')]
@@ -176,10 +178,12 @@ def main():
         print('NaNs:\n', heads_rpkm.isna().sum(), genes_rpkm.isna().sum()) 
         raise RuntimeError('rpkm dataframe seems to be wrongly splitted.')
 
+    print(heads_rpkm)
+    exit()
     heads_rpkm.to_csv(out_heads_rpkm, index=False, sep='\t')
     genes_rpkm.to_csv(out_genes_rpkm, index=False, sep='\t')
-
     u.log(f'RPKM data was sucessfully saved to disk:\n\t{out_genes_rpkm}\n\t{out_heads_rpkm}')
+
     print()
     
     #################### ORGANIZE BY LIB. AND GEN CORRELATION

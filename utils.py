@@ -129,6 +129,7 @@ def unfold_gff(df):
 
 
 def safe_open(path, mode='w', exist_ok=True):
+    # why exist_ok?
     message = f"'{path}' já existe, nada será feito. Use '-r' se quiser sobrescrever."
 
     if path.exists() and not redo_flag:
@@ -231,6 +232,7 @@ def get_subsets(d, cols=None):
 
 
 def multibox_compare(ds, labels=None, arch_height=None, margin=None):
+    # ds appear to be a list of pd.Series
     if labels is None:
         labels = [d.name for d in ds]
     labels = [f'{l}\n{len(d)}'for l, d in zip(labels, ds)]
@@ -279,8 +281,8 @@ def print_header(*args, sep=' ', log=False, **kwargs):
         print(file=outfile)
 
 
-def clean(*paths):
-    if args.clean:
+def clean(*paths, force=False):
+    if force or args.clean:
        [path.unlink() for path in paths] 
        log('Deleted following files:', *paths, sep='\n\t')
 

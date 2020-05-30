@@ -13,7 +13,7 @@ import count_SRA_reads
 
 n_cpu = mp.cpu_count()
 SRA_data_dir = u.pardir/'SRA_data'
-chunk_size = 2  # Maximum number of accession codes fetched in a run
+chunk_size = 4  # Maximum number of accession codes fetched in a run
 # 4 as 4 files per acc, so 16 files for 16 cores. (2 because disk space is running out).
 FINISHED_FLAG = 'finished_fetching'
 
@@ -28,16 +28,17 @@ with open('seqs/SRAaccs.txt', 'r') as accs_file:
 
 
 def fetch_acc(acc):
+    import count_SRA_reads as counter
+
     existing_files = (
-        *count_SRA_reads.out_dir.glob(acc+'*'),
+        # *count_SRA_reads.out_dir.glob(acc+'*'), # tested by counted func
         *SRA_to_genome_alignments.glob(acc+'*'),
         *trimmed_data_dir.glob(acc+'*'),
         *SRA_data_dir.glob(acc+'*'),
     )
 
-    u.log(existing_files,'not existing', not bool(existing_files), 'redo', u.redo_flag)
     # if no outfile in outdir
-    if not existing_files or u.redo_flag:
+    if (not existing_files and not counter.counted(acc)) or u.redo_flag:
         u.log(f"Baixando '{acc}'...")
         try:
             sp.run(f'fasterq-dump --split-files -O {str(SRA_data_dir)} {acc} -e {n_cpu} -t /dev/shm -p', shell=True, check=True)
@@ -49,7 +50,7 @@ def fetch_acc(acc):
 
     else:
         u.log(f"Pulando '{acc}' por existirem os seguintes arquivos:",
-            *existing_files, sep='\n')
+            *existing_files, sep='\n  ')
         return 'skipped'
 
 

@@ -1,0 +1,55 @@
+RX5554087_head: 
+SRX5554087_head_complement: 
+'/home/ilidio/perere3/counted_reads/SRX5554087_head.tsv' finalizado em 0:54:31.822837.
+'/home/ilidio/perere3/counted_reads/SRX5554087_head_complement.tsv' finalizado em 0:54:31.833854.
+SRX5554087 was already counted.
+Existing count files:
+        /home/ilidio/perere3/counted_reads/SRX5554087_gene_complement.tsv
+        /home/ilidio/perere3/counted_reads/SRX5554087_gene.tsv
+        /home/ilidio/perere3/counted_reads/SRX5554087_head.tsv
+        /home/ilidio/perere3/counted_reads/SRX5554087_head_complement.tsv
+SRX5554087 was already counted.
+Existing count files:
+    /home/ilidio/perere3/counted_reads/SRX5554087_gene_complement.tsv
+    /home/ilidio/perere3/counted_reads/SRX5554087_gene.tsv
+    /home/ilidio/perere3/counted_reads/SRX5554087_head.tsv
+    /home/ilidio/perere3/counted_reads/SRX5554087_head_complement.tsv
+Deleted following files:
+    /home/ilidio/perere3/alinhamentos/SRA_vs_genoma/SRX5554087.sam
+multiprocessing.pool.RemoteTraceback: 
+    """
+    Traceback (most recent call last):
+    File "/usr/lib/python3.6/multiprocessing/pool.py", line 119, in worker
+    result = (True, func(*args, **kwds))
+    File "/usr/lib/python3.6/multiprocessing/pool.py", line 44, in mapstar
+    return list(map(*args))
+    File "/home/ilidio/perere3/scripts/count_SRA_reads.py", line 64, in count_reads
+    u.clean(alignment_file)
+    File "/home/ilidio/perere3/scripts/utils.py", line 286, in clean
+    [path.unlink() for path in paths]
+    File "/home/ilidio/perere3/scripts/utils.py", line 286, in <listcomp>
+    [path.unlink() for path in paths]
+    File "/usr/lib/python3.6/pathlib.py", line 1284, in unlink
+    self._accessor.unlink(self)
+    File "/usr/lib/python3.6/pathlib.py", line 387, in wrapped
+    return strfunc(str(pathobj), *args)
+    FileNotFoundError: [Errno 2] No such file or directory: '/home/ilidio/perere3/alinhamentos/SRA_vs_genoma/SRX5554087.sam'
+    """
+    The above exception was the direct cause of the following exception:
+    Traceback (most recent call last):
+    File "multiheadlen_metapipe.py", line 32, in <module>
+    main()
+    File "multiheadlen_metapipe.py", line 24, in main
+    run_pipeline.main()
+    File "/home/ilidio/perere3/scripts/run_pipeline.py", line 152, in main
+    run_script(script)
+    File "/home/ilidio/perere3/scripts/run_pipeline.py", line 98, in run_script
+    exec(f'import {sname}; main_ret = {sname}.main(); del {sname}', globals())  # del after?
+    File "<string>", line 1, in <module>
+    File "/home/ilidio/perere3/scripts/count_SRA_reads.py", line 77, in main
+    pool.map(count_reads, ((af, t) for af in alignment_files for t in types))
+    File "/usr/lib/python3.6/multiprocessing/pool.py", line 266, in map
+    return self._map_async(func, iterable, mapstar, chunksize).get()
+    File "/usr/lib/python3.6/multiprocessing/pool.py", line 644, in get
+    raise self._value
+FileNotFoundError: [Errno 2] No such file or directory: '/home/ilidio/perere3/alinhamentos/SRA_vs_genoma/SRX5554087.sam'

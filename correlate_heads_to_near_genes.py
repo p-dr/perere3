@@ -178,8 +178,6 @@ def main():
         print('NaNs:\n', heads_rpkm.isna().sum(), genes_rpkm.isna().sum()) 
         raise RuntimeError('rpkm dataframe seems to be wrongly splitted.')
 
-    print(heads_rpkm)
-    exit()
     heads_rpkm.to_csv(out_heads_rpkm, index=False, sep='\t')
     genes_rpkm.to_csv(out_genes_rpkm, index=False, sep='\t')
     u.log(f'RPKM data was sucessfully saved to disk:\n\t{out_genes_rpkm}\n\t{out_heads_rpkm}')

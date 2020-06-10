@@ -13,7 +13,7 @@ from sr3_filter import filtered_outpath as inpath
 # A filtragem por evalue é feita no próprio BLAST.
 # How much does the GTAA repeats influnces the final result?
 
-HEAD_LEN = 100  # final head length
+HEAD_LEN = 1000  # final head length
 GTAA_WINDOW_LEN = 4000  # search window length for GTAA repetitions
 PREFIX_LEN = 12  # Length of printed transposon tail in verbose mode
 PHASE_TOL = 3  # phase difference tollerance in gtaa region (only to the 3'?)

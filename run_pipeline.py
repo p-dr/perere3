@@ -129,7 +129,7 @@ def run_end_scripts(scripts, plot=False):
     u.log('End scripts:', *scripts, end='\t\n')
 
     for script in scripts:
-        run_script(script, finished)
+        run_script(script, finished=True)
 
     if plot:
         u.print_header('plotting...', log=True)

@@ -5,7 +5,7 @@ import shutil
 from count_SRA_reads import out_dir as count_dir
 from aggregate_data import outpath as outagg
 
-lengths = (100, 200, 300, 400, 500, 700, 1000, 1500)
+lengths = (50, 100, 150, 200, 300, 400, 500, 700, 1000, 1250, 1500, 2000)
 dir_suffix = 'bp_counted_reads'
 u.args.clean = True
 

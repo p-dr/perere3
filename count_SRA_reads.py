@@ -60,8 +60,13 @@ def count_reads(args):
             raise RuntimeError(f'HTSeq returned {htseq.returncode} exit code')
         else:
             u.log(f"'{str(out_path)}' finalizado em {dt}.")
-            if counted(acc):
-                u.clean(alignment_file)
+            # Test existence from now on because collision has been detected when multiprocessing.
+            # i.e. another thread deleted alignment_file after its existence was confirmed here at line -18 (above).
+            if counted(acc) and alignment_file.exists():
+                try:
+                    u.clean(alignment_file)
+                except FileNotFoundError:
+                    u.log(f'FileNotFound: Collided when deleted {alignment_file}')
 
     else:
         print (f"'{str(out_path)}' já existe. Pulando '{acc}_{kind}'.")

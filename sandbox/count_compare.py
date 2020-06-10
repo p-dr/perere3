@@ -16,7 +16,7 @@ dirs = u.pardir.glob('[0-9]*_counted_reads')
 counts = {}
 
 for d in dirs:
-    dkey = d.stem.split('_')[0]
+    dkey = int(d.stem.split('bp_')[0])
     print('Reading', dkey)
     counts[dkey] = pd.DataFrame()
 
@@ -24,31 +24,29 @@ for d in dirs:
         counts[dkey] = counts[dkey].add(pd.read_table(c, names=['id', 'count'], index_col='id'), fill_value=0)
 
     counts[dkey] = counts[dkey][counts[dkey].index.str.startswith('head')]
-    print(counts[dkey].shape)
     #counts[dkey] = counts[dkey][~counts[dkey].index.str.endswith('complement')]
 
 counts = dict(sorted(counts.items()))
 
-plt.figure(figsize=(4,10))
-u.multibox_compare([c.loc[c['count'] != 0, 'count'] for c in counts.values()], labels=counts.keys())
-plt.savefig('multilen_counts_compare_no_zero.png')
-
+if u.args.plot:
+    plt.figure(figsize=(5,10))
+    u.multibox_compare([c.loc[c['count'] != 0, 'count'] for c in counts.values()], labels=counts.keys())
+    plt.savefig('multiheadlen/counts.png')
+    plt.show()
 
 counts_df = pd.DataFrame()
 
-for i_headlen in counts:
-    counts_df[int(i_headlen.strip('bp'))] = counts[i_headlen].mean()
-    for j_headlen in counts:
-              print(i_headlen, '/', j_headlen, ':',
-              counts[i_headlen].mean() / counts[j_headlen].mean())
-        
+for headlen, count in counts.items():
+    count = count[count['count'] != 0]
+    counts_df[headlen] = count['count'].describe()
+    # for j_headlen in counts:
+    #           print(i_headlen, '/', j_headlen, ':',
+    #           counts[i_headlen].mean() / counts[j_headlen].mean())
+
+counts_df = counts_df.T
+counts_df.index.name = 'headlen'
 print(counts_df)
-counts_df.to_csv('counts_means.tsv', sep='\t')
-
-# print('média (500bp/200bp)', (counts['500bp'] / counts['200bp']).replace([np.inf, -np.inf], np.nan).dropna().mean())
-# print('(média 500bp) / (média 200bp)', counts['500bp'].mean() / counts['200bp'].mean())
-
-
+counts_df.to_csv('counts_stats.tsv', sep='\t')
 
 # # counts = {}
 # # 

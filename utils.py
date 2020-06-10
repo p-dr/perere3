@@ -159,7 +159,7 @@ def save_all_figs():
         plt.show()
         if args.show:
             return
-        
+
     timestamp = dt.now().strftime('%Y-%-m-%-d-%Hh%Mm%Ss')
 
     for fignum in tqdm(plt.get_fignums(), desc='Saving figures'):
@@ -185,14 +185,19 @@ def boxplot(data):
     """data is list of list of values"""
     for j, d in enumerate(data):
         c = 'C' + str(j)
-        plt.boxplot(d, widths=.75, positions=[j], showfliers=False,
-                    patch_artist=True,
-                    boxprops=dict(facecolor=c, color=c),
-                    capprops=dict(color=c),
-                    whiskerprops=dict(color=c),
-                    flierprops=dict(color=c, markeredgecolor=c),
-                    medianprops=dict(solid_capstyle='projecting', color='black')
-                    )
+        plt.boxplot(d,
+            widths=.75,
+            positions=[j],
+            showfliers=False,
+            showmeans=True,
+            patch_artist=True,
+            boxprops=dict(facecolor=c, color=c),
+            capprops=dict(color=c),
+            whiskerprops=dict(color=c),
+            flierprops=dict(color=c, markeredgecolor=c),
+            medianprops=dict(solid_capstyle='projecting', color='black'),
+            meanprops=dict(markerfacecolor='black', marker='o', markeredgecolor='white'),
+        )
 
 
 from scipy.stats import mannwhitneyu
@@ -213,7 +218,7 @@ def box_compare(a, b, labels=None):
     plt.annotate(plabel, (.5, .885), xycoords='axes fraction', ha='center')
     label_string = [l + '\n' + str(len(data)) for l, data in zip(labels, [a, b])]
     plt.xticks([0, 1], labels=label_string)
-    
+
     return pvalue
 
 
@@ -231,13 +236,32 @@ def get_subsets(d, cols=None):
     return subsets
 
 
-def multibox_compare(ds, labels=None, arch_height=None, margin=None):
+def multibox_compare(ds, names=None, arch_height=None, margin=None,
+                     color=True, correct=True, alpha=.05, **kwargs):
+    if color:
+        colors = ('C3', 'C2')  # (rejected, not rejected) null hip.
+    else:
+        colors = ('k', 'k')
+    pvalues = {}
+    reject = {}
+
     # ds appear to be a list of pd.Series
-    if labels is None:
-        labels = [d.name for d in ds]
-    labels = [f'{l}\n{len(d)}'for l, d in zip(labels, ds)]
-    print('labels:', labels)
-    print('lengths from multibox:', *[len(d) for d in ds])
+    if names is None:
+        names = [d.name for d in ds]
+    labels = [f'{l}\n{len(d)}'for l, d in zip(names, ds)]
+
+    for i in range(len(ds)):
+        for j in range(i+1, len(ds)):
+            pvalue = mannwhitneyu(ds[i], ds[j]).pvalue
+            pvalues[(names[i], names[j])] = pvalue
+
+    if correct:
+        from statsmodels.stats.multitest import multipletests
+        multitested = multipletests(list(pvalues.values()), alpha=alpha, **kwargs)
+        pvalues = {k:p for k, p in zip(pvalues.keys(), multitested[1])}
+        reject = {k:p for k, p in zip(pvalues.keys(), multitested[0])}
+    else:
+        reject = {k:(p < alpha) for k,p in pvalues.items()}
 
     boxplot(ds)
     plt.xticks(range(len(ds)), labels=labels)
@@ -252,18 +276,20 @@ def multibox_compare(ds, labels=None, arch_height=None, margin=None):
 
     for i in range(len(ds)):
         for j in range(i+1, len(ds)):
+            color = colors[reject[(names[i], names[j])]]
             plt.plot((i, i, j, j),
                     (height,
                      height + arch_height,
                      height + arch_height,
-                     height), '-k', lw=1)
+                     height), '-', color=color, lw=1)
 
-            pvalue = mannwhitneyu(ds[i], ds[j]).pvalue
-            plabel = f'p: {pvalue:.5}'
-            print(plabel)
+            pvalue = pvalues[(names[i], names[j])]
+            plabel = f'{pvalue:.5}'
             plt.annotate(plabel, ((i+j)/2, height + arch_height),
-                         ha='center', va='bottom')
+                         ha='center', va='bottom', color=color)
             height += arch_height + margin
+
+    return pvalues
 
 
 import os

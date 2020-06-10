@@ -1,0 +1,2 @@
+>>> olap[olap.same_strand].shape[0]/olap.shape[0]
+0.27062914954157447

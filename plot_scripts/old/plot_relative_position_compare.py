@@ -9,7 +9,7 @@ from utils import pardir, show_flag, box_compare, multibox_compare, save_all_fig
 import utils as u
 
 d = pd.read_table(pardir/'genome_annotation/all_together_now.tsv')
-d = d[d.repetitions == 0]
+# d = d[d.repetitions == 0]
 
 
 def main(subsets, corr_transcr):
@@ -59,25 +59,25 @@ def main(subsets, corr_transcr):
     #                              index=subsets.keys())
     # sns.heatmap(median_matrix, annot=True)
 
-    ### PLOT MEANS COMPARISON MATRIX
-    plt.figure()
-    plt.title('log da razão das meanas (positivo => coluna maior)')
+    # ### PLOT MEANS COMPARISON MATRIX
+    # plt.figure()
+    # plt.title('log da razão das meanas (positivo => coluna maior)')
 
-    means = np.array([subset.mean() for subset in subsets.values()])
-    print(means)
-    mean_matrix = np.log(means/ means[:, np.newaxis])
-    mean_matrix = pd.DataFrame(mean_matrix,
-                                 columns=subsets.keys(),
-                                 index=subsets.keys())
-    sns.heatmap(mean_matrix, cmap='RdYlBu', annot=True)
+    # means = np.array([subset.mean() for subset in subsets.values()])
+    # print(means)
+    # mean_matrix = np.log(means/ means[:, np.newaxis])
+    # mean_matrix = pd.DataFrame(mean_matrix,
+    #                              columns=subsets.keys(),
+    #                              index=subsets.keys())
+    # sns.heatmap(mean_matrix, cmap='RdYlBu', annot=True)
 
-    ### PLOT P-VALUES MATRIX
-    plt.figure()
-    plt.title('p-valores')
-    pmatrix = pd.DataFrame(pmatrix,
-                           columns=subsets.keys(),
-                           index=subsets.keys())
-    sns.heatmap(pmatrix, annot=True)
+    # ### PLOT P-VALUES MATRIX
+    # plt.figure()
+    # plt.title('p-valores')
+    # pmatrix = pd.DataFrame(pmatrix,
+    #                        columns=subsets.keys(),
+    #                        index=subsets.keys())
+    # sns.heatmap(pmatrix, annot=True)
 
 
 if __name__ == '__main__':

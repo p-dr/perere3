@@ -1,0 +1,6 @@
+Reunião 2jun2020
+1.  fiz testes pro rpkm;
+2.  a primeira coisa que tinha chamado a atenção era maior rpkm dos complementos: hipótese do Ricardo corroborada: 71% das sobrepostas ao NG tão na fita menos;
+        - gráfico do asterico anterior;
+3.  no geral, média parece constante, mediana cai (porquê? qual a distribuição?);
+4.   
